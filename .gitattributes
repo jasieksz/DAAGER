@@ -1,0 +1,9 @@
+*.java			text
+*.xml			text
+*.txt			text
+*.launch		text
+*.xsd			text
+*.properties	text
+.gitattributes	text
+.gitignore		text
+gradlew.bat     eol=crlf

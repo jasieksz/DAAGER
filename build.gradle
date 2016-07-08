@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2016 Intelligent Information Systems Group.
+ *
+ * This file is part of AgE.
+ *
+ * AgE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AgE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+allprojects {
+	group 'pl.edu.agh.age'
+	version '0.3-SNAPSHOT'
+}
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:+'
+	}
+}
+
+subprojects {
+	apply plugin: 'maven-publish'
+	apply plugin: 'java'
+	apply plugin: 'ch.raffael.pegdown-doclet'
+
+	sourceCompatibility = 1.8
+
+	configurations {
+		checkerFrameworkAnnotatedJDK
+		checkerFramework
+	}
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		compile 'javax.inject:javax.inject:1'
+		compile 'org.slf4j:slf4j-api:+'
+		compile 'org.slf4j:jcl-over-slf4j:+'
+		compile 'com.google.code.findbugs:jsr305:+'
+		compile 'com.google.guava:guava:+'
+		compile 'io.javaslang:javaslang:2.+'
+		//compile files('/opt/checker-framework-2.1.0/checker/lib/guava-19.0.jar')
+
+		runtime 'org.codehaus.groovy:groovy:+'
+		compile 'ch.qos.logback:logback-classic:+'
+
+		testCompile 'junit:junit:+'
+		testCompile 'org.mockito:mockito-all:+'
+		testCompile 'org.assertj:assertj-core:+'
+
+		checkerFrameworkAnnotatedJDK 'org.checkerframework:jdk8:+'
+		checkerFramework 'org.checkerframework:checker:+'
+		compile 'org.checkerframework:checker-qual:+'
+	}
+
+//	tasks.withType(JavaCompile).all { JavaCompile compile ->
+//		compile.options.compilerArgs = [
+//				'-processor', 'org.checkerframework.checker.nullness.NullnessChecker',
+//				'-processorpath', "${configurations.checkerFramework.asPath}",
+//				// uncomment to turn Checker Framework errors into warnings
+//				// '-Awarns',
+//				'-AassumeAssertionsAreEnabled',
+//				'-cp', '/opt/checker-framework-2.1.0/checker/lib/guava-19.0.jar',
+//				"-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
+//		]
+//	}
+}
