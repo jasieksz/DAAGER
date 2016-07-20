@@ -37,22 +37,23 @@ import com.hazelcast.core.IMap;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+@RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:spring-test-node.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public final class DiscoveryIT extends AbstractTestNGSpringContextTests {
+public final class DiscoveryIT {
 
 	@Inject private HazelcastDiscoveryService discoveryService;
 
@@ -68,13 +69,10 @@ public final class DiscoveryIT extends AbstractTestNGSpringContextTests {
 
 	private final List<DiscoveryEvent> events = newCopyOnWriteArrayList();
 
-	@BeforeClass public void globalSetUp() {
-		members = hazelcastInstance.getMap(HazelcastDiscoveryService.MEMBERS_MAP);
-		eventBus.register(this);
-	}
-
 	@Before public void setUp() {
 		MockitoAnnotations.initMocks(this);
+		members = hazelcastInstance.getMap(HazelcastDiscoveryService.MEMBERS_MAP);
+		eventBus.register(this);
 		events.clear();
 	}
 

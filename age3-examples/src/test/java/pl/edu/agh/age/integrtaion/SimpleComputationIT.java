@@ -17,7 +17,7 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.integration;
+package pl.edu.agh.age.integrtaion;
 
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,12 +37,13 @@ import com.hazelcast.core.ITopic;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -54,9 +55,11 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+@Ignore
+@RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:spring-test-node.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public final class MultipleComputationsIT extends AbstractTestNGSpringContextTests {
+public final class SimpleComputationIT {
 
 	@Inject private DefaultWorkerService workerService;
 
@@ -72,43 +75,36 @@ public final class MultipleComputationsIT extends AbstractTestNGSpringContextTes
 
 	private final List<WorkerServiceEvent> events = newCopyOnWriteArrayList();
 
-	@BeforeClass public void globalSetUp() {
+	@Before public void setUp() {
+		MockitoAnnotations.initMocks(this);
 		topic = hazelcastInstance.getTopic(DefaultWorkerService.CHANNEL_NAME);
 		configurationMap = hazelcastInstance.getReplicatedMap(DefaultWorkerService.CONFIGURATION_MAP_NAME);
 		eventBus.register(this);
 	}
 
-	@Before public void setUp() {
-		MockitoAnnotations.initMocks(this);
+	@Test public void testIfIsRunning() {
+		assertThat(workerService.isRunning()).isTrue();
 	}
 
-	@Test public void testMultipleComputations() throws IOException, InterruptedException {
-		for (int i = 0; i < 2; i++) {
+	@Test public void testIfLoadsConfig() throws IOException, InterruptedException {
+		final SpringConfiguration configuration = SpringConfiguration.fromClasspath(
+				"pl/edu/agh/age/example/spring-simple.xml");
+		configurationMap.put(DefaultWorkerService.ConfigurationKey.CONFIGURATION, configuration);
 
-			final SpringConfiguration configuration = SpringConfiguration.fromClasspath(
-					"org/age/example/spring-simple.xml");
-			configurationMap.put(DefaultWorkerService.ConfigurationKey.CONFIGURATION, configuration);
+		topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.LOAD_CONFIGURATION));
 
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.LOAD_CONFIGURATION));
+		TimeUnit.SECONDS.sleep(3L);
 
-			TimeUnit.SECONDS.sleep(3L);
+		assertThat(computationState()).isEqualTo(ComputationState.CONFIGURED);
+	}
 
-			assertThat(computationState()).isEqualTo(ComputationState.CONFIGURED);
+	@Test public void testIfRunsComputation() throws InterruptedException {
+		topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.START_COMPUTATION));
 
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.START_COMPUTATION));
+		TimeUnit.SECONDS.sleep(3L);
 
-			TimeUnit.SECONDS.sleep(3L);
-
-			assertThat(computationState()).isEqualTo(ComputationState.FINISHED);
-
-			assertThat(events).hasAtLeastOneElementOfType(TaskStartedEvent.class);
-
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.CLEAN_CONFIGURATION));
-
-			TimeUnit.SECONDS.sleep(3L);
-
-			assertThat(computationState()).isEqualTo(ComputationState.NONE);
-		}
+		assertThat(computationState()).isEqualTo(ComputationState.FINISHED);
+		assertThat(events).hasAtLeastOneElementOfType(TaskStartedEvent.class);
 	}
 
 	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key, final Class<T> klass) {
