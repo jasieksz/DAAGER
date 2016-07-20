@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright (C) 2016 Intelligent Information Systems Group.
+  ~
+  ~ This file is part of AgE.
+  ~
+  ~ AgE is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ AgE is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with AgE.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="stop-condition" class="pl.edu.agh.age.compute.stream.TimedStopCondition">
+		<constructor-arg value="10" type="long"/>
+	</bean>
+
+	<!-- Define a step function for workplaces -->
+	<bean id="step" class="pl.edu.agh.age.compute.stream.example.SampleStep"/>
+
+	<!-- Define an after-step analyzer -->
+	<bean id="population-analyzer" class="pl.edu.agh.age.compute.stream.example.SampleAfterStepAction"/>
+
+	<util:list id="agents-jul" value-type="pl.edu.agh.age.compute.stream.emas.EmasAgent">
+		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
+		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
+		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
+		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
+		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
+	</util:list>
+
+	<bean id="workplace-1" class="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
+		<constructor-arg ref="step"/>
+		<constructor-arg ref="agents-jul"/>
+	</bean>
+	<util:list id="workplace-configurations"
+	           value-type="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
+		<ref bean="workplace-1"/>
+	</util:list>
+
+	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
+
+	<!-- Commented out, because it would require too many dependencies -->
+	<!--<bean id="runnable" class="pl.edu.agh.age.compute.stream.StreamAgents"/>-->
+
+</beans>

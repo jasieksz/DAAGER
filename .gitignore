@@ -4,5 +4,6 @@ build/
 hs_err_pid*
 .gradle/
 .idea/
+*.iml
 *.log
 !/gradle/wrapper/gradle-wrapper.jar

@@ -68,7 +68,9 @@ public final class NodeBootstrapper {
 				for (final String arg : args) {
 					logger.info("Loading: {}", arg);
 					workerServiceClient.prepareConfiguration(SpringConfiguration.fromFilesystem(arg));
+					TimeUnit.SECONDS.sleep(1);
 					workerServiceClient.startComputation();
+					TimeUnit.SECONDS.sleep(1);
 					while (workerServiceClient.isComputationRunning()) {
 						TimeUnit.SECONDS.sleep(1);
 					}

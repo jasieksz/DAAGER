@@ -54,7 +54,6 @@ import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -125,6 +124,10 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			WorkerMessage.Type.class);
 
 	private final Set<CommunicationFacility> communicationFacilities = newHashSet();
+
+	private final DefaultThreadPool computeThreadPool = new DefaultThreadPool();
+
+	private HazelcastDistributionUtilities computeDistributionUtilities;
 
 	private final EnumMap<WorkerMessage.Type, Consumer<Serializable>> messageHandlers = newEnumMap(
 			WorkerMessage.Type.class);
@@ -219,6 +222,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		configurationMap = hazelcastInstance.getMap(CONFIGURATION_MAP_NAME);
 		nodeComputationState = hazelcastInstance.getMap(STATE_MAP_NAME);
 		eventBus.register(this);
+		computeDistributionUtilities = new HazelcastDistributionUtilities(hazelcastInstance);
 	}
 
 	@Override public boolean isAutoStartup() {
@@ -410,6 +414,8 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			service.subscribedTypes().forEach(key -> workerMessageListeners.get(key).add(service));
 			taskBuilder.registerSingleton(service);
 		});
+		taskBuilder.registerSingleton(computeThreadPool);
+		taskBuilder.registerSingleton(computeDistributionUtilities);
 
 		// Refreshing the Spring context
 		taskBuilder.finishConfiguration();

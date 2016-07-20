@@ -36,7 +36,7 @@ import javax.inject.Named;
 @Named
 public final class FullyConnectedWithLocalLoopsTopologyProcessor implements TopologyProcessor {
 
-	private static final int PRIORITY = 40;
+	private static final int PRIORITY = 50;
 
 	@Override public int priority() {
 		return PRIORITY;
