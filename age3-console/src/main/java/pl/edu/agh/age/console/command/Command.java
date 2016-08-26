@@ -18,44 +18,11 @@
  */
 package pl.edu.agh.age.console.command;
 
-import static java.util.Collections.emptySet;
-
-import com.beust.jcommander.JCommander;
-
-import org.jline.reader.LineReader;
-import org.jline.terminal.Terminal;
-
-import java.io.IOException;
-import java.util.Set;
-
 /**
  * Interface for commands used by the pl.edu.agh.age.console.
- *
- * Each implementing class should be annotated using {@link com.beust.jcommander.Parameters} and {@link
- * com.beust.jcommander.Parameter} annotations.
  */
-@FunctionalInterface
 public interface Command {
 
-	/**
-	 * Main method of the command - called when the command is executed.
-	 *
-	 * @param commander
-	 * 		Current (per command) {@link JCommander} instance.
-	 * @param reader
-	 * 		Current {@link LineReader}.
-	 * @param terminal
-	 * 		Current writer - command should use this writer for output.
-	 */
-	void execute(JCommander commander, LineReader reader, Terminal terminal) throws IOException;
+	String name();
 
-	/**
-	 * Returns set of suboperations (subcommands) of the command in the from of strings. By default returns an empty
-	 * set.
-	 *
-	 * @return suboperations of the command.
-	 */
-	default Set<String> operations() {
-		return emptySet();
-	}
 }

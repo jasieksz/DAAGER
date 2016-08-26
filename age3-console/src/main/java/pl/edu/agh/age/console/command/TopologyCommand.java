@@ -19,10 +19,9 @@
 package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.client.TopologyServiceClient;
-
-import com.beust.jcommander.Parameters;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -30,10 +29,8 @@ import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,53 +39,41 @@ import javax.inject.Named;
  * Command for getting and configuring topology of the cluster.
  */
 @Named
-@Parameters(commandNames = "topology", commandDescription = "Topology management", optionPrefixes = "--")
 public final class TopologyCommand extends BaseCommand {
-
-	private enum Operation {
-		INFO("info");
-
-		private final String operationName;
-
-		Operation(final String operationName) {
-			this.operationName = operationName;
-		}
-
-		public String operationName() {
-			return operationName;
-		}
-	}
 
 	private static final Logger logger = LoggerFactory.getLogger(TopologyCommand.class);
 
-	@Inject private TopologyServiceClient topologyService;
+	private final TopologyServiceClient topologyService;
 
-	public TopologyCommand() {
-		addHandler(Operation.INFO.operationName(), this::info);
+	private final PrintWriter writer;
+
+	@Inject public TopologyCommand(final TopologyServiceClient topologyService, final Terminal terminal) {
+		this.topologyService = requireNonNull(topologyService);
+		writer = terminal.writer();
 	}
 
-	@Override public final Set<String> operations() {
-		return Arrays.stream(Operation.values()).map(Operation::operationName).collect(Collectors.toSet());
+	@Override public String name() {
+		return "topology";
 	}
 
-	private void info(final Terminal printWriter) {
+	@Operation(description = "Prints information about topology.") public void info() {
 		final Optional<String> masterId = topologyService.masterId();
 		final Optional<DirectedGraph<String, DefaultEdge>> topology = topologyService.topologyGraph();
 		final Optional<String> topologyType = topologyService.topologyType();
 
-		printWriter.writer().println("Topology info = {");
-		printWriter.writer().println("\tmaster = " + masterId.orElse("# not elected #"));
+		writer.println("Topology info = {");
+		writer.println("\tmaster = " + masterId.orElse("# not elected #"));
 		if (topology.isPresent()) {
-			printWriter.writer().println("\ttopology type = " + topologyType.get());
-			printWriter.writer().println("\ttopology = {");
+			writer.println("\ttopology type = " + topologyType.get());
+			writer.println("\ttopology = {");
 			for (final DefaultEdge edge : topology.get().edgeSet()) {
-				printWriter.writer().println("\t\t" + edge);
+				writer.println("\t\t" + edge);
 			}
-			printWriter.writer().println("\t}");
+			writer.println("\t}");
 		} else {
-			printWriter.writer().println("\ttopology type = # no topology #");
+			writer.println("\ttopology type = # no topology #");
 		}
-		printWriter.writer().println("}");
+		writer.println("}");
 	}
 
 	@Override public String toString() {

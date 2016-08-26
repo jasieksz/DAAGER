@@ -17,24 +17,14 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.console
+/**
+ * Created by nnidyu on 26.08.16.
+ */
 
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.FileAppender
-
-def bySecond = timestamp("yyyyMMdd'T'HHmmss")
-
-appender("FILE", FileAppender) {
-	file = "console-${bySecond}.logger"
-	append = false
-
-	encoder(PatternLayoutEncoder) {
-		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
-	}
+function cls() {
+	clear.execute();
 }
 
-root(DEBUG, ["FILE"])
-logger("pl.edu.agh.age", DEBUG)
-logger("com.hazelcast", INFO)
-logger("com.hazelcast.client", INFO)
-logger("org.springframework", INFO)
+function help(obj) {
+	_help.execute(obj);
+}

@@ -19,46 +19,57 @@
 
 package pl.edu.agh.age.console.command;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 
-import pl.edu.agh.age.annotation.ForTestsOnly;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.jline.reader.LineReader;
-import org.jline.terminal.Terminal;
-
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 /**
  * A class to simplify creation of commands with suboperations.
  */
 public abstract class BaseCommand implements Command {
 
-	private final Map<String, Consumer<Terminal>> handlers = newHashMap();
-
-	@Parameter private final @MonotonicNonNull List<String> unnamed = newArrayList();
-
-	protected final void addHandler(final String commandName, final Consumer<Terminal> handler) {
-		handlers.put(commandName, handler);
-	}
-
-	@Override public void execute(final JCommander commander, final LineReader reader, final Terminal printWriter) {
-		final String command = getOnlyElement(unnamed, "");
-		if (!handlers.containsKey(command)) {
-			printWriter.writer().println("Unknown command '" + command + "'.");
-			return;
+	protected static <T> T checkAndCast(final Object obj, final Class<T> klass, final String msg) {
+		if (klass.isInstance(obj)){
+			return klass.cast(obj);
 		}
-		handlers.get(command).accept(printWriter);
+		throw new IllegalArgumentException(msg);
 	}
 
-	@ForTestsOnly final void setUnnamed(final List<String> unnamed) {
-		this.unnamed.addAll(unnamed);
+	protected static <T> T getAndCast(final Map<String, Object> parameters, final String name, final Class<T> klass) {
+		final Object obj  = parameters.get(name);
+		return checkAndCast(obj, klass, format("%s is required to be %s, %s provided instead", name, klass, obj.getClass()));
+	}
+
+	protected static <T> Optional<T> checkAndCastNullable(final @Nullable Object obj, final Class<T> klass, final String msg) {
+		if (obj == null) {
+			return Optional.empty();
+		}
+		if (klass.isInstance(obj)){
+			return Optional.of(klass.cast(obj));
+		}
+		throw new IllegalArgumentException(msg);
+	}
+
+	protected static <T> Optional<T> getAndCastNullable(final Map<String, Object> parameters, final String name, final Class<T> klass) {
+		final Object obj  = parameters.get(name);
+		return checkAndCastNullable(obj, klass, format("%s is required to be %s, %s provided instead", name, klass, obj.getClass()));
+	}
+
+	protected static <T> T checkAndCastDefault(final @Nullable Object obj, final Class<T> klass, final T def, final String msg) {
+		if (obj == null) {
+			return def;
+		}
+		if (klass.isInstance(obj)){
+			return klass.cast(obj);
+		}
+		throw new IllegalArgumentException(msg);
+	}
+
+	protected static <T> T getAndCastDefault(final Map<String, Object> parameters, final String name, final Class<T> klass, final T def) {
+		final Object obj  = parameters.get(name);
+		return checkAndCastDefault(obj, klass, def, format("%s is required to be %s, %s provided instead", name, klass, obj.getClass()));
 	}
 }

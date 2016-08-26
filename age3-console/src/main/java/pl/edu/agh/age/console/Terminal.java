@@ -17,24 +17,16 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.console
+package pl.edu.agh.age.console;
 
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.FileAppender
+import org.jline.terminal.impl.ExecPty;
+import org.jline.terminal.impl.PosixSysTerminal;
 
-def bySecond = timestamp("yyyyMMdd'T'HHmmss")
+import java.io.IOException;
 
-appender("FILE", FileAppender) {
-	file = "console-${bySecond}.logger"
-	append = false
+public final class Terminal extends PosixSysTerminal {
 
-	encoder(PatternLayoutEncoder) {
-		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
+	public Terminal() throws IOException {
+		super("t", "xterm-256color", ExecPty.current(), "UTF-8", true);
 	}
 }
-
-root(DEBUG, ["FILE"])
-logger("pl.edu.agh.age", DEBUG)
-logger("com.hazelcast", INFO)
-logger("com.hazelcast.client", INFO)
-logger("org.springframework", INFO)

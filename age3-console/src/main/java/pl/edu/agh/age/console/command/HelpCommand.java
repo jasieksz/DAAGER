@@ -20,23 +20,63 @@
 package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameters;
-
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
  * Command for showing the help.
  */
 @Named
-@Parameters(commandNames = "help", commandDescription = "Show the help")
 public final class HelpCommand implements Command {
+	private final Terminal terminal;
 
-	@Override public void execute(final JCommander commander, final LineReader reader, final Terminal printWriter) {}
+	private final PrintWriter writer;
+
+	@Inject public HelpCommand(final Terminal terminal) {
+		this.terminal = requireNonNull(terminal);
+
+		writer = terminal.writer();
+	}
+
+	@Override public String name() {
+		return "_help";
+	}
+
+	public void execute(final Object obj) {
+		requireNonNull(obj);
+		if (obj instanceof Command) {
+			final Command command = (Command)obj;
+			writer.println(format("%s", command.name()));
+			final List<Method> methods = Arrays.stream(obj.getClass().getMethods())
+			                                   .filter(m -> m.isAnnotationPresent(Operation.class))
+			                                   .collect(toList());
+			for (final Method method : methods) {
+				final Operation annotation = method.getAnnotation(Operation.class);
+				writer.println(format("%s - %s", method.getName(), annotation.description()));
+
+				if (method.isAnnotationPresent(Parameters.class)) {
+					final Parameter[] parameters = method.getAnnotation(Parameters.class).value();
+					for (final Parameter parameter : parameters) {
+						final String format = parameter.optional() ? "[%s] - %s" : "%s - %s";
+						writer.println(format('\t' + format, parameter.name(), parameter.description()));
+					}
+				}
+			}
+		} else {
+			terminal.writer().println("I have no help for this.");
+		}
+	}
 
 	@Override public String toString() {
 		return toStringHelper(this).toString();

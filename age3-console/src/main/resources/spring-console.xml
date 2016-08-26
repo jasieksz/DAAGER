@@ -38,6 +38,8 @@
 		<context:exclude-filter type="regex" expression="pl\.edu\.agh\.age\.services.*"/>
 	</context:component-scan>
 
+	<bean id="terminal" class="pl.edu.agh.age.console.Terminal"/>
+
 	<bean id="eventBus"
 	      class="com.google.common.eventbus.EventBus"/>
 

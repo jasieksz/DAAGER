@@ -49,7 +49,7 @@ public class CommandCompleter {//implements Completer {
 
 	private static final Logger log = LoggerFactory.getLogger(CommandCompleter.class);
 
-	@Inject private CommandIntrospector introspector;
+	private CommandIntrospector introspector;
 
 	//@Override
 	public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {

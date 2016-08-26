@@ -17,24 +17,16 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.console
+package pl.edu.agh.age.console.command;
 
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.FileAppender
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-def bySecond = timestamp("yyyyMMdd'T'HHmmss")
-
-appender("FILE", FileAppender) {
-	file = "console-${bySecond}.logger"
-	append = false
-
-	encoder(PatternLayoutEncoder) {
-		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Parameters {
+	Parameter[] value();
 }
-
-root(DEBUG, ["FILE"])
-logger("pl.edu.agh.age", DEBUG)
-logger("com.hazelcast", INFO)
-logger("com.hazelcast.client", INFO)
-logger("org.springframework", INFO)
