@@ -32,8 +32,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.io.IOException;
-
 /**
  * Bootstrapper for the console.
  *
@@ -94,26 +92,22 @@ public final class ConsoleBootstrapper {
 		}
 	}
 
-	private static void consoleLoop(final ConfigurableApplicationContext context) {
-		logger.info("Starting console");
-		try {
-			final Console console = context.getBean(Console.class);
-			if (isNull(console)) {
-				System.out.println("No console is defined. Do you have a correct spring configuration?");
-				logger.error("No console is defined.");
-				return;
-			}
-			console.mainLoop();
-		} catch (final IOException e) {
-			handleException(e);
-		}
-	}
-
 	private static void handleException(final Exception e) {
 		logger.error("Console exception", e);
 		final Throwable rootCause = Throwables.getRootCause(e);
 		System.out.println("I could not initialize the console. The cause was:");
 		System.out.println(rootCause.getLocalizedMessage());
 		System.out.println("Have you configured and started the computational cluster?");
+	}
+
+	private static void consoleLoop(final ConfigurableApplicationContext context) {
+		logger.info("Starting console");
+		final Console console = context.getBean(Console.class);
+		if (isNull(console)) {
+			System.out.println("No console is defined. Do you have a correct spring configuration?");
+			logger.error("No console is defined.");
+			return;
+		}
+		console.mainLoop();
 	}
 }

@@ -20,6 +20,7 @@
 package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.util.Objects.requireNonNull;
 
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
@@ -29,16 +30,20 @@ import javax.inject.Named;
 
 /**
  * Command providing an action of clearing the screen.
+ *
+ * This command is internal and is wrapped in base_commands.js
  */
 @Named
 public final class ClearScreenCommand implements Command {
 
 	private final Terminal terminal;
 
-	@Inject public ClearScreenCommand(final Terminal terminal) {this.terminal = terminal;}
+	@Inject public ClearScreenCommand(final Terminal terminal) {
+		this.terminal = requireNonNull(terminal);
+	}
 
 	@Override public String name() {
-		return "clear";
+		return "_clear";
 	}
 
 	public void execute() {

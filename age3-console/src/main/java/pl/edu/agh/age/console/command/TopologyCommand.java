@@ -39,7 +39,7 @@ import javax.inject.Named;
  * Command for getting and configuring topology of the cluster.
  */
 @Named
-public final class TopologyCommand extends BaseCommand {
+public final class TopologyCommand implements Command {
 
 	private static final Logger logger = LoggerFactory.getLogger(TopologyCommand.class);
 

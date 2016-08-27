@@ -24,6 +24,9 @@ import org.jline.terminal.impl.PosixSysTerminal;
 
 import java.io.IOException;
 
+/**
+ * Terminal wrapper for easier Spring configuration.
+ */
 public final class Terminal extends PosixSysTerminal {
 
 	public Terminal() throws IOException {

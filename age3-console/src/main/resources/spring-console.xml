@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright (C) 2016 Intelligent Information Systems Group.
   ~
   ~ This file is part of AgE.
@@ -40,9 +39,7 @@
 
 	<bean id="terminal" class="pl.edu.agh.age.console.Terminal"/>
 
-	<bean id="eventBus"
-	      class="com.google.common.eventbus.EventBus"/>
+	<bean id="eventBus" class="com.google.common.eventbus.EventBus"/>
 
-	<bean id="console"
-	      class="pl.edu.agh.age.console.Console"/>
+	<bean id="console" class="pl.edu.agh.age.console.Console"/>
 </beans>

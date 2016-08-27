@@ -20,17 +20,12 @@ package pl.edu.agh.age.examples.tests;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.nonNull;
-import static pl.edu.agh.age.services.worker.internal.SpringConfiguration.fromFilesystem;
 
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
-import pl.edu.agh.age.console.command.BaseCommand;
+import pl.edu.agh.age.console.command.Command;
 import pl.edu.agh.age.examples.SimpleLongRunning;
 import pl.edu.agh.age.examples.SimpleLongRunningWithError;
-import pl.edu.agh.age.services.lifecycle.LifecycleMessage;
-import pl.edu.agh.age.services.lifecycle.internal.DefaultNodeLifecycleService;
-import pl.edu.agh.age.services.worker.WorkerMessage;
-import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.SingleClassConfiguration;
 import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
 import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
@@ -39,10 +34,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jline.terminal.Terminal;
@@ -52,12 +44,10 @@ import org.springframework.context.annotation.Scope;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -67,7 +57,7 @@ import javax.inject.Named;
 @Named
 @Scope("prototype")
 @Parameters(commandNames = "test", commandDescription = "Run sample computations", optionPrefixes = "--")
-public final class TestCommand extends BaseCommand {
+public final class TestCommand implements Command {
 
 	private enum Operation {
 		LIST_EXAMPLES("list-examples"),

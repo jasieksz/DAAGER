@@ -1,0 +1,28 @@
+This is the [1;45mAgE[0m console.
+
+It is Javascript-based REPL using Nashorn engine. You can use any JS syntax and commands.
+Access to all Java classes is also possible.
+
+Type help() to see this help. You can also type help(group) where `group` is
+a name of command group to see help only for this group.
+
+[1;42mCOMMANDS LIST[0m
+
+[1mGENERAL COMMANDS[0m
+
+[1mhelp([command])[0m
+	displays help
+[1mcls()[0m
+	clears screen
+[1mquit()[0m/[1mCtrl-D[0m
+	quit
+
+[1mDYNAMICALLY LOADED COMMANDS[0m
+
+All dynamically loaded commands have the following syntax:
+
+group.command(parameters)
+
+Where parameters are JS dictionary, e.g.:
+cluster.nodes({ id: 1 })
+

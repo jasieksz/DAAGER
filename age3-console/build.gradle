@@ -24,16 +24,15 @@ plugins {
 
 mainClassName = 'pl.edu.agh.age.console.ConsoleBootstrapper'
 applicationDefaultJvmArgs = [
-		'-enableassertions',
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy'
+	'-enableassertions',
+	'-Dhazelcast.logging.type=slf4j',
+	'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy'
 ]
 
 dependencies {
 	compile project(':age3-core')
 
 	compile 'com.hazelcast:hazelcast-client:3.6+'
-
 	compile 'jline:jline:3.+'
 
 	// JNA is needed for jline
@@ -49,17 +48,17 @@ shadowJar {
 task(shell, dependsOn: 'classes') << {
 	def classpath = sourceSets.main.runtimeClasspath
 	def command = [
-			'java',
-			'-cp', classpath.collect().join(':'),
-			'-Dhazelcast.logging.type=slf4j',
-			'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
-			'pl.edu.agh.age.console.ConsoleBootstrapper'
+		'java',
+		'-cp', classpath.collect().join(':'),
+		'-Dhazelcast.logging.type=slf4j',
+		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
+		'pl.edu.agh.age.console.ConsoleBootstrapper'
 	]
 	def proc = new ProcessBuilder(command)
-			.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-			.redirectInput(ProcessBuilder.Redirect.INHERIT)
-			.redirectError(ProcessBuilder.Redirect.INHERIT)
-			.start()
+		.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+		.redirectInput(ProcessBuilder.Redirect.INHERIT)
+		.redirectError(ProcessBuilder.Redirect.INHERIT)
+		.start()
 	proc.waitFor()
 }
 

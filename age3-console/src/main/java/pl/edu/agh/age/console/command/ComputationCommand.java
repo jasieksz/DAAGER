@@ -21,6 +21,7 @@ package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
+import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.DiscoveryServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
@@ -46,7 +47,7 @@ import javax.inject.Named;
  * Command for getting info about and managing the computation.
  */
 @Named
-public final class ComputationCommand extends BaseCommand {
+public final class ComputationCommand implements Command {
 
 	private static final Logger logger = LoggerFactory.getLogger(ComputationCommand.class);
 
@@ -112,7 +113,7 @@ public final class ComputationCommand extends BaseCommand {
 	@Operation(description = "Prints info about computation") public void info() {
 		logger.debug("Printing information about info.");
 		final Set<NodeDescriptor> neighbours = discoveryService.allMembers();
-		neighbours.forEach(x -> writer.println(x));
+		neighbours.forEach(writer::println);
 	}
 
 	@Operation(description = "Starts the computation") public void start() {

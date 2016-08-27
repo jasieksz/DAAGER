@@ -17,12 +17,8 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Created by nnidyu on 26.08.16.
- */
-
 function cls() {
-	clear.execute();
+	_clear.execute();
 }
 
 function help(obj) {
