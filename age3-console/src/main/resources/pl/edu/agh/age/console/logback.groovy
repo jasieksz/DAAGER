@@ -25,7 +25,7 @@ import ch.qos.logback.core.FileAppender
 def bySecond = timestamp("yyyyMMdd'T'HHmmss")
 
 appender("FILE", FileAppender) {
-	file = "console-${bySecond}.logger"
+	file = "console-${bySecond}.log"
 	append = false
 
 	encoder(PatternLayoutEncoder) {
