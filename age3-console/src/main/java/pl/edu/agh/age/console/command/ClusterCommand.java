@@ -21,6 +21,8 @@ package pl.edu.agh.age.console.command;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
+import static pl.edu.agh.age.console.command.Command.getAndCastDefault;
+import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.DiscoveryServiceClient;
 import pl.edu.agh.age.client.LifecycleServiceClient;
@@ -49,7 +51,7 @@ import javax.inject.Named;
  */
 @SuppressWarnings("unused")
 @Named
-public final class ClusterCommand extends BaseCommand {
+public final class ClusterCommand implements Command {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterCommand.class);
 
