@@ -36,6 +36,14 @@ To run the computational node, you can build a fatjar similarly, or start it dir
 ./gradlew age3-core:node
 ```
 
+## Stream Agents
+
+Stream agents module contains a stub for agent-based computations with stream processing. To run an example from gradle
+one needs to run `node` task with path to Spring configuration file, as follows:
+```
+./gradlew node -PappArgs="['build/resources/main/pl/edu/agh/age/compute/stream/example/spring-sample-runnable.xml']"
+```
+
 ## Examples
 
 Simple examples are provided in the `age3-examples` module. You can build it and start the same way, as a console and
