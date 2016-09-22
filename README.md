@@ -41,7 +41,7 @@ To run the computational node, you can build a fatjar similarly, or start it dir
 Stream agents module contains a stub for agent-based computations with stream processing. To run an example from gradle
 one needs to run `node` task with path to Spring configuration file, as follows:
 ```
-gradle node -PappArgs="['build/resources/main/pl/edu/agh/age/compute/stream/example/spring-sample-runnable.xml']"
+./gradlew node -PappArgs="['build/resources/main/pl/edu/agh/age/compute/stream/example/spring-sample-runnable.xml']"
 ```
 
 ## Examples
