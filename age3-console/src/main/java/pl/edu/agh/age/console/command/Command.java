@@ -84,8 +84,8 @@ public interface Command {
 	 */
 	static <T> T getAndCast(final Map<String, Object> parameters, final String name, final Class<T> klass) {
 		final Object obj = parameters.get(name);
-		return checkAndCast(obj, klass,
-		                    format("%s is required to be %s, %s provided instead", name, klass, obj.getClass()));
+		return checkAndCast(obj, klass, format("%s is required to be %s, %s provided instead", name, klass,
+		                                       (obj == null) ? "null" : obj.getClass()));
 	}
 
 	/**
@@ -141,7 +141,7 @@ public interface Command {
 	                                          final Class<T> klass) {
 		final Object obj = parameters.get(name);
 		return checkAndCastNullable(obj, klass, format("%s is required to be %s, %s provided instead", name, klass,
-		                                               obj.getClass()));
+		                                               (obj == null) ? "null" : obj.getClass()));
 	}
 
 	/**
@@ -200,8 +200,8 @@ public interface Command {
 	static <T> T getAndCastDefault(final Map<String, Object> parameters, final String name, final Class<T> klass,
 	                               final T def) {
 		final Object obj = parameters.get(name);
-		return checkAndCastDefault(obj, klass, def,
-		                           format("%s is required to be %s, %s provided instead", name, klass, obj.getClass()));
+		return checkAndCastDefault(obj, klass, def, format("%s is required to be %s, %s provided instead", name, klass,
+		                                                   (obj == null) ? "null" : obj.getClass()));
 	}
 
 }
