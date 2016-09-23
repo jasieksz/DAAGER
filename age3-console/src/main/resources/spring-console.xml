@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright (C) 2016 Intelligent Information Systems Group.
   ~
   ~ This file is part of AgE.
@@ -38,9 +37,9 @@
 		<context:exclude-filter type="regex" expression="pl\.edu\.agh\.age\.services.*"/>
 	</context:component-scan>
 
-	<bean id="eventBus"
-	      class="com.google.common.eventbus.EventBus"/>
+	<bean id="terminal" class="pl.edu.agh.age.console.TerminalBuilder" factory-method="build"/>
 
-	<bean id="console"
-	      class="pl.edu.agh.age.console.Console"/>
+	<bean id="eventBus" class="com.google.common.eventbus.EventBus"/>
+
+	<bean id="console" class="pl.edu.agh.age.console.Console"/>
 </beans>

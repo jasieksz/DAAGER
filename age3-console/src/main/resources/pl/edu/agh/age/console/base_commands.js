@@ -17,7 +17,10 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Console-related classes and interfaces.
- */
-package pl.edu.agh.age.console;
+function cls() {
+	_clear.execute();
+}
+
+function help(obj) {
+	_help.execute(obj);
+}

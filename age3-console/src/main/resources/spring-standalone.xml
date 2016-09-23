@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright (C) 2016 Intelligent Information Systems Group.
   ~
   ~ This file is part of AgE.
@@ -41,15 +40,13 @@
 
 	<context:component-scan base-package="pl.edu.agh.age"/>
 
-	<bean id="eventBus"
-	      class="com.google.common.eventbus.EventBus"/>
+	<bean id="eventBus" class="com.google.common.eventbus.EventBus"/>
 
-	<bean id="worker"
-	      class="pl.edu.agh.age.services.worker.internal.DefaultWorkerService"/>
+	<bean id="worker" class="pl.edu.agh.age.services.worker.internal.DefaultWorkerService"/>
 
-	<bean id="status"
-	      class="pl.edu.agh.age.services.status.internal.DefaultStatusService"/>
+	<bean id="status" class="pl.edu.agh.age.services.status.internal.DefaultStatusService"/>
 
-	<bean id="console"
-	      class="pl.edu.agh.age.console.Console"/>
+	<bean id="terminal" class="pl.edu.agh.age.console.Terminal"/>
+
+	<bean id="console" class="pl.edu.agh.age.console.Console"/>
 </beans>

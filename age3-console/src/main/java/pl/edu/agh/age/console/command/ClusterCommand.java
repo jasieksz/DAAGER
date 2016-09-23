@@ -20,6 +20,9 @@ package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
+import static pl.edu.agh.age.console.command.Command.getAndCastDefault;
+import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.DiscoveryServiceClient;
 import pl.edu.agh.age.client.LifecycleServiceClient;
@@ -28,17 +31,16 @@ import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.identity.NodeType;
 import pl.edu.agh.age.services.status.Status;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 
+import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -47,81 +49,82 @@ import javax.inject.Named;
 /**
  * Command for getting info about and managing the whole cluster.
  */
+@SuppressWarnings("unused")
 @Named
-@Scope("prototype")
-@Parameters(commandNames = "cluster", commandDescription = "Cluster management", optionPrefixes = "--")
-public final class ClusterCommand extends BaseCommand {
+public final class ClusterCommand implements Command {
 
-	private enum Operation {
-		NODES("nodes"),
-		DESTROY("destroy");
+	private static final Logger logger = LoggerFactory.getLogger(ClusterCommand.class);
 
-		private final String operationName;
+	private final DiscoveryServiceClient discoveryService;
 
-		Operation(final String operationName) {
-			this.operationName = operationName;
-		}
+	private final LifecycleServiceClient lifecycleServiceClient;
 
-		public String operationName() {
-			return operationName;
-		}
+	private final StatusServiceClient statusServiceClient;
+
+	private final PrintWriter writer;
+
+	@Inject
+	public ClusterCommand(final DiscoveryServiceClient discoveryService,
+	                      final LifecycleServiceClient lifecycleServiceClient,
+	                      final StatusServiceClient statusServiceClient, final Terminal terminal) {
+		this.discoveryService = requireNonNull(discoveryService);
+		this.lifecycleServiceClient = requireNonNull(lifecycleServiceClient);
+		this.statusServiceClient = requireNonNull(statusServiceClient);
+		writer = terminal.writer();
 	}
 
-	private static final Logger log = LoggerFactory.getLogger(ClusterCommand.class);
 
-	@Inject private DiscoveryServiceClient discoveryService;
-
-	@Inject private LifecycleServiceClient lifecycleServiceClient;
-
-	@Inject private StatusServiceClient statusServiceClient;
-
-	@Parameter(names = "--long") private boolean longOutput = false;
-
-	@Parameter(names = "--id") private @MonotonicNonNull String id;
-
-	public ClusterCommand() {
-		addHandler(Operation.NODES.operationName(), this::nodes);
-		addHandler(Operation.DESTROY.operationName(), this::destroy);
+	@Override public String name() {
+		return "cluster";
 	}
 
 	/**
 	 * Prints information about nodes (multiple or single).
 	 */
-	private void nodes(final Terminal printWriter) {
-		log.debug("Printing information about nodes.");
-		if (isNull(id)) {
-			final Set<NodeDescriptor> neighbours = discoveryService.allMembers();
-			neighbours.forEach(descriptor -> printNode(descriptor, printWriter));
+	@Operation(description = "Prints information about nodes (multiple or single).")
+	@Parameter(name = "id", type = Integer.class, optional = true, description = "id of node to print")
+	@Parameter(name = "longOutput", type = Boolean.class, optional = true, description = "long mode")
+	public void nodes(final Map<String, Object> parameters) {
+		final Optional<Integer> id = getAndCastNullable(parameters, "id", Integer.class);
+		final boolean longOutput = getAndCastDefault(parameters, "longOutput", Boolean.class, false);
+		logger.debug("Printing information about nodes.");
+		if (id.isPresent()) {
+			final NodeDescriptor descriptor = discoveryService.memberWithId(id.get().toString()); // FIXME
+			printNode(descriptor, longOutput);
 		} else {
-			final NodeDescriptor descriptor = discoveryService.memberWithId(id);
-			printNode(descriptor, printWriter);
+			final Set<NodeDescriptor> neighbours = discoveryService.allMembers();
+			neighbours.forEach(descriptor -> printNode(descriptor, longOutput));
 		}
+	}
+
+	public void nodes() {
+		nodes(Collections.emptyMap());
 	}
 
 	/**
 	 * Destroys the cluster.
 	 */
-	private void destroy(final Terminal printWriter) {
+	@Operation(description = "Destroys the cluster.") public void destroy() {
 		lifecycleServiceClient.destroyCluster();
 	}
 
-	private void printNode(final NodeDescriptor descriptor, final Terminal printWriter) {
-		printWriter.writer().println(String.format("%s - %s", descriptor.id(), descriptor.type()));
+	private void printNode(final NodeDescriptor descriptor, final boolean longOutput) {
+		writer.println(String.format("%s - %s", descriptor.id(), descriptor.type()));
 		if (longOutput && (descriptor.type() == NodeType.COMPUTE)) {
 			final @Nullable Status status = statusServiceClient.getStatusForNode(descriptor);
 			if (isNull(status)) {
-				printWriter.writer().println("\tNo status for the node. Seems to be an error.");
+				writer.println("\tNo status for the node. Seems to be an error.");
 				return;
 			}
-			printWriter.writer()
-			           .println("\tLast updated: " + status.creationTimestamp()
-			                                               .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-			printWriter.writer().println("\tCaught exceptions:");
-			status.errors().forEach(e -> printWriter.writer().println("\t\t" + e.getMessage()));
+			writer.println(
+				"\tLast updated: " + status.creationTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+			writer.println("\tCaught exceptions:");
+			status.errors().forEach(e -> writer.println("\t\t" + e.getMessage()));
 		}
 	}
 
 	@Override public String toString() {
 		return toStringHelper(this).toString();
 	}
+
 }

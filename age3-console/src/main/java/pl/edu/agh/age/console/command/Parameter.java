@@ -17,7 +17,23 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Console-related classes and interfaces.
- */
-package pl.edu.agh.age.console;
+package pl.edu.agh.age.console.command;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Repeatable(Parameters.class)
+public @interface Parameter {
+	String name();
+
+	String description();
+
+	boolean optional();
+
+	Class<?> type();
+}

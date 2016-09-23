@@ -19,45 +19,34 @@
 package pl.edu.agh.age.examples.tests;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static java.util.Objects.nonNull;
-import static pl.edu.agh.age.services.worker.internal.SpringConfiguration.fromFilesystem;
+import static java.util.Objects.requireNonNull;
+import static pl.edu.agh.age.console.command.Command.getAndCast;
+import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
-import pl.edu.agh.age.console.command.BaseCommand;
+import pl.edu.agh.age.console.command.Command;
+import pl.edu.agh.age.console.command.Operation;
+import pl.edu.agh.age.console.command.Parameter;
 import pl.edu.agh.age.examples.SimpleLongRunning;
 import pl.edu.agh.age.examples.SimpleLongRunningWithError;
-import pl.edu.agh.age.services.lifecycle.LifecycleMessage;
-import pl.edu.agh.age.services.lifecycle.internal.DefaultNodeLifecycleService;
-import pl.edu.agh.age.services.worker.WorkerMessage;
-import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.SingleClassConfiguration;
 import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
 import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -65,25 +54,8 @@ import javax.inject.Named;
  * Command that eases testing the cluster.
  */
 @Named
-@Scope("prototype")
-@Parameters(commandNames = "test", commandDescription = "Run sample computations", optionPrefixes = "--")
-public final class TestCommand extends BaseCommand {
-
-	private enum Operation {
-		LIST_EXAMPLES("list-examples"),
-		EXECUTE("execute"),
-		COMPUTATION_INTERRUPTED("computation-interrupted");
-
-		private final String operationName;
-
-		Operation(final @NonNull String operationName) {
-			this.operationName = operationName;
-		}
-
-		public String operationName() {
-			return operationName;
-		}
-	}
+public final class TestCommand implements Command {
+	private static final Logger logger = LoggerFactory.getLogger(TestCommand.class);
 
 	private enum Type {
 		DESTROY("destroy"),
@@ -92,7 +64,7 @@ public final class TestCommand extends BaseCommand {
 
 		private final String typeName;
 
-		Type(final @NonNull String typeName) {
+		Type(final String typeName) {
 			this.typeName = typeName;
 		}
 
@@ -103,77 +75,74 @@ public final class TestCommand extends BaseCommand {
 
 	private static final String EXAMPLES_PACKAGE = "pl.edu.agh.age.examples";
 
-	private static final Logger log = LoggerFactory.getLogger(TestCommand.class);
+	private final WorkerServiceClient workerServiceClient;
 
-	@Inject private WorkerServiceClient workerServiceClient;
+	private final LifecycleServiceClient lifecycleServiceClient;
 
-	@Inject private LifecycleServiceClient lifecycleServiceClient;
+	private final PrintWriter writer;
 
-	@Parameter(names = "--example") private @MonotonicNonNull String example;
-
-	@Parameter(names = "--config") private @MonotonicNonNull String config;
-
-	@Parameter(names = "--type") private @MonotonicNonNull String type = Type.DESTROY.typeName();
-
-	public TestCommand() {
-		addHandler(Operation.LIST_EXAMPLES.operationName(), this::listExamples);
-		addHandler(Operation.EXECUTE.operationName(), this::executeExample);
-		addHandler(Operation.COMPUTATION_INTERRUPTED.operationName(), this::computationInterrupted);
+	@Inject
+	public TestCommand(final WorkerServiceClient workerServiceClient,
+	                   final LifecycleServiceClient lifecycleServiceClient, final Terminal terminal) {
+		this.workerServiceClient = requireNonNull(workerServiceClient);
+		this.lifecycleServiceClient = requireNonNull(lifecycleServiceClient);
+		writer = terminal.writer();
 	}
 
-	@Override public Set<String> operations() {
-		return Arrays.stream(Operation.values()).map(Operation::operationName).collect(Collectors.toSet());
+	@Override public String name() {
+		return "test";
 	}
 
-	private void listExamples(final Terminal terminal) {
-		log.debug("Listing examples.");
+	@Operation(description = "Lists examples") public void listExamples() {
+		logger.debug("Listing examples.");
 		try {
 			final ClassPath classPath = ClassPath.from(TestCommand.class.getClassLoader());
 			final ImmutableSet<ClassPath.ClassInfo> classes = classPath.getTopLevelClasses(EXAMPLES_PACKAGE);
-			log.debug("Class path {}.", classes);
-			classes.forEach(klass -> terminal.writer().println(klass.getSimpleName()));
+			logger.debug("Class path {}", classes);
+			classes.forEach(klass -> writer.println(klass.getSimpleName()));
 		} catch (final IOException e) {
-			log.error("Cannot load classes.", e);
-			terminal.writer().println("Error: Cannot load classes.");
+			logger.error("Cannot load classes", e);
+			writer.println("Error: Cannot load classes.");
 		}
 	}
 
-	private void executeExample(final Terminal terminal) {
-		final WorkerConfiguration configuration;
-		try {
-			if (nonNull(config)) {
-				configuration = runConfig();
-			} else if (nonNull(example)) {
-				configuration = runExample();
-			} else {
-				terminal.writer().println("Provide --config or --example.");
-				return;
-			}
-		} catch (final IOException e) {
-			terminal.writer().println("File " + config + " does not exist.");
+	@Operation(description = "Executes a single example")
+	@Parameter(name = "example", type = String.class, optional = true, description = "")
+	@Parameter(name = "config", type = String.class, optional = true, description = "")
+	public void executeExample(final Map<String, Object> parameters) {
+		final Optional<String> example = getAndCastNullable(parameters, "example", String.class);
+		final Optional<String> config = getAndCastNullable(parameters, "config", String.class);
+
+		if (!example.isPresent() && !config.isPresent()) {
+			writer.println("Provide --config or --example.");
 			return;
 		}
 
 		try {
+			final WorkerConfiguration configuration = config.isPresent() ? runConfig(config.get())
+			                                                             : runExample(example.get());
+
 			TimeUnit.SECONDS.sleep(1L);
-			log.debug("Sending {}", configuration);
+			logger.debug("Sending {}", configuration);
 			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(1L);
 			workerServiceClient.startComputation();
+		} catch (final IOException e) {
+			writer.println("File " + config + " does not exist.");
 		} catch (final InterruptedException e) {
-			log.debug("Interrupted.", e);
+			logger.debug("Interrupted.", e);
 		}
 	}
 
-	private SingleClassConfiguration runExample() {
-		log.debug("Executing example.");
+	private static WorkerConfiguration runExample(final String example) {
+		logger.debug("Executing example");
 		final String className = EXAMPLES_PACKAGE + '.' + example;
 
 		return new SingleClassConfiguration(className);
 	}
 
-	private SpringConfiguration runConfig() throws IOException {
-		log.debug("Running config.");
+	private static WorkerConfiguration runConfig(final String config) throws IOException {
+		logger.debug("Running config");
 		return SpringConfiguration.fromFilesystem(config);
 	}
 
@@ -183,30 +152,31 @@ public final class TestCommand extends BaseCommand {
 	 * Currently it can run:
 	 * # a computation stopped by cluster destruction,
 	 * # a computation stopping because of its own error.
-	 *
-	 * @param terminal
-	 * 		Print writer.
 	 */
-	private void computationInterrupted(final Terminal terminal) {
-		log.debug("Testing interrupted computation.");
+	@Operation(description = "Executes an interrupted computation")
+	@Parameter(name = "type", type = String.class, optional = true, description = "")
+	public void computationInterrupted(final Map<String, Object> parameters) {
+		final String type = getAndCast(parameters, "type", String.class);
 
-		terminal.writer().println("Loading class...");
+		logger.debug("Testing interrupted computation");
+
+		writer.println("Loading class...");
 		final String className = type.equals(Type.COMPUTE_ERROR.typeName())
 		                         ? SimpleLongRunningWithError.class.getCanonicalName()
 		                         : SimpleLongRunning.class.getCanonicalName();
 		try {
 			workerServiceClient.prepareConfiguration(new SingleClassConfiguration(className));
-			terminal.writer().println("Starting computation...");
+			writer.println("Starting computation...");
 			workerServiceClient.startComputation();
-			terminal.writer().println("Waiting...");
+			writer.println("Waiting...");
 
 			TimeUnit.SECONDS.sleep(10L);
 		} catch (final InterruptedException e) {
-			log.debug("Interrupted.", e);
+			logger.debug("Interrupted", e);
 		}
 
 		if (type.equals(Type.DESTROY.typeName())) {
-			terminal.writer().println("Destroying cluster...");
+			writer.println("Destroying cluster...");
 			lifecycleServiceClient.destroyCluster();
 		}
 	}
@@ -214,4 +184,5 @@ public final class TestCommand extends BaseCommand {
 	@Override public String toString() {
 		return toStringHelper(this).toString();
 	}
+
 }

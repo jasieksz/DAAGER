@@ -46,7 +46,7 @@ task(shell, dependsOn: 'classes') << {
 	def classpath = sourceSets.main.runtimeClasspath
 	def command = [
 		'java',
-		'-cp', classpath.collect().join(':'),
+		'-cp', classpath.collect().join(java.io.File.pathSeparator),
 		'-Dhazelcast.logging.type=slf4j',
 		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper'
@@ -63,7 +63,7 @@ task(standalone, dependsOn: 'classes') << {
 	def classpath = sourceSets.main.runtimeClasspath
 	def command = [
 		'java',
-		'-cp', classpath.collect().join(':'),
+		'-cp', classpath.collect().join(java.io.File.pathSeparator),
 		'-Dhazelcast.logging.type=slf4j',
 		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper',

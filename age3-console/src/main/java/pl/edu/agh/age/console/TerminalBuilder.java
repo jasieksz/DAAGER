@@ -16,30 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pl.edu.agh.age.console.command;
 
-import static com.google.common.base.MoreObjects.toStringHelper;
+package pl.edu.agh.age.console;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameters;
-
-import org.jline.reader.LineReader;
+import org.apache.commons.lang3.SystemUtils;
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
- * Main (empty) command for the pl.edu.agh.age.console.
+ * Terminal wrapper for easier Spring configuration.
  */
-@Parameters(optionPrefixes = "--")
-public final class MainCommand implements Command {
+public final class TerminalBuilder {
 
-	private static final Logger logger = LoggerFactory.getLogger(MainCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(TerminalBuilder.class);
 
-	@Override public String toString() {
-		return toStringHelper(this).toString();
+	private TerminalBuilder() {}
+
+	public static Terminal build() throws IOException {
+		logger.debug("Executing our terminal builder");
+		if (SystemUtils.IS_OS_WINDOWS) {
+			// Seems that JNA does not work?
+			return org.jline.terminal.TerminalBuilder.builder().jna(false).build();
+		} else {
+			return org.jline.terminal.TerminalBuilder.builder().jna(true).build();
+		}
 	}
-
-	@Override public void execute(final JCommander commander, final LineReader reader, final Terminal printWriter) {}
 }
-

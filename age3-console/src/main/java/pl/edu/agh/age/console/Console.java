@@ -19,122 +19,90 @@
 
 package pl.edu.agh.age.console;
 
-import static java.util.Objects.isNull;
+import static com.google.common.base.Throwables.getRootCause;
+import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.console.command.Command;
-import pl.edu.agh.age.console.command.HelpCommand;
-import pl.edu.agh.age.console.command.MainCommand;
-import pl.edu.agh.age.console.command.QuitCommand;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-import com.google.common.collect.Iterables;
-
-import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
-import org.jline.reader.impl.completer.completer.AggregateCompleter;
-import org.jline.reader.impl.completer.completer.FileNameCompleter;
-import org.jline.reader.impl.completer.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.impl.ExecPty;
-import org.jline.terminal.impl.PosixSysTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 /**
  * Console is the shell-like interface for managing the cluster and AgE nodes.
  *
- * A command is a class that implements the {@link pl.edu.agh.age.console.command.Command} interface
- * and is annotated using the {@link com.beust.jcommander.Parameters} and {@link javax.inject.Named} annotations.
- * Such commands are automatically recognized and available for the user.
+ * A command is a class that implements the {@link Command} interface and is annotated using the {@link
+ * javax.inject.Named} annotations. Such commands are automatically recognized and made available for the user.
  */
 public final class Console {
 
+	private static final Logger logger = LoggerFactory.getLogger(Console.class);
+
+	private static final String BASE_SCRIPT = "classpath:pl/edu/agh/age/console/base_commands.js";
+
 	private static final String PROMPT = "AgE> ";
 
-	private static final Pattern WHITESPACE = Pattern.compile("\\s");
-
-	private static final Logger log = LoggerFactory.getLogger(Console.class);
-
-	@Inject private ApplicationContext applicationContext;
-
-	@Inject private CommandCompleter commandCompleter;
+	private final ApplicationContext applicationContext;
 
 	private final Terminal terminal;
 
-	public Console() throws IOException {
-		terminal = new PosixSysTerminal("t", "xterm-256color", ExecPty.current(), "UTF-8", true);
-		log.debug("Using {}", terminal);
+	private final PrintWriter writer;
+
+	@Inject public Console(final ApplicationContext applicationContext, final Terminal terminal) {
+		this.applicationContext = requireNonNull(applicationContext);
+		this.terminal = requireNonNull(terminal);
+		writer = terminal.writer();
+
+		logger.debug("Using {}", this.terminal);
 	}
 
-	@PostConstruct private void construct() {
-		//reader.addCompleter(commandCompleter);
-	}
+	void mainLoop() {
+		final LineReader reader = LineReaderBuilder.builder().appName("AgE").terminal(terminal).build();
+		final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+		try {
+			engine.eval("load('" + BASE_SCRIPT + "');");
+		} catch (final ScriptException e) {
+			logger.error("Could not load the base script", e);
+			writer.println("Could not load the configuration, exiting:");
+			writer.println(e.getMessage());
+			return;
+		}
 
-	public void mainLoop() throws IOException {
-		final Completer completer = new AggregateCompleter(new FileNameCompleter(), new StringsCompleter("aaa"));
-		final LineReader reader = LineReaderBuilder.builder()
-		                                           .appName("AgE")
-		                                           .terminal(terminal)
-		                                           .completer(completer)
-		                                           .build();
+		writer.println("Welcome to the AgE console. Type help() to see usage information.");
+		writer.flush();
 
-		terminal.writer().println("Welcome to the AgE console. Type help to see usage information.");
-		terminal.writer().flush();
+		final Collection<Command> commands = applicationContext.getBeansOfType(Command.class).values();
+		commands.forEach(command -> engine.put(command.name(), command));
 
 		while (true) {
 			try {
 				final String line = reader.readLine(PROMPT);
-
 				if (line == null) {
 					continue;
 				}
-				log.debug("Read command: {}.", line);
-
-				// We need to allocate new instances every time
-				final MainCommand mainCommand = new MainCommand();
-				final JCommander mainCommander = new JCommander(mainCommand);
-				final Collection<Command> commands = applicationContext.getBeansOfType(Command.class).values();
-				commands.forEach(mainCommander::addCommand);
-				mainCommander.parse(reader.getParsedLine().words().toArray(new String[0]));
-				final String parsedCommand = mainCommander.getParsedCommand();
-				log.debug("Parsed command: {}", parsedCommand);
-
-				final Command command;
-				final JCommander commander;
-				if (isNull(parsedCommand)) {
-					commander = mainCommander;
-					command = mainCommand;
-				} else {
-					commander = mainCommander.getCommands().get(parsedCommand);
-					command = (Command)Iterables.getOnlyElement(commander.getObjects());
-				}
-				// Because of limitations of JCommander, we need to do this using instanceof
-				if (command instanceof QuitCommand) {
-					break;
-				}
-				if (command instanceof HelpCommand) {
-					mainCommander.usage();
-				}
-				command.execute(commander, reader, terminal);
-			} catch (final ParameterException e) {
-				terminal.writer().println(e.getLocalizedMessage());
-				terminal.flush();
-			} catch (final UserInterruptException e) {
-				log.debug("UIE", e);
+				logger.debug("Read command: {}.", line);
+				engine.eval(line);
+			} catch (final UserInterruptException e) { // XXX: never seen that one?
+				logger.debug("UserInterruptException", e);
 			} catch (final EndOfFileException ignored) {
 				return;
+			} catch (final ScriptException e) {
+				final Throwable rootCause = getRootCause(e);
+				writer.println("Parsing problem:");
+				writer.println(rootCause.getMessage());
 			}
 		}
 	}
