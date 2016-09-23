@@ -33,7 +33,7 @@ dependencies {
 	compile project(':age3-core')
 
 	compile 'com.hazelcast:hazelcast-client:3.6+'
-	compile 'jline:jline:3.+'
+	compile 'org.jline:jline:+'
 
 	// JNA is needed for jline
 	runtime 'net.java.dev.jna:jna:+'

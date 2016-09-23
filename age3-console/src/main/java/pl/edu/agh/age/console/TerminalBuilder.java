@@ -19,17 +19,22 @@
 
 package pl.edu.agh.age.console;
 
-import org.jline.terminal.impl.ExecPty;
-import org.jline.terminal.impl.PosixSysTerminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 /**
  * Terminal wrapper for easier Spring configuration.
  */
-public final class Terminal extends PosixSysTerminal {
+public final class TerminalBuilder {
 
-	public Terminal() throws IOException {
-		super("t", "xterm-256color", ExecPty.current(), "UTF-8", true);
+	private static final Logger logger = LoggerFactory.getLogger(TerminalBuilder.class);
+
+	private TerminalBuilder() {}
+
+	public static org.jline.terminal.Terminal build() throws IOException {
+		logger.debug("Executing our terminal builder");
+		return org.jline.terminal.TerminalBuilder.builder().jna(true).build();
 	}
 }
