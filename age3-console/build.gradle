@@ -37,6 +37,7 @@ dependencies {
 
 	// JNA is needed for jline
 	runtime 'net.java.dev.jna:jna:+'
+	runtime 'org.fusesource.jansi:jansi:+'
 }
 
 shadowJar {

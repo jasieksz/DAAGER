@@ -54,6 +54,7 @@ subprojects {
 		compile 'com.google.code.findbugs:jsr305:+'
 		compile 'com.google.guava:guava:+'
 		compile 'io.javaslang:javaslang:2.+'
+		compile 'org.apache.commons:commons-lang3:+'
 		//compile files('/opt/checker-framework-2.1.0/checker/lib/guava-19.0.jar')
 
 		runtime 'org.codehaus.groovy:groovy:+'

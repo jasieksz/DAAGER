@@ -19,6 +19,8 @@
 
 package pl.edu.agh.age.console;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +35,13 @@ public final class TerminalBuilder {
 
 	private TerminalBuilder() {}
 
-	public static org.jline.terminal.Terminal build() throws IOException {
+	public static Terminal build() throws IOException {
 		logger.debug("Executing our terminal builder");
-		return org.jline.terminal.TerminalBuilder.builder().jna(true).build();
+		if (SystemUtils.IS_OS_WINDOWS) {
+			// Seems that JNA does not work?
+			return org.jline.terminal.TerminalBuilder.builder().jna(false).build();
+		} else {
+			return org.jline.terminal.TerminalBuilder.builder().jna(true).build();
+		}
 	}
 }
