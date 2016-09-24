@@ -46,7 +46,7 @@
 
 	<bean id="status" class="pl.edu.agh.age.services.status.internal.DefaultStatusService"/>
 
-	<bean id="terminal" class="pl.edu.agh.age.console.Terminal"/>
+	<bean id="terminal" class="pl.edu.agh.age.console.TerminalBuilder" factory-method="build"/>
 
 	<bean id="console" class="pl.edu.agh.age.console.Console"/>
 </beans>
