@@ -15,8 +15,6 @@ AgE can be run in three modes:
 * console-only for accessing the cluster — `age3-console` module,
 * standalone single node with console — `age3-console` module.
 
-To run non-interactive node, firstly build the :
-
 To run the console or standalone node, firstly build the fatjar and startup scripts:
 ```
 ./gradlew age3-console:distShadowTar
