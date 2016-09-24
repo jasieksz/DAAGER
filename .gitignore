@@ -7,3 +7,4 @@ hs_err_pid*
 *.iml
 *.log
 !/gradle/wrapper/gradle-wrapper.jar
+/gradle.properties

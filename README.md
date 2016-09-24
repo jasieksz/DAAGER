@@ -60,4 +60,5 @@ Then check the `test list-examples` command.
 ## Links
 
 * [Repository on GitLab](https://gitlab.com/age-agh/age3)
+* [Maven Repository](https://repo.age.agh.edu.pl/repository/maven-public/)
 * [Javadocs](https://www.age.agh.edu.pl/docs/dev/javadocs/)
