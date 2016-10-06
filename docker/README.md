@@ -7,7 +7,7 @@ To build a container, build the node shadow jar:
 ```
 ./gradlew age3-core:shadowJar
 ```
-Copy the jar (`age3-core/build/libs/age3-core-VERSION-all.jar`) to this directory.
+Copy the jar (`age3-core/build/libs/age3-core.jar`) to this directory.
 
 Run `docker build -t age3 .`
 

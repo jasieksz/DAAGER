@@ -5,7 +5,11 @@ before_script:
 
 stages:
   - test
+  - build
   - deploy
+
+variables:
+  CONTAINER_TEST_IMAGE: registry.gitlab.com/age-agh/age3:node-latest
 
 cache:
   key: "$CI_BUILD_REF_NAME"
@@ -29,3 +33,33 @@ deploy_age_snapshot:
     - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD publish
   tags:
     - java
+
+build_core_jar:
+  stage: build
+  only:
+    - develop
+  tags:
+    - java
+  script:
+    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD age3-core:shadowJar
+  artifacts:
+    paths:
+      - age3-core/build/libs/age3-core.jar
+
+build_docker:
+  stage: deploy
+  image: docker:latest
+  only:
+    - develop
+  services:
+    - docker:dind
+  tags:
+    - docker
+  dependencies:
+    - build_core_jar
+  script:
+    - cp age3-core/build/libs/age3-core.jar docker/age3-core.jar
+    - cd docker
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build --pull -t registry.gitlab.com/age-agh/age3 .
+    - docker push registry.gitlab.com/age-agh/age3
