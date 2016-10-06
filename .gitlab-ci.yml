@@ -1,0 +1,31 @@
+image: java:8
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+stages:
+  - test
+  - deploy
+
+cache:
+  key: "$CI_BUILD_REF_NAME"
+  untracked: true
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+test_age:
+  stage: test
+  script:
+    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD test
+  tags:
+    - java
+
+deploy_age_snapshot:
+  stage: deploy
+  only:
+    - develop
+  script:
+    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD publish
+  tags:
+    - java
