@@ -32,6 +32,9 @@ applicationDefaultJvmArgs = [
 shadowJar {
 	// Required for merging spring handler definitions (e.g. from Hazelcast)
 	mergeServiceFiles('META-INF/spring.*')
+	baseName = 'age3-core'
+	classifier = null
+	version = null
 }
 
 dependencies {
