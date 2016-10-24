@@ -148,12 +148,12 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 		return ImmutableSet.copyOf(members.values());
 	}
 
-	@Override public NodeDescriptor memberWithId(final String id) {
+	@Override public Optional<NodeDescriptor> memberWithId(final String id) {
 		final @Nullable NodeDescriptor descriptor = members.get(requireNonNull(id));
 		if (isNull(descriptor)) {
-			throw new NullPointerException("No such member."); // FIXME: Better exception type
+			logger.debug("No such member: {}", id);
 		}
-		return descriptor;
+		return Optional.ofNullable(descriptor);
 	}
 
 	// Actions
