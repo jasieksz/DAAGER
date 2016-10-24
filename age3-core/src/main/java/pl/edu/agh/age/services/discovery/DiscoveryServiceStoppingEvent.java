@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class DiscoveryServiceStoppingEvent implements DiscoveryEvent {
+public final class DiscoveryServiceStoppingEvent implements DiscoveryEvent {
 
 	private final LocalDateTime timestamp = LocalDateTime.now();
 

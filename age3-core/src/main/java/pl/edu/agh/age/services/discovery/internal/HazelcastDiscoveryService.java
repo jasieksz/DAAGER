@@ -41,26 +41,24 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.LifecycleEvent;
-import com.hazelcast.core.MapEvent;
+import com.hazelcast.map.listener.EntryAddedListener;
+import com.hazelcast.map.listener.EntryRemovedListener;
 import com.hazelcast.query.SqlPredicate;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.units.qual.s;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -71,26 +69,31 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 
 	private static final @s long UPDATE_PERIOD_IN_S = 10L;
 
-	private static final Logger log = LoggerFactory.getLogger(HazelcastDiscoveryService.class);
+	private static final Logger logger = LoggerFactory.getLogger(HazelcastDiscoveryService.class);
 
 	private final ListeningScheduledExecutorService executorService = listeningDecorator(
-			newSingleThreadScheduledExecutor());
+		newSingleThreadScheduledExecutor());
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final HazelcastInstance hazelcastInstance;
 
-	@Inject private NodeIdentityService identityService;
+	private final NodeIdentityService identityService;
 
-	@Inject private EventBus eventBus;
+	private final EventBus eventBus;
 
-	private @MonotonicNonNull IMap<String, NodeDescriptor> members;
+	private final IMap<String, NodeDescriptor> members;
 
-	private @MonotonicNonNull String nodeId;
+	private final String nodeId;
 
-	private @MonotonicNonNull String entryListenerId;
+	private final String entryListenerId;
 
-	@EnsuresNonNull({"nodeId", "members", "entryListenerId"}) @PostConstruct private void construct() {
+	@Inject
+	public HazelcastDiscoveryService(final HazelcastInstance hazelcastInstance, final EventBus eventBus,
+	                                 final NodeIdentityService identityService) {
+		this.hazelcastInstance = hazelcastInstance;
+		this.eventBus = eventBus;
+		this.identityService = identityService;
 		nodeId = identityService.nodeId();
 		members = hazelcastInstance.getMap(MEMBERS_MAP);
 		entryListenerId = members.addEntryListener(new NeighbourMapListener(), true);
@@ -106,28 +109,25 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 	}
 
 	@Override public void start() {
-		log.debug("Discovery service starting.");
-		log.debug("Hazelcast instance: {}.", hazelcastInstance);
-		log.debug("Neighbourhood map: {}.", members);
+		logger.debug("Discovery service starting");
+		logger.debug("Hazelcast instance: {}", hazelcastInstance);
 		running.set(true);
 		hazelcastInstance.getLifecycleService().addLifecycleListener(this::onHazelcastStateChange);
-		log.debug("Waiting for initialization to complete.");
+		logger.debug("Waiting for initialization to complete");
 		updateMap();
 		final ListenableScheduledFuture<?> mapUpdateTask = executorService.scheduleAtFixedRate(
-				Runnables.withThreadName("discovery-map-update", this::updateMap), UPDATE_PERIOD_IN_S,
-				UPDATE_PERIOD_IN_S, TimeUnit.SECONDS);
+			Runnables.withThreadName("discovery-map-update", this::updateMap), UPDATE_PERIOD_IN_S, UPDATE_PERIOD_IN_S,
+			TimeUnit.SECONDS);
 		Futures.addCallback(mapUpdateTask, new MapUpdateCallback());
-		log.info("Discovery service started.");
+		logger.info("Discovery service started");
 	}
 
-	@Override public void stop() {
-		log.debug("Discovery service stopping.");
-		if (hazelcastInstance.getLifecycleService().isRunning()) {
-			cleanUp();
-		}
+	@SuppressWarnings("ResultOfMethodCallIgnored") @Override public void stop() {
+		logger.debug("Discovery service stopping");
+		cleanUp();
 		shutdownAndAwaitTermination(executorService, UPDATE_PERIOD_IN_S, TimeUnit.SECONDS);
 		running.set(false);
-		log.info("Discovery service stopped.");
+		logger.info("Discovery service stopped");
 	}
 
 	@Override public boolean isRunning() {
@@ -159,14 +159,14 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 	// Actions
 
 	private void updateMap() {
-		log.debug("Updating my info in the members map: {}.", nodeId);
+		logger.debug("Updating my info in the members map: {}", nodeId);
 		members.set(nodeId, identityService.descriptor());
-		log.debug("Finished update.");
+		logger.debug("Finished update");
 	}
 
 	private void cleanUp() {
 		members.removeEntryListener(entryListenerId);
-		log.debug("Deleting myself from the members map.");
+		logger.debug("Deleting myself from the members map");
 		members.delete(nodeId);
 	}
 
@@ -176,7 +176,7 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 	private void onHazelcastStateChange(final LifecycleEvent event) {
 		assert nonNull(event);
 
-		log.debug("Hazelcast lifecycle event: {}.", event);
+		logger.debug("Hazelcast lifecycle event: {}", event);
 		if (event.getState() == LifecycleEvent.LifecycleState.SHUTTING_DOWN) {
 			eventBus.post(new DiscoveryServiceStoppingEvent());
 			cleanUp();
@@ -189,36 +189,21 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 		}
 
 		@Override public void onFailure(final Throwable t) {
-			log.error("Map update failed.", t);
+			logger.error("Map update failed", t);
 		}
 	}
 
-	private final class NeighbourMapListener implements EntryListener<String, NodeDescriptor> {
+	private final class NeighbourMapListener
+		implements EntryAddedListener<String, NodeDescriptor>, EntryRemovedListener<String, NodeDescriptor> {
+
 		@Override public void entryAdded(final EntryEvent<String, NodeDescriptor> event) {
-			log.debug("NeighbourMapListener add event: {}.", event);
+			logger.debug("NeighbourMapListener add event: {}", event);
 			eventBus.post(new MemberAddedEvent(event.getKey(), event.getValue().type()));
 		}
 
 		@Override public void entryRemoved(final EntryEvent<String, NodeDescriptor> event) {
-			log.debug("NeighbourMapListener remove event: {}.", event);
+			logger.debug("NeighbourMapListener remove event: {}", event);
 			eventBus.post(new MemberRemovedEvent(event.getKey()));
-		}
-
-		@Override public void entryUpdated(final EntryEvent<String, NodeDescriptor> event) {
-			log.debug("NeighbourMapListener update event: {}.", event);
-		}
-
-		@Override public void entryEvicted(final EntryEvent<String, NodeDescriptor> event) {
-			log.debug("NeighbourMapListener evict event: {}.", event);
-			eventBus.post(new MemberRemovedEvent(event.getKey()));
-		}
-
-		@Override public void mapEvicted(final MapEvent event) {
-			log.debug("NeighbourMapListener map evict event: {}.", event);
-		}
-
-		@Override public void mapCleared(final MapEvent event) {
-			log.debug("NeighbourMapListener map clear event: {}.", event);
 		}
 	}
 }
