@@ -28,7 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class MemberAddedEvent implements DiscoveryEvent {
+public final class MemberAddedEvent implements DiscoveryEvent {
 
 	private final String memberId;
 

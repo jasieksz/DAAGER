@@ -21,6 +21,7 @@ package pl.edu.agh.age.services.discovery;
 
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -53,10 +54,7 @@ public interface DiscoveryService {
 	 * @param id
 	 * 		an ID to look up.
 	 *
-	 * @return a matching NodeDescriptor.
-	 *
-	 * @throws java.lang.NullPointerException
-	 * 		if the entry for the node does not exist.
+	 * @return a matching NodeDescriptor or empty Optional if there is no such member.
 	 */
-	NodeDescriptor memberWithId(String id);
+	Optional<NodeDescriptor> memberWithId(String id);
 }

@@ -27,6 +27,7 @@ import pl.edu.agh.age.services.identity.NodeType;
 import pl.edu.agh.age.services.worker.WorkerService;
 
 import com.google.common.collect.ImmutableSet;
+import com.hazelcast.core.HazelcastInstance;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
-public class DefaultNodeIdentityService implements NodeIdentityService {
+public final class DefaultNodeIdentityService implements NodeIdentityService {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultNodeIdentityService.class);
 
@@ -54,22 +55,24 @@ public class DefaultNodeIdentityService implements NodeIdentityService {
 			"pl.edu.agh.age.services.topology.TopologyService", "pl.edu.agh.age.services.worker.WorkerService",
 			"pl.edu.agh.age.services.identity.NodeIdentityService");
 
-	private final UUID nodeId = UUID.randomUUID();
+	private final UUID nodeId;
 
-	private final String encodedNodeId = nodeId.toString();
+	private final String encodedNodeId;
 
 	private NodeType nodeType = NodeType.UNKNOWN;
 
-	@Inject private @MonotonicNonNull ApplicationContext applicationContext;
+	private final ApplicationContext applicationContext;
+
+	@Inject public DefaultNodeIdentityService(final HazelcastInstance hazelcastInstance,
+	                                          final ApplicationContext applicationContext) {
+		encodedNodeId = hazelcastInstance.getLocalEndpoint().getUuid();
+		nodeId = UUID.fromString(encodedNodeId);
+		this.applicationContext = applicationContext;
+	}
 
 	@PostConstruct private void construct() {
 		log.debug("Constructing identity service.");
-		try {
-			applicationContext.getBean(WorkerService.class);
-			nodeType = NodeType.COMPUTE;
-		} catch (final NoSuchBeanDefinitionException ignored) {
-			nodeType = NodeType.SATELLITE;
-		}
+		nodeType = NodeType.COMPUTE;
 		log.info("Node type: {}.", nodeType);
 		log.info("Node id: {}.", encodedNodeId);
 	}

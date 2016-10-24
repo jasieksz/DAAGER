@@ -43,7 +43,7 @@ dependencies {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
-	compile 'com.hazelcast:hazelcast-spring:3.6+'
+	compile 'com.hazelcast:hazelcast-spring:3.7+'
 	compile 'org.jgrapht:jgrapht-core:+'
 
 	runtime 'javax.cache:cache-api:+'
