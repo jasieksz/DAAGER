@@ -20,7 +20,7 @@
 package pl.edu.agh.age.client.hazelcast;
 
 import pl.edu.agh.age.client.TopologyServiceClient;
-import pl.edu.agh.age.services.topology.TopologyMessage;
+import pl.edu.agh.age.services.topology.internal.TopologyMessage;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;

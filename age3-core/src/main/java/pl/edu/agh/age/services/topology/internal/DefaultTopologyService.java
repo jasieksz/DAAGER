@@ -31,7 +31,6 @@ import pl.edu.agh.age.services.discovery.DiscoveryService;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.lifecycle.NodeDestroyedEvent;
-import pl.edu.agh.age.services.topology.TopologyMessage;
 import pl.edu.agh.age.services.topology.TopologyService;
 import pl.edu.agh.age.services.topology.processors.TopologyProcessor;
 import pl.edu.agh.age.util.fsm.FSM;
