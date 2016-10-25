@@ -49,15 +49,17 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultQueryProcessor.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final WorkerCommunication workerCommunication;
 
-	@Inject private WorkerCommunication workerCommunication;
+	private final NodeIdentityService identityService;
 
-	@Inject private NodeIdentityService identityService;
+	private final ReplicatedMap<String, T> replicatedMap;
 
-	private ReplicatedMap<String, T> replicatedMap;
-
-	@PostConstruct private void construct() {
+	@Inject
+	public DefaultQueryProcessor(final NodeIdentityService identityService, final HazelcastInstance hazelcastInstance,
+	                             final WorkerCommunication workerCommunication) {
+		this.identityService = identityService;
+		this.workerCommunication = workerCommunication;
 		replicatedMap = hazelcastInstance.getReplicatedMap("query-cache");
 	}
 

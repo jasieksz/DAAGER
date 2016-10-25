@@ -38,8 +38,6 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.units.qual.s;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +47,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 public final class DefaultStatusService implements SmartLifecycle {
@@ -69,19 +66,23 @@ public final class DefaultStatusService implements SmartLifecycle {
 
 	private final List<Throwable> collectedErrors = newArrayListWithCapacity(10);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final NodeIdentityService identityService;
 
-	@Inject private NodeIdentityService identityService;
+	private final NodeLifecycleService lifecycleService;
 
-	@Inject private NodeLifecycleService lifecycleService;
+	private final EventBus eventBus;
 
-	@Inject private EventBus eventBus;
+	private final String nodeId;
 
-	private @MonotonicNonNull String nodeId;
+	private final IMap<String, Status> statusMap;
 
-	private @MonotonicNonNull IMap<String, Status> statusMap;
+	@Inject
+	public DefaultStatusService(final NodeIdentityService identityService, final NodeLifecycleService lifecycleService,
+	                            final HazelcastInstance hazelcastInstance, final EventBus eventBus) {
+		this.identityService = identityService;
+		this.lifecycleService = lifecycleService;
+		this.eventBus = eventBus;
 
-	@EnsuresNonNull({"nodeId", "statusMap"}) @PostConstruct private void construct() {
 		nodeId = identityService.nodeId();
 		statusMap = hazelcastInstance.getMap(MAP_NAME);
 		eventBus.register(this);

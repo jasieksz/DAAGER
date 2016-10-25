@@ -129,8 +129,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	private final EnumMap<WorkerMessage.Type, Consumer<Serializable>> messageHandlers = newEnumMap(
 			WorkerMessage.Type.class);
 
-	private final HazelcastInstance hazelcastInstance;
-
 	private final NodeIdentityService identityService;
 
 	private final NodeLifecycleService lifecycleService;
@@ -162,7 +160,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 		this.identityService = identityService;
 		this.applicationContext = applicationContext;
-		this.hazelcastInstance = hazelcastInstance;
 		this.topologyService = topologyService;
 		this.eventBus = eventBus;
 		this.lifecycleService = lifecycleService;

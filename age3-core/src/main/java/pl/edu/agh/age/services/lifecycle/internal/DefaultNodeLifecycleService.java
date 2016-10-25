@@ -37,7 +37,6 @@ import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,6 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -106,22 +104,21 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultNodeLifecycleService.class);
 
-	@Inject private @MonotonicNonNull HazelcastInstance hazelcastInstance;
+	private final EventBus eventBus;
 
-	@Inject private @MonotonicNonNull EventBus eventBus;
+	private final ITopic<LifecycleMessage> topic;
 
-	private @MonotonicNonNull ITopic<LifecycleMessage> topic;
-
-	private @MonotonicNonNull StateMachineService<State, Event> service;
+	private final StateMachineService<State, Event> service;
 
 	private final EnumMap<LifecycleMessage.Type, Consumer<Serializable>> messageHandlers = newEnumMap(
 			LifecycleMessage.Type.class);
 
-	public DefaultNodeLifecycleService() {
+	@Inject public DefaultNodeLifecycleService(final HazelcastInstance hazelcastInstance, final EventBus eventBus) {
 		messageHandlers.put(LifecycleMessage.Type.DESTROY, this::handleDestroy);
 	}
+		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		this.eventBus = eventBus;
 
-	@PostConstruct private void construct() {
 		//@formatter:off
 		service = StateMachineServiceBuilder
 			.withStatesAndEvents(State.class, Event.class)
@@ -153,8 +150,6 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 			.withEventBus(eventBus)
 			.build();
 		//@formatter:on
-
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
 	}
 
 	@Override public boolean isAutoStartup() {
