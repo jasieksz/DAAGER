@@ -70,7 +70,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@Named("default")
+@Named
 public final class DefaultTopologyService implements SmartLifecycle, TopologyService {
 
 	public static final String CONFIG_MAP_NAME = "topology/config";
