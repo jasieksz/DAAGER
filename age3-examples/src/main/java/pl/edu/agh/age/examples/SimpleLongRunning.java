@@ -26,22 +26,21 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The simplest possible computation. Completely detached and having no dependencies and no friends. Long running
- * version.
+ * This example shows the long running version of the minimal example. Used mainly for testing.
  */
-public class SimpleLongRunning implements Runnable {
+public final class SimpleLongRunning implements Runnable {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleLongRunning.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleLongRunning.class);
 
 	@Override public void run() {
-		log.info("This is the simplest possible example of a computation.");
+		logger.info("This is the simplest possible example of a computation");
 		for (int i = 0; i < 100; i++) {
-			log.info("Iteration {}.", i);
+			logger.info("Iteration {}", i);
 
 			try {
 				TimeUnit.SECONDS.sleep(1L);
 			} catch (final InterruptedException e) {
-				log.debug("Interrupted.", e);
+				logger.debug("Interrupted", e);
 				Thread.currentThread().interrupt();
 				return;
 			}

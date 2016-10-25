@@ -32,11 +32,21 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 /**
- * The simplest possible computation. Completely detached and having no dependencies and no friends.
+ * This example shows how the compute level can communicate between nodes using broadcast messages.
+ *
+ * Broadcast messaging is performed in regards of the topology defined in the platform level and the messages are sent
+ * only to neighbours of the current node.
+ *
+ * Sent messages can have any serializable payload.
+ *
+ * To receive messages, the runnable must register a {@link BroadcastMessageListener} using
+ * {@link BroadcastMessenger#registerListener}.
+ *
+ * @see pl.edu.agh.age.services.topology.TopologyService
  */
 public final class SimpleWithBroadcastCommunication implements Runnable, BroadcastMessageListener<@NonNull String> {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleWithBroadcastCommunication.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleWithBroadcastCommunication.class);
 
 	private final BroadcastMessenger messenger;
 
@@ -45,20 +55,20 @@ public final class SimpleWithBroadcastCommunication implements Runnable, Broadca
 	}
 
 	@Override public void run() {
-		log.info("This is the simplest possible example of a computation.");
-		log.info("Broadcast messenger: {}.", messenger);
+		logger.info("This is the simplest possible example of a computation");
+		logger.info("Broadcast messenger: {}", messenger);
 
 		messenger.registerListener(this);
 
 		for (int i = 0; i < 100; i++) {
-			log.info("Iteration {}. Sending message.", i);
+			logger.info("Iteration {}. Sending message", i);
 
 			messenger.send("Test message from " + hashCode());
 
 			try {
 				TimeUnit.SECONDS.sleep(1L);
 			} catch (final InterruptedException e) {
-				log.debug("Interrupted.", e);
+				logger.debug("Interrupted.", e);
 				Thread.currentThread().interrupt();
 				return;
 			}

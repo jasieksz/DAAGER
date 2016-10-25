@@ -35,11 +35,17 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 /**
- * The simplest possible computation that uses queries.
+ * This example shows how the compute level can communicate between nodes using queries.
+ *
+ * Query is a very general mechanism that simply makes it possible to schedule a callable to run every second and return
+ * any serializable data to be saved in a global cache.
+ *
+ * Query is always performed on a current node but its results are available for all nodes
+ * (accessible using {@link QueryProcessor#query()} method).
  */
 public final class SimpleWithQuery implements Runnable {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleWithQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleWithQuery.class);
 
 	private final QueryProcessor<SampleCached> queryProcessor;
 
@@ -48,21 +54,21 @@ public final class SimpleWithQuery implements Runnable {
 	}
 
 	@Override public void run() {
-		log.info("This is the simplest possible example of a computation.");
-		log.info("Query processor: {}.", queryProcessor);
+		logger.info("This is the simplest possible example of a computation");
+		logger.info("Query processor: {}", queryProcessor);
 
-		queryProcessor.schedule(() -> new SampleCached());
+		queryProcessor.schedule(SampleCached::new);
 
 		for (int i = 0; i < 100; i++) {
-			log.info("Iteration {}.", i);
+			logger.info("Iteration {}", i);
 
 			final List<SampleCached> collect = queryProcessor.query().collect(toList());
-			log.info("Results: {}.", collect);
+			logger.info("Results: {}", collect);
 
 			try {
 				TimeUnit.SECONDS.sleep(1L);
 			} catch (final InterruptedException e) {
-				log.debug("Interrupted.", e);
+				logger.debug("Interrupted", e);
 				Thread.currentThread().interrupt();
 				return;
 			}
@@ -73,7 +79,7 @@ public final class SimpleWithQuery implements Runnable {
 		return toStringHelper(this).toString();
 	}
 
-	public static final class SampleCached implements Serializable {
+	private static final class SampleCached implements Serializable {
 
 		private static final long serialVersionUID = 728385759168736437L;
 

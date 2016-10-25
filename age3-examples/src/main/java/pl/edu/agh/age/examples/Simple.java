@@ -24,14 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The simplest possible computation. Completely detached and having no dependencies and no friends.
+ * This example shows how the minimal runnable should be configured.
+ *
+ * There is a Spring configuration file: `pl/edu/agh/age/examples/spring-simple.xml` that demonstrates how the basic
+ * configuration should looks like if it is required.
  */
-public class Simple implements Runnable {
+public final class Simple implements Runnable {
 
-	private static final Logger log = LoggerFactory.getLogger(Simple.class);
+	private static final Logger logger = LoggerFactory.getLogger(Simple.class);
 
 	@Override public void run() {
-		log.info("This is the simplest possible example of a computation.");
+		logger.info("This is the simplest possible example of a computation.");
 	}
 
 	@Override public String toString() {
