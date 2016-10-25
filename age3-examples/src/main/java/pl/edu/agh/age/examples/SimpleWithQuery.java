@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
 
 import pl.edu.agh.age.compute.api.QueryProcessor;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,11 @@ public final class SimpleWithQuery implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(SimpleWithQuery.class);
 
-	@Inject private @MonotonicNonNull QueryProcessor<SampleCached> queryProcessor;
+	private final QueryProcessor<SampleCached> queryProcessor;
+
+	@Inject public SimpleWithQuery(final QueryProcessor<SampleCached> queryProcessor) {
+		this.queryProcessor = queryProcessor;
+	}
 
 	@Override public void run() {
 		log.info("This is the simplest possible example of a computation.");

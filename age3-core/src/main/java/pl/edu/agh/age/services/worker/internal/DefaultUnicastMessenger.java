@@ -58,9 +58,16 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 	/**
 	 * Topology service - needed for obtaining the node-level neighbours.
 	 */
-	@Inject @Named("default") private TopologyService topologyService;
+	private final TopologyService topologyService;
 
-	@Inject private WorkerCommunication workerCommunication;
+	private final WorkerCommunication workerCommunication;
+
+	@Inject
+	public DefaultUnicastMessenger(final TopologyService topologyService,
+	                               final WorkerCommunication workerCommunication) {
+		this.topologyService = topologyService;
+		this.workerCommunication = workerCommunication;
+	}
 
 	@Override public WorkerAddress address() {
 		return localWorkerAddress;

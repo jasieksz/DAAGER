@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.worker.internal;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.base.Throwables.propagate;
 
 import pl.edu.agh.age.compute.api.QueryProcessor;
 import pl.edu.agh.age.services.identity.NodeIdentityService;
@@ -39,7 +38,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,20 +47,22 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultQueryProcessor.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final WorkerCommunication workerCommunication;
 
-	@Inject private WorkerCommunication workerCommunication;
+	private final NodeIdentityService identityService;
 
-	@Inject private NodeIdentityService identityService;
+	private final ReplicatedMap<String, T> replicatedMap;
 
-	private ReplicatedMap<String, T> replicatedMap;
-
-	@PostConstruct private void construct() {
+	@Inject
+	public DefaultQueryProcessor(final NodeIdentityService identityService, final HazelcastInstance hazelcastInstance,
+	                             final WorkerCommunication workerCommunication) {
+		this.identityService = identityService;
+		this.workerCommunication = workerCommunication;
 		replicatedMap = hazelcastInstance.getReplicatedMap("query-cache");
 	}
 
 	@PreDestroy private void destroy() throws InterruptedException {
-		log.debug("Destroying Query Processor.");
+		log.debug("Destroying Query Processor");
 		// XXX: Replicated map does not support eviction yet
 		replicatedMap.remove(identityService.nodeId());
 		TimeUnit.SECONDS.sleep(1L); // Give it a chance to propagate
@@ -77,15 +77,17 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 			try {
 				final T call = callable.call();
 				replicatedMap.put(identityService.nodeId(), call, 10L, TimeUnit.SECONDS);
+			} catch (final RuntimeException|Error e) {
+				throw e;
 			} catch (final Exception e) {
-				propagate(e);
+				throw new RuntimeException(e);
 			}
 		}, 0L, 1L, TimeUnit.SECONDS);
 	}
 
 	@Override public <V extends Serializable> boolean onMessage(final WorkerMessage<V> workerMessage) {
 		assert false : "onMessage should not be called";
-		throw new UnsupportedOperationException("onMessage is not supported for DefaultQueryProcessor.");
+		throw new UnsupportedOperationException("onMessage is not supported for DefaultQueryProcessor");
 	}
 
 	@Override public Set<WorkerMessage.Type> subscribedTypes() {
@@ -93,7 +95,7 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 	}
 
 	@Override public void start() {
-		log.debug("Starting Query Processor.");
+		log.debug("Starting Query Processor");
 	}
 
 	@Override public String toString() {

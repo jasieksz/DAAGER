@@ -33,17 +33,15 @@ import com.hazelcast.query.SqlPredicate;
 
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
 public final class HazelcastDiscoveryServiceClient implements DiscoveryServiceClient {
-	@Inject private HazelcastInstance hazelcastInstance;
 
-	private IMap<String, NodeDescriptor> members;
+	private final IMap<String, NodeDescriptor> members;
 
-	@PostConstruct private void construct() {
+	@Inject public HazelcastDiscoveryServiceClient(final HazelcastInstance hazelcastInstance) {
 		members = hazelcastInstance.getMap(MEMBERS_MAP);
 	}
 

@@ -30,7 +30,6 @@ import com.hazelcast.core.ITopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -38,11 +37,9 @@ import javax.inject.Named;
 public final class HazelcastLifecycleServiceClient implements LifecycleServiceClient {
 	private static final Logger logger = LoggerFactory.getLogger(HazelcastLifecycleServiceClient.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final ITopic<LifecycleMessage> topic;
 
-	private ITopic<LifecycleMessage> topic;
-
-	@PostConstruct private void construct() {
+	@Inject public HazelcastLifecycleServiceClient(final HazelcastInstance hazelcastInstance) {
 		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
 	}
 

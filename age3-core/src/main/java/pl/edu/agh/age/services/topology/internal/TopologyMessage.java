@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pl.edu.agh.age.services.topology;
+
+package pl.edu.agh.age.services.topology.internal;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -27,7 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.Optional;
 
-public class TopologyMessage implements Serializable {
+public final class TopologyMessage implements Serializable {
 
 	public enum Type {
 		MASTER_ELECTED(false),

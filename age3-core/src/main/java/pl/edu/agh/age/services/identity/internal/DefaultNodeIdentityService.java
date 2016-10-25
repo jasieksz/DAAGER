@@ -24,12 +24,10 @@ import static java.util.stream.Collectors.toSet;
 
 import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.identity.NodeType;
-import pl.edu.agh.age.services.worker.WorkerService;
 
 import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.HazelcastInstance;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -79,10 +77,6 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 
 	@Override public String nodeId() {
 		return encodedNodeId;
-	}
-
-	@Override public NodeType nodeType() {
-		return nodeType;
 	}
 
 	@Override public NodeDescriptor descriptor() {

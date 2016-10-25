@@ -26,7 +26,6 @@ import java.util.List;
 /**
  * Describes a status of a node.
  */
-
 public interface Status extends Serializable {
 
 	LocalDateTime creationTimestamp();

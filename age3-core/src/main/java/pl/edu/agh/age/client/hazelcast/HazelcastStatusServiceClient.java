@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -39,11 +38,9 @@ import javax.inject.Named;
 public final class HazelcastStatusServiceClient implements StatusServiceClient {
 	private static final Logger logger = LoggerFactory.getLogger(HazelcastStatusServiceClient.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
-
 	private IMap<String, Status> statusMap;
 
-	@PostConstruct private void construct() {
+	@Inject public HazelcastStatusServiceClient(final HazelcastInstance hazelcastInstance) {
 		statusMap = hazelcastInstance.getMap(DefaultStatusService.MAP_NAME);
 	}
 

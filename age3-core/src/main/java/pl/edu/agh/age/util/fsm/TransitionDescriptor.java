@@ -43,7 +43,6 @@ import java.util.function.Consumer;
  * 		an events type
  */
 @SuppressWarnings("unchecked")
-
 final class TransitionDescriptor<S extends Enum<S>, E extends Enum<E>> {
 
 	private static final Consumer<FSM<?, ?>> ILLEGAL_ACTION = fsm -> {
