@@ -21,7 +21,6 @@ package pl.edu.agh.age.services.worker.internal.task;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.nonNull;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 

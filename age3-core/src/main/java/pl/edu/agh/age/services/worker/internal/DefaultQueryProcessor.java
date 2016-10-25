@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.worker.internal;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.base.Throwables.propagate;
 
 import pl.edu.agh.age.compute.api.QueryProcessor;
 import pl.edu.agh.age.services.identity.NodeIdentityService;
@@ -39,7 +38,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;

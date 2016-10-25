@@ -31,13 +31,6 @@ public interface NodeIdentityService {
 	String nodeId();
 
 	/**
-	 * Returns the type of the node.
-	 *
-	 * @see NodeType
-	 */
-	NodeType nodeType();
-
-	/**
 	 * Returns the descriptor for the node that contains cached, serializable information from the service.
 	 */
 	NodeDescriptor descriptor();
