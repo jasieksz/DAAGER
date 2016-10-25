@@ -64,7 +64,7 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 	}
 
 	@PreDestroy private void destroy() throws InterruptedException {
-		log.debug("Destroying Query Processor.");
+		log.debug("Destroying Query Processor");
 		// XXX: Replicated map does not support eviction yet
 		replicatedMap.remove(identityService.nodeId());
 		TimeUnit.SECONDS.sleep(1L); // Give it a chance to propagate
@@ -79,15 +79,17 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 			try {
 				final T call = callable.call();
 				replicatedMap.put(identityService.nodeId(), call, 10L, TimeUnit.SECONDS);
+			} catch (final RuntimeException|Error e) {
+				throw e;
 			} catch (final Exception e) {
-				propagate(e);
+				throw new RuntimeException(e);
 			}
 		}, 0L, 1L, TimeUnit.SECONDS);
 	}
 
 	@Override public <V extends Serializable> boolean onMessage(final WorkerMessage<V> workerMessage) {
 		assert false : "onMessage should not be called";
-		throw new UnsupportedOperationException("onMessage is not supported for DefaultQueryProcessor.");
+		throw new UnsupportedOperationException("onMessage is not supported for DefaultQueryProcessor");
 	}
 
 	@Override public Set<WorkerMessage.Type> subscribedTypes() {
@@ -95,7 +97,7 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 	}
 
 	@Override public void start() {
-		log.debug("Starting Query Processor.");
+		log.debug("Starting Query Processor");
 	}
 
 	@Override public String toString() {

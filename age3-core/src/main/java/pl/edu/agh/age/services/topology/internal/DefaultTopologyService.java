@@ -40,14 +40,13 @@ import pl.edu.agh.age.util.fsm.StateMachineServiceBuilder;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.hazelcast.core.EntryAdapter;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ICountDownLatch;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
+import com.hazelcast.map.listener.EntryUpdatedListener;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jgrapht.DirectedGraph;
@@ -114,21 +113,19 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 
 	private final List<TopologyProcessor> topologyProcessors;
 
-	private TopologyProcessor currentTopologyProcessor;
-
 	private final IMap<String, Object> runtimeConfig;
 
 	private final ITopic<TopologyMessage> topic;
 
-	private ICountDownLatch latch;
-
 	private final StateMachineService<State, Event> service;
 
-	private boolean master;
+	private TopologyProcessor currentTopologyProcessor;
+
+	private boolean master = false;
 
 	private @Nullable String listenerKey;
 
-	@Nullable private DirectedGraph<String, DefaultEdge> cachedTopology;
+	private @Nullable DirectedGraph<String, DefaultEdge> cachedTopology;
 
 	@Inject
 	public DefaultTopologyService(final DiscoveryService discoveryService, final NodeIdentityService identityService,
@@ -216,22 +213,21 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	}
 
 	private void internalStart(final FSM<State, Event> fsm) {
-		logger.debug("Topology service starting.");
-		logger.debug("Known topologies: {}.", topologyProcessors);
+		logger.debug("Topology service starting");
+		logger.debug("Known topologies: {}", topologyProcessors);
 		assert !topologyProcessors.isEmpty() : "No topology processors.";
-		assert identityService.isCompute() : "This implementation is only for compute nodes.";
 
 		topic.addMessageListener(new DistributedMessageListener());
 		eventBus.register(this);
 
-		logger.info("Topology service started.");
+		logger.info("Topology service started");
 		service.fire(Event.STARTED);
 	}
 
 	private void internalStop(final FSM<State, Event> fsm) {
-		logger.debug("Topology service stopping.");
+		logger.debug("Topology service stopping");
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
-		logger.info("Topology service stopped.");
+		logger.info("Topology service stopped");
 	}
 
 	private void handleError(final FSM<State, Event> fsm) {
@@ -246,30 +242,30 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	 * In this case we selects the node with the largest nodeId.
 	 */
 	private void electMaster(final FSM<State, Event> fsm) {
-		logger.debug("Locally selecting master.");
+		logger.debug("Locally selecting master");
 
-		final Set<NodeDescriptor> computeNodes = computeNodes();
+		final Set<NodeDescriptor> computeNodes = allNodes();
 		final Optional<NodeDescriptor> maxIdentity = computeNodes.parallelStream()
 		                                                         .max(Comparator.comparing(NodeDescriptor::id));
-		logger.debug("Max identity is {}.", maxIdentity);
+		logger.debug("Max identity is {}", maxIdentity);
 
 		assert maxIdentity.isPresent();
 
 		if (identityService.nodeId().equals(maxIdentity.get().id())) {
-			logger.debug("I am master.");
+			logger.debug("I am master");
 			master = true;
 			runtimeConfig.put(ConfigKeys.MASTER, identityService.nodeId());
 
 			// Select initial topology type if this is the first election
 			if (!runtimeConfig.containsKey(ConfigKeys.TOPOLOGY_TYPE)) {
-				logger.debug("Seems to be the first election. Selecting topology.");
+				logger.debug("Seems to be the first election. Selecting topology");
 				final Optional<TopologyProcessor> selectedProcessor = topologyProcessors.parallelStream()
 				                                                                        .max(Comparator.comparing(
 					                                                                        TopologyProcessor::priority));
 				assert selectedProcessor.isPresent();
 
 				currentTopologyProcessor = selectedProcessor.get();
-				logger.debug("Selected initial topology: {}.", currentTopologyProcessor);
+				logger.debug("Selected initial topology: {}", currentTopologyProcessor);
 				runtimeConfig.put(ConfigKeys.TOPOLOGY_TYPE, currentTopologyProcessor.name());
 			}
 			listenerKey = runtimeConfig.addEntryListener(new TopologyTypeChangeListener(), ConfigKeys.TOPOLOGY_TYPE,
@@ -280,7 +276,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 			topic.publish(TopologyMessage.createWithoutPayload(MASTER_ELECTED));
 
 		} else {
-			logger.debug("I am slave.");
+			logger.debug("I am slave");
 			master = false;
 			if (listenerKey != null) {
 				runtimeConfig.removeEntryListener(listenerKey);
@@ -302,18 +298,18 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	 */
 	private void topologyChanged(final FSM<State, Event> stateEventFSM) {
 		assert master;
-		logger.debug("Topology initialization.");
+		logger.debug("Topology initialization");
 
 		final String processorName = topologyType().get();
-		logger.debug("Processor name: {}.", processorName);
+		logger.debug("Processor name: {}", processorName);
 
 		final Optional<TopologyProcessor> topologyProcessor = getTopologyProcessorWithName(processorName);
 		assert topologyProcessor.isPresent();
 		currentTopologyProcessor = topologyProcessor.get();
 
-		final Set<NodeDescriptor> computeNodes = computeNodes();
+		final Set<NodeDescriptor> computeNodes = allNodes();
 		cachedTopology = currentTopologyProcessor.createGraphFrom(computeNodes);
-		logger.debug("Topology: {}.", cachedTopology);
+		logger.debug("Topology: {}", cachedTopology);
 		runtimeConfig.put(ConfigKeys.TOPOLOGY_GRAPH, cachedTopology);
 		topic.publish(TopologyMessage.createWithoutPayload(TOPOLOGY_SELECTED));
 	}
@@ -325,7 +321,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		assert !master || (currentTopologyProcessor != null) : "Current topology processor null for master";
 		assert runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH) != null : "No topology graph in config";
 
-		logger.debug("Topology has been configured. Caching the graph.");
+		logger.debug("Topology has been configured. Caching the graph");
 		cachedTopology = getCurrentTopologyGraph();
 	}
 
@@ -336,7 +332,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		                         .findFirst();
 	}
 
-	 private @Nullable DirectedGraph<String, DefaultEdge> getCurrentTopologyGraph() {
+	private @Nullable DirectedGraph<String, DefaultEdge> getCurrentTopologyGraph() {
 		return (DirectedGraph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH);
 	}
 
@@ -363,7 +359,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 
 	@Override public Set<String> neighbours() {
 		if (!hasTopology()) {
-			throw new IllegalStateException("Topology not ready.");
+			throw new IllegalStateException("Topology not ready");
 		}
 
 		final DirectedGraph<String, DefaultEdge> graph = getCurrentTopologyGraph();
@@ -376,8 +372,8 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		service.fire(Event.MEMBERSHIP_CHANGED);
 	}
 
-	protected Set<NodeDescriptor> computeNodes() {
-		return discoveryService.membersMatching("type = 'compute'");
+	private Set<NodeDescriptor> allNodes() {
+		return discoveryService.allMembers();
 	}
 
 	private static class ConfigKeys {
@@ -389,7 +385,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	}
 
 	@Subscribe public void handleNodeDestroyedEvent(final NodeDestroyedEvent event) {
-		logger.debug("Got event: {}.", event);
+		logger.debug("Got event: {}", event);
 		service.fire(Event.STOP);
 	}
 
@@ -400,9 +396,9 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		                           .toString();
 	}
 
-	private class TopologyTypeChangeListener extends EntryAdapter<String, Object> {
+	private class TopologyTypeChangeListener implements EntryUpdatedListener<String, Object> {
 		@Override public void entryUpdated(final EntryEvent<String, Object> event) {
-			logger.info("Topology type updated: {}.", event);
+			logger.info("Topology type updated: {}", event);
 			service.fire(Event.TOPOLOGY_TYPE_CHANGED);
 		}
 	}
@@ -419,8 +415,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		}
 	}
 
-	private class ExceptionHandler implements Consumer<Throwable> {
-
+	private static final class ExceptionHandler implements Consumer<Throwable> {
 		@Override public void accept(final Throwable throwable) {
 			logger.error("Exception", throwable);
 		}

@@ -57,10 +57,10 @@ public final class DefaultStatusService implements SmartLifecycle {
 
 	private static final @s long UPDATE_PERIOD_IN_S = 1L;
 
-	private static final Logger log = LoggerFactory.getLogger(DefaultStatusService.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultStatusService.class);
 
 	private final ListeningScheduledExecutorService executorService = listeningDecorator(
-			newSingleThreadScheduledExecutor());
+		newSingleThreadScheduledExecutor());
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -98,7 +98,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 	}
 
 	@Override public void start() {
-		log.debug("Status service starting.");
+		logger.debug("Status service starting");
 
 		running.set(true);
 		final ListenableScheduledFuture<?> mapUpdateTask = executorService.scheduleAtFixedRate(this::updateMap,
@@ -107,16 +107,16 @@ public final class DefaultStatusService implements SmartLifecycle {
 		                                                                                       TimeUnit.SECONDS);
 		Futures.addCallback(mapUpdateTask, new MapUpdateCallback());
 
-		log.info("Status service started.");
+		logger.info("Status service started");
 	}
 
 	@Override public void stop() {
-		log.debug("Status service stopping.");
+		logger.debug("Status service stopping");
 
 		running.set(false);
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
 
-		log.info("Status service stopped.");
+		logger.info("Status service stopped");
 	}
 
 	@Override public boolean isRunning() {
@@ -136,7 +136,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 	// Event handlers
 
 	@Subscribe public void handleServiceFailureEvent(final ServiceFailureEvent event) {
-		log.debug("Service failure event: {}.", event);
+		logger.debug("Service failure event: {}", event);
 		collectedErrors.add(event.cause());
 	}
 
@@ -146,7 +146,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 		}
 
 		@Override public void onFailure(final Throwable t) {
-			log.error("Map update failed.", t);
+			logger.error("Map update failed", t);
 		}
 	}
 }

@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.status.internal;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.services.status.Status;
@@ -40,10 +39,10 @@ public final class DefaultStatus implements Status {
 
 	private final LocalDateTime creationTimestamp = LocalDateTime.now();
 
-	private final List<Throwable> errors;
+	private final ImmutableList<Throwable> errors;
 
 	private DefaultStatus(final ImmutableList<Throwable> errors) {
-		assert nonNull(errors);
+		assert errors != null;
 
 		this.errors = errors;
 	}
@@ -75,7 +74,7 @@ public final class DefaultStatus implements Status {
 		                           .toString();
 	}
 
-	public static final class Builder {
+	static final class Builder {
 
 		private ImmutableList<Throwable> errors = ImmutableList.of();
 
@@ -85,12 +84,12 @@ public final class DefaultStatus implements Status {
 			return new Builder();
 		}
 
-		public Builder addErrors(final List<Throwable> errors) {
+		Builder addErrors(final List<Throwable> errors) {
 			this.errors = ImmutableList.copyOf(requireNonNull(errors));
 			return this;
 		}
 
-		public Status buildStatus() {
+		Status buildStatus() {
 			return new DefaultStatus(errors);
 		}
 

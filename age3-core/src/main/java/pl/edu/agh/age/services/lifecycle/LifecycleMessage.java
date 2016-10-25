@@ -27,7 +27,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.Optional;
 
-public class LifecycleMessage implements Serializable {
+public final class LifecycleMessage implements Serializable {
 
 	public enum Type {
 		DESTROY(false);
@@ -47,9 +47,9 @@ public class LifecycleMessage implements Serializable {
 
 	private final Type type;
 
-	private final Serializable payload;
+	private final @Nullable Serializable payload;
 
-	LifecycleMessage(final Type type, final @Nullable Serializable payload) {
+	private LifecycleMessage(final Type type, final @Nullable Serializable payload) {
 		this.type = requireNonNull(type);
 		this.payload = payload;
 	}
@@ -59,7 +59,7 @@ public class LifecycleMessage implements Serializable {
 		return new LifecycleMessage(type, null);
 	}
 
-	public Type getType() {
+	public Type type() {
 		return type;
 	}
 
@@ -67,7 +67,7 @@ public class LifecycleMessage implements Serializable {
 		return type == requireNonNull(typeToCheck);
 	}
 
-	public Optional<@Nullable Serializable> getPayload() {
+	public Optional<Serializable> payload() {
 		return Optional.ofNullable(payload);
 	}
 
