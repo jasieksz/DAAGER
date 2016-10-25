@@ -18,8 +18,8 @@
  */
 package pl.edu.agh.age.compute.api;
 
-public interface MessageListener<T> {
+public interface BroadcastMessageListener<T> {
 
-	void onMessage(T message);
+	void onBroadcastMessage(T message);
 
 }

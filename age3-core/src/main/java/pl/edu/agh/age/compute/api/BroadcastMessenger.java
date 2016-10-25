@@ -49,7 +49,7 @@ public interface BroadcastMessenger {
 	 * @param <T>
 	 * 		a type of the payload.
 	 */
-	<T extends Serializable> void registerListener(MessageListener<T> listener);
+	<T extends Serializable> void registerListener(BroadcastMessageListener<T> listener);
 
 	/**
 	 * Removes the listener.
@@ -59,5 +59,5 @@ public interface BroadcastMessenger {
 	 * @param <T>
 	 * 		a type of the payload.
 	 */
-	<T extends Serializable> void removeListener(MessageListener<T> listener);
+	<T extends Serializable> void removeListener(BroadcastMessageListener<T> listener);
 }

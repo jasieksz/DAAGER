@@ -82,7 +82,7 @@ public final class SimpleWithUnicastCommunication implements Runnable, UnicastMe
 		return toStringHelper(this).toString();
 	}
 
-	@Override public void onMessage(final @NonNull String message, final @NonNull WorkerAddress sender) {
-		log.info("Message received: {} from {}.", message, sender);
+	@Override public void onUnicastMessage(final @NonNull String message, final @NonNull WorkerAddress sender) {
+		logger.info("Message received: {} from {}", message, sender);
 	}
 }

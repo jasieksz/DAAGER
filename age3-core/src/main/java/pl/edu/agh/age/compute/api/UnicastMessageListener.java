@@ -20,6 +20,6 @@ package pl.edu.agh.age.compute.api;
 
 public interface UnicastMessageListener<T> {
 
-	void onMessage(T message, WorkerAddress sender);
+	void onUnicastMessage(T message, WorkerAddress sender);
 
 }

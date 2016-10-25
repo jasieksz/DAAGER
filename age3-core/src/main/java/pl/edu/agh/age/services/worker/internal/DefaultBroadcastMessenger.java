@@ -24,7 +24,7 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.compute.api.BroadcastMessenger;
-import pl.edu.agh.age.compute.api.MessageListener;
+import pl.edu.agh.age.compute.api.BroadcastMessageListener;
 import pl.edu.agh.age.services.topology.TopologyService;
 import pl.edu.agh.age.services.worker.WorkerMessage;
 
@@ -46,7 +46,7 @@ public final class DefaultBroadcastMessenger implements BroadcastMessenger, Comm
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultBroadcastMessenger.class);
 
-	private final Set<MessageListener<Serializable>> listeners = newConcurrentHashSet();
+	private final Set<BroadcastMessageListener<Serializable>> listeners = newConcurrentHashSet();
 
 	private final TopologyService topologyService;
 
@@ -74,7 +74,7 @@ public final class DefaultBroadcastMessenger implements BroadcastMessenger, Comm
 
 		if (workerMessage.hasType(WorkerMessage.Type.BROADCAST_MESSAGE)) {
 			final Serializable message = workerMessage.requiredPayload();
-			listeners.parallelStream().forEach(listener -> listener.onMessage(message));
+			listeners.parallelStream().forEach(listener -> listener.onBroadcastMessage(message));
 
 			return true;
 		}
@@ -90,12 +90,12 @@ public final class DefaultBroadcastMessenger implements BroadcastMessenger, Comm
 		log.debug("Starting local broadcast messenger.");
 	}
 
-	@Override public <T extends Serializable> void registerListener(final MessageListener<T> listener) {
+	@Override public <T extends Serializable> void registerListener(final BroadcastMessageListener<T> listener) {
 		log.debug("Adding listener {}.", listener);
-		listeners.add((MessageListener<Serializable>)listener);
+		listeners.add((BroadcastMessageListener<Serializable>)listener);
 	}
 
-	@Override public <T extends Serializable> void removeListener(final MessageListener<T> listener) {
+	@Override public <T extends Serializable> void removeListener(final BroadcastMessageListener<T> listener) {
 		log.debug("Removing listener {}.", listener);
 		listeners.remove(listener);
 	}

@@ -20,8 +20,8 @@ package pl.edu.agh.age.examples;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 
+import pl.edu.agh.age.compute.api.BroadcastMessageListener;
 import pl.edu.agh.age.compute.api.BroadcastMessenger;
-import pl.edu.agh.age.compute.api.MessageListener;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ import javax.inject.Inject;
 /**
  * The simplest possible computation. Completely detached and having no dependencies and no friends.
  */
-public class SimpleWithBroadcastCommunication implements Runnable, MessageListener<@NonNull String> {
+public final class SimpleWithBroadcastCommunication implements Runnable, BroadcastMessageListener<@NonNull String> {
 
 	private static final Logger log = LoggerFactory.getLogger(SimpleWithBroadcastCommunication.class);
 
@@ -71,7 +71,7 @@ public class SimpleWithBroadcastCommunication implements Runnable, MessageListen
 		return toStringHelper(this).toString();
 	}
 
-	@Override public void onMessage(final @NonNull String message) {
-		log.info("Message received: {}.", message);
+	@Override public void onBroadcastMessage(final @NonNull String message) {
+		logger.info("Message received: {}", message);
 	}
 }
