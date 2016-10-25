@@ -25,6 +25,7 @@ import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -53,7 +54,9 @@ public final class NodeBootstrapper {
 	private NodeBootstrapper() {}
 
 	public static void main(final String... args) throws InterruptedException, IOException {
-		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring-node.xml")) {
+		final @Nullable String property = System.getProperty("age.node.config");
+		final String configName = (property != null) ? property : "spring-node.xml";
+		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(configName)) {
 			context.registerShutdownHook();
 			final NodeLifecycleService lifecycleService = context.getBean(NodeLifecycleService.class);
 			if (isNull(lifecycleService)) {

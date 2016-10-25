@@ -32,7 +32,7 @@ applicationDefaultJvmArgs = [
 dependencies {
 	compile project(':age3-core')
 
-	compile 'com.hazelcast:hazelcast-client:3.6+'
+	compile 'com.hazelcast:hazelcast-client:3.7+'
 	compile 'org.jline:jline:+'
 
 	// JNA is needed for jline
