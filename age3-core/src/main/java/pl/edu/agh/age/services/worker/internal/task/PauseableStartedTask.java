@@ -39,41 +39,42 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 final class PauseableStartedTask extends StartedTask {
 
-	private static final Logger log = LoggerFactory.getLogger(PauseableStartedTask.class);
+	private static final Logger logger = LoggerFactory.getLogger(PauseableStartedTask.class);
 
 	private final AtomicBoolean paused = new AtomicBoolean(false);
 
 	PauseableStartedTask(final String className, final AbstractApplicationContext springContext,
-	                     final Pauseable runnable, final ListenableScheduledFuture<?> future) {
+	                     @SuppressWarnings("TypeMayBeWeakened") final Pauseable runnable,
+	                     final ListenableScheduledFuture<?> future) {
 		super(className, springContext, runnable, future);
 	}
 
 	@Override public void pause() {
 		if (paused.get()) {
-			log.debug("The task has been already paused.");
+			logger.debug("The task has been already paused.");
 			return;
 		}
 		if (!isRunning()) {
-			log.warn("Cannot pause not running task.");
+			logger.warn("Cannot pause not running task.");
 			return;
 		}
 
-		log.debug("Pausing the task {}.", runnable);
+		logger.debug("Pausing the task {}.", runnable);
 		((Pauseable)runnable).pause();
 		paused.set(true);
 	}
 
 	@Override public void resume() {
 		if (!paused.get()) {
-			log.debug("The task has not been paused.");
+			logger.debug("The task has not been paused.");
 			return;
 		}
 		if (!isRunning()) {
-			log.warn("Cannot resume finished task.");
+			logger.warn("Cannot resume finished task.");
 			return;
 		}
 
-		log.debug("Resuming the task {}.", runnable);
+		logger.debug("Resuming the task {}.", runnable);
 		((Pauseable)runnable).resume();
 		paused.set(false);
 	}

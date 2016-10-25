@@ -54,7 +54,6 @@ import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +71,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 public final class DefaultWorkerService implements SmartLifecycle, WorkerCommunication, WorkerService {
 
@@ -116,7 +113,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	public static final String STATE_MAP_NAME = "worker/state";
 
-	private static final Logger log = LoggerFactory.getLogger(DefaultWorkerService.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkerService.class);
 
 	private final ListeningScheduledExecutorService executorService = listeningDecorator(newScheduledThreadPool(5));
 
@@ -127,45 +124,49 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	private final DefaultThreadPool computeThreadPool = new DefaultThreadPool();
 
-	private HazelcastDistributionUtilities computeDistributionUtilities;
+	private final HazelcastDistributionUtilities computeDistributionUtilities;
 
 	private final EnumMap<WorkerMessage.Type, Consumer<Serializable>> messageHandlers = newEnumMap(
 			WorkerMessage.Type.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final HazelcastInstance hazelcastInstance;
 
-	@Inject private NodeIdentityService identityService;
+	private final NodeIdentityService identityService;
 
-	@Inject private NodeLifecycleService lifecycleService;
+	private final NodeLifecycleService lifecycleService;
 
-	@Inject @Named("default") private TopologyService topologyService;
+	private final TopologyService topologyService;
 
-	@Inject private EventBus eventBus;
+	private final EventBus eventBus;
 
-	@Inject private ApplicationContext applicationContext;
+	private final ApplicationContext applicationContext;
 
-	private @MonotonicNonNull ITopic<WorkerMessage<Serializable>> topic;
+	private final ITopic<WorkerMessage<Serializable>> topic;
 
-	private @MonotonicNonNull Map<ConfigurationKey, Object> configurationMap;
+	private final Map<ConfigurationKey, Object> configurationMap;
 
-	private @MonotonicNonNull IMap<String, ComputationState> nodeComputationState;
+	private final IMap<String, ComputationState> nodeComputationState;
 
-	private @MonotonicNonNull StateMachineService<State, Event> service;
+	private final StateMachineService<State, Event> service;
 
 	private @Nullable TaskBuilder taskBuilder;
 
 	private Task currentTask = NullTask.INSTANCE;
 
-	private DefaultWorkerService() {
+	@Inject
+	private DefaultWorkerService(final NodeIdentityService identityService, final ApplicationContext applicationContext,
+	                             final HazelcastInstance hazelcastInstance,
+	                             final TopologyService topologyService, final EventBus eventBus,
+	                             final NodeLifecycleService lifecycleService) {
 		Arrays.stream(WorkerMessage.Type.values()).forEach(type -> workerMessageListeners.put(type, newHashSet()));
 
-		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> service.fire(Event.CONFIGURE));
-		messageHandlers.put(WorkerMessage.Type.START_COMPUTATION, payload -> service.fire(Event.START_EXECUTION));
-		messageHandlers.put(WorkerMessage.Type.STOP_COMPUTATION, payload -> service.fire(Event.CANCEL_EXECUTION));
-		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> service.fire(Event.CLEAN));
-	}
+		this.identityService = identityService;
+		this.applicationContext = applicationContext;
+		this.hazelcastInstance = hazelcastInstance;
+		this.topologyService = topologyService;
+		this.eventBus = eventBus;
+		this.lifecycleService = lifecycleService;
 
-	@PostConstruct private void construct() {
 		//@formatter:off
 		service = StateMachineServiceBuilder
 			.withStatesAndEvents(State.class, Event.class)
@@ -215,8 +216,12 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			.withEventBus(eventBus)
 			.build();
 		//@formatter:on
+		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> service.fire(Event.CONFIGURE));
+		messageHandlers.put(WorkerMessage.Type.START_COMPUTATION, payload -> service.fire(Event.START_EXECUTION));
+		messageHandlers.put(WorkerMessage.Type.STOP_COMPUTATION, payload -> service.fire(Event.CANCEL_EXECUTION));
+		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> service.fire(Event.CLEAN));
 
-		log.debug("Hazelcast instance: {}", hazelcastInstance);
+		logger.debug("Hazelcast instance: {}", hazelcastInstance);
 		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
 		topic.addMessageListener(new DistributedMessageListener());
 		configurationMap = hazelcastInstance.getMap(CONFIGURATION_MAP_NAME);
@@ -251,7 +256,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	@Override public void sendMessage(final WorkerMessage<Serializable> message) {
-		log.debug("Sending message {}.", message);
+		logger.debug("Sending message {}.", message);
 		topic.publish(message);
 	}
 
@@ -264,7 +269,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	// State changes
 
 	private void internalStart(final FSM<State, Event> fsm) {
-		log.debug("Worker service starting.");
+		logger.debug("Worker service starting.");
 
 		setNodeComputationState(ComputationState.NONE);
 
@@ -278,13 +283,13 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			service.fire(Event.START_EXECUTION);
 		}
 
-		log.info("Worker service started.");
+		logger.info("Worker service started.");
 	}
 
 	private void terminate(final FSM<State, Event> fsm) {
-		log.debug("Topology service stopping.");
+		logger.debug("Topology service stopping.");
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
-		log.info("Topology service stopped.");
+		logger.info("Topology service stopped.");
 	}
 
 	private void handleError(final FSM<State, Event> fsm) {
@@ -307,14 +312,14 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		assert nonNull(taskBuilder);
 
 		if (!isEnvironmentReady()) {
-			log.warn("Trying to start computation when node is not ready.");
+			logger.warn("Trying to start computation when node is not ready.");
 			// Reschedule the event once again
 			executorService.schedule(() -> service.fire(Event.START_EXECUTION), 1L, TimeUnit.SECONDS);
 			fsm.goTo(State.CONFIGURED);
 			return;
 		}
 
-		log.debug("Starting task {}.", taskBuilder);
+		logger.debug("Starting task {}.", taskBuilder);
 
 		communicationFacilities.forEach(CommunicationFacility::start);
 		currentTask = taskBuilder.buildAndSchedule(executorService, new ExecutionListener());
@@ -325,22 +330,22 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	private void pauseTask(final FSM<State, Event> fsm) {
-		log.debug("Pausing current task {}.", currentTask);
+		logger.debug("Pausing current task {}.", currentTask);
 		currentTask.pause();
 	}
 
 	private void resumeTask(final FSM<State, Event> fsm) {
-		log.debug("Resuming current task {}.", currentTask);
+		logger.debug("Resuming current task {}.", currentTask);
 		currentTask.resume();
 	}
 
 	private void cancelTask(final FSM<State, Event> fsm) {
-		log.debug("Cancelling current task {}.", currentTask);
+		logger.debug("Cancelling current task {}.", currentTask);
 		currentTask.cancel();
 	}
 
 	private void stopTask(final FSM<State, Event> fsm) {
-		log.debug("Stopping current task {}.", currentTask);
+		logger.debug("Stopping current task {}.", currentTask);
 		currentTask.stop();
 	}
 
@@ -349,7 +354,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		final Collection<ComputationState> states = nodeComputationState.values(
 				v -> v.getValue() != ComputationState.FINISHED);
 		if (states.isEmpty()) {
-			log.debug("All nodes finished computation.");
+			logger.debug("All nodes finished computation.");
 			changeGlobalComputationStateIfMaster(ComputationState.FINISHED);
 		}
 	}
@@ -359,12 +364,12 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	private void cleanUpAfterTask(final FSM<State, Event> fsm) {
-		log.debug("Cleaning up after task {}.", currentTask);
+		logger.debug("Cleaning up after task {}.", currentTask);
 		currentTask.cleanUp();
 		currentTask = NullTask.INSTANCE;
 		setNodeComputationState(ComputationState.NONE);
 		changeGlobalComputationStateIfMaster(ComputationState.NONE);
-		log.debug("Clean up finished.");
+		logger.debug("Clean up finished.");
 	}
 
 	private boolean isTaskPresent() {
@@ -409,7 +414,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				CommunicationFacility.class);
 		communicationFacilities.addAll(facilitiesMap.values());
 		// Add services injected by the container
-		log.debug("Registering facilities and adding them as listeners for messages.");
+		logger.debug("Registering facilities and adding them as listeners for messages.");
 		communicationFacilities.forEach(service -> {
 			service.subscribedTypes().forEach(key -> workerMessageListeners.get(key).add(service));
 			taskBuilder.registerSingleton(service);
@@ -424,7 +429,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	// Event bus handlers
 
 	@Subscribe public void handleNodeDestroyedEvent(final NodeDestroyedEvent event) {
-		log.debug("Got event: {}.", event);
+		logger.debug("Got event: {}.", event);
 		service.fire(Event.TERMINATE);
 	}
 
@@ -432,11 +437,11 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 		@Override public void onMessage(final Message<WorkerMessage<Serializable>> message) {
 			final WorkerMessage<Serializable> workerMessage = requireNonNull(message.getMessageObject());
-			log.debug("WorkerMessage received: {}.", workerMessage);
+			logger.debug("WorkerMessage received: {}.", workerMessage);
 
 			try {
 				if (!workerMessage.isRecipient(identityService.nodeId())) {
-					log.debug("Message {} was not directed to me.", workerMessage);
+					logger.debug("Message {} was not directed to me.", workerMessage);
 					return;
 				}
 
@@ -444,7 +449,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				final Set<CommunicationFacility> listeners = workerMessageListeners.get(type);
 				boolean eaten = false;
 				for (final CommunicationFacility listener : listeners) {
-					log.debug("Notifying listener {}.", listener);
+					logger.debug("Notifying listener {}.", listener);
 					if (listener.onMessage(workerMessage)) {
 						eaten = true;
 						break;
@@ -457,7 +462,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 				messageHandlers.get(type).accept(workerMessage.payload().orElse(null));
 			} catch (final Throwable t) {
-				log.info("T", t);
+				logger.info("T", t);
 			}
 		}
 	}
@@ -465,17 +470,17 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	private final class ExecutionListener implements FutureCallback<Object> {
 
 		@Override public void onSuccess(final Object result) {
-			log.info("Task {} finished.", currentTask);
+			logger.info("Task {} finished.", currentTask);
 			eventBus.post(new TaskFinishedEvent());
 			service.fire(Event.COMPUTATION_FINISHED);
 		}
 
 		@Override public void onFailure(final Throwable t) {
 			if (t instanceof CancellationException) {
-				log.debug("Task {} was cancelled. Ignoring exception.", currentTask);
+				logger.debug("Task {} was cancelled. Ignoring exception.", currentTask);
 				service.fire(Event.COMPUTATION_FAILED);
 			} else {
-				log.error("Task {} failed with error.", currentTask, t);
+				logger.error("Task {} failed with error.", currentTask, t);
 				eventBus.post(new TaskFailedEvent(t));
 				service.fire(Event.COMPUTATION_FAILED);
 			}
@@ -485,7 +490,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	private static final class ExceptionHandler implements Consumer<Throwable> {
 
 		@Override public void accept(final Throwable throwable) {
-			log.error("Exception", throwable);
+			logger.error("Exception", throwable);
 		}
 	}
 }

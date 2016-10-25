@@ -55,7 +55,7 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public final class TaskBuilder {
 
-	private static final Logger log = LoggerFactory.getLogger(TaskBuilder.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskBuilder.class);
 
 	private final AtomicBoolean configured = new AtomicBoolean(false);
 
@@ -71,20 +71,20 @@ public final class TaskBuilder {
 		assert nonNull(className);
 
 		try {
-			log.debug("Setting up task from class {}.", className);
+			logger.debug("Setting up task from class {}.", className);
 
-			log.debug("Creating internal Spring context.");
+			logger.debug("Creating internal Spring context.");
 			final AnnotationConfigApplicationContext taskContext = new AnnotationConfigApplicationContext();
 
 			// Configure task
 			final BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(className);
 			taskContext.registerBeanDefinition("runnable", builder.getBeanDefinition());
 
-			log.debug("Task setup finished.");
+			logger.debug("Task setup finished.");
 
 			return new TaskBuilder(taskContext);
 		} catch (final BeanCreationException e) {
-			log.error("Cannot create the task from class.", e);
+			logger.error("Cannot create the task from class.", e);
 			throw new FailedComputationSetupException("Cannot create the task from class", e);
 		}
 	}
@@ -93,17 +93,17 @@ public final class TaskBuilder {
 		assert nonNull(configuration);
 
 		try {
-			log.debug("Setting up task from config {}.", configuration.substring(0, 50));
+			logger.debug("Setting up task from config {}.", configuration.substring(0, 50));
 
-			log.debug("Creating internal Spring context.");
+			logger.debug("Creating internal Spring context.");
 			final GenericXmlApplicationContext taskContext = new GenericXmlApplicationContext();
 			taskContext.load(new ByteArrayResource(configuration.getBytes()));
 
-			log.debug("Task setup finished.");
+			logger.debug("Task setup finished.");
 
 			return new TaskBuilder(taskContext);
 		} catch (final BeanCreationException e) {
-			log.error("Cannot create the task from file.", e);
+			logger.error("Cannot create the task from file.", e);
 			throw new FailedComputationSetupException("Cannot create the task from file", e);
 		}
 	}
@@ -120,7 +120,7 @@ public final class TaskBuilder {
 		assert nonNull(bean);
 		checkState(!isConfigured(), "Task is already configured.");
 
-		log.debug("Registering {} as {} in application context.", bean.getClass().getSimpleName(), bean);
+		logger.debug("Registering {} as {} in application context.", bean.getClass().getSimpleName(), bean);
 		springContext.getBeanFactory().registerSingleton(bean.getClass().getSimpleName(), bean);
 	}
 
@@ -132,7 +132,7 @@ public final class TaskBuilder {
 			springContext.refresh();
 			configured.set(true);
 		} catch (final BeansException e) {
-			log.error("Cannot refresh the Spring context.", e);
+			logger.error("Cannot refresh the Spring context.", e);
 			throw new FailedComputationSetupException("Cannot refresh the Spring context", e);
 		}
 	}
@@ -146,7 +146,7 @@ public final class TaskBuilder {
 			final Runnable runnable = (Runnable)springContext.getBean("runnable");
 			final String className = springContext.getType("runnable").getCanonicalName();
 
-			log.info("Starting execution of {}.", runnable);
+			logger.info("Starting execution of {}.", runnable);
 			final ListenableScheduledFuture<?> future = executorService.schedule(withThreadName("COMPUTE", runnable),
 			                                                                     0L, TimeUnit.SECONDS);
 			Futures.addCallback(future, executionListener);
@@ -155,7 +155,7 @@ public final class TaskBuilder {
 			}
 			return new StartedTask(className, springContext, runnable, future);
 		} catch (final BeansException e) {
-			log.error("Cannot get runnable from the context.", e);
+			logger.error("Cannot get runnable from the context.", e);
 			throw new FailedComputationSetupException("Cannot get runnable from the context.", e);
 		}
 	}
