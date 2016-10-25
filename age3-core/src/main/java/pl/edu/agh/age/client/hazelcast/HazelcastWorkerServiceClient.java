@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -43,13 +42,11 @@ import javax.inject.Named;
 public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 	private static final Logger logger = LoggerFactory.getLogger(HazelcastWorkerServiceClient.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final ITopic<WorkerMessage<?>> workerTopic;
 
-	private ITopic<WorkerMessage<?>> workerTopic;
+	private final Map<DefaultWorkerService.ConfigurationKey, Object> workerConfigurationMap;
 
-	private Map<DefaultWorkerService.ConfigurationKey, Object> workerConfigurationMap;
-
-	@PostConstruct private void construct() {
+	@Inject public HazelcastWorkerServiceClient(final HazelcastInstance hazelcastInstance) {
 		workerTopic = hazelcastInstance.getTopic(DefaultWorkerService.CHANNEL_NAME);
 		workerConfigurationMap = hazelcastInstance.getMap(DefaultWorkerService.CONFIGURATION_MAP_NAME);
 	}

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -46,13 +45,11 @@ public final class HazelcastTopologyServiceClient implements TopologyServiceClie
 
 	private static final Logger log = LoggerFactory.getLogger(HazelcastTopologyServiceClient.class);
 
-	@Inject private HazelcastInstance hazelcastInstance;
+	private final IMap<String, Object> runtimeConfig;
 
-	private IMap<String, Object> runtimeConfig;
+	private final ITopic<TopologyMessage> topic;
 
-	private ITopic<TopologyMessage> topic;
-
-	@PostConstruct private void construct() {
+	@Inject public HazelcastTopologyServiceClient(final HazelcastInstance hazelcastInstance) {
 		log.debug("Constructing NonParticipatingTopologyService.");
 		// Obtain dependencies
 		runtimeConfig = hazelcastInstance.getMap(CONFIG_MAP_NAME);

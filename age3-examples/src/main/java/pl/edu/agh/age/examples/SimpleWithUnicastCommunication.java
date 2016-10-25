@@ -24,7 +24,6 @@ import pl.edu.agh.age.compute.api.UnicastMessageListener;
 import pl.edu.agh.age.compute.api.UnicastMessenger;
 import pl.edu.agh.age.compute.api.WorkerAddress;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,11 @@ public final class SimpleWithUnicastCommunication implements Runnable, UnicastMe
 
 	private static final Logger log = LoggerFactory.getLogger(SimpleWithUnicastCommunication.class);
 
-	@Inject @MonotonicNonNull private UnicastMessenger messenger;
+	private final UnicastMessenger messenger;
+
+	@Inject public SimpleWithUnicastCommunication(final UnicastMessenger messenger) {
+		this.messenger = messenger;
+	}
 
 	@Override public void run() {
 		log.info("This is the simplest possible example of a computation.");
