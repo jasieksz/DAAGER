@@ -17,107 +17,67 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.integrtaion;
+package pl.edu.agh.age.integration;
 
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import pl.edu.agh.age.services.topology.TopologyService;
+import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.TaskStartedEvent;
-import pl.edu.agh.age.services.worker.WorkerMessage;
 import pl.edu.agh.age.services.worker.WorkerServiceEvent;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:spring-test-node.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public final class MultipleComputationsIT {
 
-	@Inject private DefaultWorkerService workerService;
-
-	@Inject private HazelcastInstance hazelcastInstance;
-
-	@Inject @Named("default") private TopologyService topologyService;
-
 	@Inject private EventBus eventBus;
 
-	private @MonotonicNonNull ITopic<WorkerMessage<Serializable>> topic;
-
-	private @MonotonicNonNull Map<DefaultWorkerService.ConfigurationKey, Object> configurationMap;
+	@Inject private WorkerServiceClient workerServiceClient;
 
 	private final List<WorkerServiceEvent> events = newCopyOnWriteArrayList();
 
 	@Before public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		topic = hazelcastInstance.getTopic(DefaultWorkerService.CHANNEL_NAME);
-		configurationMap = hazelcastInstance.getReplicatedMap(DefaultWorkerService.CONFIGURATION_MAP_NAME);
 		eventBus.register(this);
 	}
 
 	@Test public void testMultipleComputations() throws IOException, InterruptedException {
 		for (int i = 0; i < 2; i++) {
-
-			final SpringConfiguration configuration = SpringConfiguration.fromClasspath(
-					"pl/edu/agh/age/example/spring-simple.xml");
-			configurationMap.put(DefaultWorkerService.ConfigurationKey.CONFIGURATION, configuration);
-
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.LOAD_CONFIGURATION));
-
+			// Configure
+			final SpringConfiguration configuration = SpringConfiguration.fromClasspath("spring-simple-test.xml");
+			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(3L);
+			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);
 
-			assertThat(computationState()).isEqualTo(ComputationState.CONFIGURED);
-
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.START_COMPUTATION));
-
+			// Start
+			workerServiceClient.startComputation();
 			TimeUnit.SECONDS.sleep(3L);
-
-			assertThat(computationState()).isEqualTo(ComputationState.FINISHED);
-
+			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.FINISHED);
 			assertThat(events).hasAtLeastOneElementOfType(TaskStartedEvent.class);
 
-			topic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.CLEAN_CONFIGURATION));
-
+			// Clean
+			workerServiceClient.cleanConfiguration();
 			TimeUnit.SECONDS.sleep(3L);
-
-			assertThat(computationState()).isEqualTo(ComputationState.NONE);
+			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.NONE);
 		}
-	}
-
-	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key, final Class<T> klass) {
-		return Optional.ofNullable((T)configurationMap.get(key));
-	}
-
-	private ComputationState computationState() {
-		return configurationValue(DefaultWorkerService.ConfigurationKey.COMPUTATION_STATE,
-		                          ComputationState.class).orElseGet(() -> ComputationState.NONE);
 	}
 
 	@Subscribe public void listenForEvents(final WorkerServiceEvent event) {

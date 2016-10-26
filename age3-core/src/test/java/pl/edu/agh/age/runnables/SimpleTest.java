@@ -17,22 +17,18 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.client;
+package pl.edu.agh.age.runnables;
 
-import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
-public interface WorkerServiceClient {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	void startComputation();
+public final class SimpleTest implements Runnable {
 
-	void stopComputation();
+	@Override public void run() {}
 
-	void cleanConfiguration();
-
-	void prepareConfiguration(WorkerConfiguration configuration) throws InterruptedException;
-
-	boolean isComputationRunning();
-
-	ComputationState computationState();
+	@Override public String toString() {
+		return toStringHelper(this).toString();
+	}
 }

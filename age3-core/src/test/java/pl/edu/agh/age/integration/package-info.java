@@ -17,22 +17,7 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.client;
-
-import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
-
-public interface WorkerServiceClient {
-
-	void startComputation();
-
-	void stopComputation();
-
-	void cleanConfiguration();
-
-	void prepareConfiguration(WorkerConfiguration configuration) throws InterruptedException;
-
-	boolean isComputationRunning();
-
-	ComputationState computationState();
-}
+/**
+ * Integration tests for core services.
+ */
+package pl.edu.agh.age.integration;

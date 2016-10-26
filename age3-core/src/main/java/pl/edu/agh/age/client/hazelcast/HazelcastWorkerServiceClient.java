@@ -74,8 +74,12 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 	}
 
 	@Override public boolean isComputationRunning() {
-		return configurationValue(DefaultWorkerService.ConfigurationKey.COMPUTATION_STATE).orElseGet(
-				() -> ComputationState.NONE) == ComputationState.RUNNING;
+		return computationState() == ComputationState.RUNNING;
+	}
+
+	@Override public ComputationState computationState() {
+		return (ComputationState)configurationValue(DefaultWorkerService.ConfigurationKey.COMPUTATION_STATE).orElseGet(
+			() -> ComputationState.NONE);
 	}
 
 	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key) {
