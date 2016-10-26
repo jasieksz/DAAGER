@@ -39,7 +39,7 @@ shadowJar {
 
 dependencies {
 	compile 'org.springframework:spring-context:+'
-	compile('com.hazelcast:hazelcast:3.6+') {
+	compile('com.hazelcast:hazelcast:3.7+') {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
