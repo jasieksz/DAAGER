@@ -2,6 +2,11 @@ image: java:8
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
+  - 'which ssh-agent || ( apk --update add openssh-client )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
 stages:
   - test
@@ -31,6 +36,16 @@ deploy_age_snapshot:
     - develop
   script:
     - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD publish
+  tags:
+    - java
+
+deploy_age_javadocs:
+  stage: deploy
+  only:
+    - develop
+  script:
+    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD alljavadoc
+    - scp -r build/docs/javadoc/ $DOCS_URL:dev/
   tags:
     - java
 

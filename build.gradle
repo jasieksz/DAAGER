@@ -17,10 +17,23 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:+'
+	}
+}
+
 allprojects {
 	group 'pl.edu.agh.age'
 	version '0.3-SNAPSHOT'
 	apply plugin: 'maven-publish'
+
+	repositories {
+		mavenCentral()
+	}
 
 	publishing {
 		repositories {
@@ -39,14 +52,6 @@ allprojects {
 	}
 }
 
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:+'
-	}
-}
 
 subprojects {
 	apply plugin: 'java'
@@ -59,10 +64,6 @@ subprojects {
 		checkerFramework
 	}
 
-	repositories {
-		mavenCentral()
-	}
-
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
@@ -70,7 +71,6 @@ subprojects {
 			}
 		}
 	}
-
 
 	dependencies {
 		compile 'javax.inject:javax.inject:1'
@@ -106,3 +106,24 @@ subprojects {
 //		]
 //	}
 }
+
+def exportedProjects = [
+	":age3-console",
+	":age3-core",
+	":age3-examples",
+	":age3-stream-agents",
+]
+
+task alljavadoc(type: Javadoc, group: "Documentation") {
+	description = 'Generates a global javadoc from all the modules'
+	source exportedProjects.collect { project(it).sourceSets.main.allJava }
+	classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+	options.memberLevel = JavadocMemberLevel.PRIVATE
+	options.links 'http://docs.oracle.com/javase/8/docs/api/'
+	options.links 'http://docs.spring.io/spring/docs/current/javadoc-api/'
+	options.links 'https://google.github.io/guava/releases/snapshot/api/docs/'
+	options.links 'http://docs.hazelcast.org/docs/3.7/javadoc/'
+	destinationDir = file("${buildDir}/docs/javadoc")
+}
+
+apply plugin: 'ch.raffael.pegdown-doclet'
