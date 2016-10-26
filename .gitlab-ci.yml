@@ -2,11 +2,6 @@ image: java:8
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
-  - 'which ssh-agent || ( apk --update add openssh-client )'
-  - eval $(ssh-agent -s)
-  - ssh-add <(echo "$SSH_PRIVATE_KEY")
-  - mkdir -p ~/.ssh
-  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
 stages:
   - test
@@ -40,6 +35,13 @@ deploy_age_snapshot:
     - java
 
 deploy_age_javadocs:
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - 'which ssh-agent || ( apk --update add openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   stage: deploy
   only:
     - develop
