@@ -66,7 +66,8 @@ public final class SimpleComputationIT {
 		eventBus.register(this);
 	}
 
-	@Test public void test_1_ifIsRunning() {
+	@Test public void test_1_ifIsRunning() throws InterruptedException {
+		TimeUnit.SECONDS.sleep(3L);
 		assertThat(workerService.isRunning()).isTrue();
 	}
 
