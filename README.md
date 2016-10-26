@@ -53,7 +53,21 @@ tar -xvf age3-examples-0.3-SNAPSHOT.tar
 age3-examples-0.3-SNAPSHOT/bin/age3-examples standalone
 ```
 
-Then check the `test list-examples` command.
+Then check the `test.listExamples()` command.
+
+### Examples requiring distributed environment
+
+Some examples are supposed to be run in a distributed environment. To do so, start at least two nodes with the proper
+classpath and proper configuration. You can use Gradle task located in `age3-examples` module:
+```
+./gradlew age3-examples:node
+```
+Then, start the shell:
+```
+./gradlew --no-daemon age3-examples:shell
+```
+
+Both of these can be run from the shadow tar (as above).
 
 ## Links
 
