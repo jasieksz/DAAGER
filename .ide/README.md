@@ -16,6 +16,7 @@ project dir: `cp -rfv .ide/IDEA/* .idea/`
 * default inspection profile,
 * run configurations:
   * `Node.xml` — node configuration with default classpath,
+  * `Node_with_examples.xml` — node configuration with **age3-examples** in the classpath,
   * `Shell.xml` — console configuration with default classpath,
   * `Standalone_node_with_shell.xml` — standalone console configuration with default classpath,
 * code style settings,

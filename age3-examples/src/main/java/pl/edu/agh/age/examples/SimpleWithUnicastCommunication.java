@@ -34,11 +34,21 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 /**
- * The simplest possible computation. Completely detached and having no dependencies and no friends.
+ * This example shows how the compute level can communicate between nodes using unicast messages.
+ *
+ * Unicast messaging is performed in regards of the topology defined in the platform level and the messages cane be sent
+ * only to neighbours of the current node.
+ *
+ * Sent messages can have any serializable payload.
+ *
+ * To receive messages, the runnable must register a {@link UnicastMessageListener} using
+ * {@link UnicastMessenger#registerListener}.
+ *
+ * @see pl.edu.agh.age.services.topology.TopologyService
  */
 public final class SimpleWithUnicastCommunication implements Runnable, UnicastMessageListener<@NonNull String> {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleWithUnicastCommunication.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleWithUnicastCommunication.class);
 
 	private final UnicastMessenger messenger;
 
@@ -47,29 +57,29 @@ public final class SimpleWithUnicastCommunication implements Runnable, UnicastMe
 	}
 
 	@Override public void run() {
-		log.info("This is the simplest possible example of a computation.");
-		log.info("Unicast messenger: {}.", messenger);
-		log.info("My address: {}.", messenger.address());
+		logger.info("This is the simplest possible example of a computation");
+		logger.info("Unicast messenger: {}", messenger);
+		logger.info("My address: {}", messenger.address());
 
 		messenger.registerListener(this);
 
 		for (int i = 0; i < 100; i++) {
-			log.info("Iteration {}. Sending message.", i);
+			logger.info("Iteration {}. Sending message", i);
 
 			// Find any neighbour
 			final Optional<WorkerAddress> target = messenger.neighbours().stream().findAny();
 
 			if (target.isPresent()) {
-				log.info("To: {}.", target.get());
+				logger.info("To: {}", target.get());
 				messenger.send(target.get(), "Test message from " + messenger.address());
 			} else {
-				log.info("I am alone :(");
+				logger.info("I am alone :(");
 			}
 
 			try {
 				TimeUnit.SECONDS.sleep(1L);
 			} catch (final InterruptedException e) {
-				log.debug("Interrupted.", e);
+				logger.debug("Interrupted", e);
 				Thread.currentThread().interrupt();
 				return;
 			}
@@ -82,7 +92,7 @@ public final class SimpleWithUnicastCommunication implements Runnable, UnicastMe
 		return toStringHelper(this).toString();
 	}
 
-	@Override public void onMessage(final @NonNull String message, final @NonNull WorkerAddress sender) {
-		log.info("Message received: {} from {}.", message, sender);
+	@Override public void onUnicastMessage(final @NonNull String message, final @NonNull WorkerAddress sender) {
+		logger.info("Message received: {} from {}", message, sender);
 	}
 }

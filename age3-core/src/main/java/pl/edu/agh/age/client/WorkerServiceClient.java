@@ -19,6 +19,7 @@
 
 package pl.edu.agh.age.client;
 
+import pl.edu.agh.age.services.worker.internal.ComputationState;
 import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
 
 public interface WorkerServiceClient {
@@ -32,4 +33,6 @@ public interface WorkerServiceClient {
 	void prepareConfiguration(WorkerConfiguration configuration) throws InterruptedException;
 
 	boolean isComputationRunning();
+
+	ComputationState computationState();
 }

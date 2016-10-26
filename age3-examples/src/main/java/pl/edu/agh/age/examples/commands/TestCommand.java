@@ -16,12 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pl.edu.agh.age.examples.tests;
+package pl.edu.agh.age.examples.commands;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 import static pl.edu.agh.age.console.command.Command.getAndCast;
-import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
@@ -31,7 +30,6 @@ import pl.edu.agh.age.console.command.Parameter;
 import pl.edu.agh.age.examples.SimpleLongRunning;
 import pl.edu.agh.age.examples.SimpleLongRunningWithError;
 import pl.edu.agh.age.services.worker.internal.SingleClassConfiguration;
-import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
 import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
 
 import com.google.common.collect.ImmutableSet;
@@ -44,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -94,11 +91,10 @@ public final class TestCommand implements Command {
 	}
 
 	@Operation(description = "Lists examples") public void listExamples() {
-		logger.debug("Listing examples.");
+		logger.debug("Listing examples");
 		try {
 			final ClassPath classPath = ClassPath.from(TestCommand.class.getClassLoader());
 			final ImmutableSet<ClassPath.ClassInfo> classes = classPath.getTopLevelClasses(EXAMPLES_PACKAGE);
-			logger.debug("Class path {}", classes);
 			classes.forEach(klass -> writer.println(klass.getSimpleName()));
 		} catch (final IOException e) {
 			logger.error("Cannot load classes", e);
@@ -107,44 +103,24 @@ public final class TestCommand implements Command {
 	}
 
 	@Operation(description = "Executes a single example")
-	@Parameter(name = "example", type = String.class, optional = true, description = "")
-	@Parameter(name = "config", type = String.class, optional = true, description = "")
+	@Parameter(name = "example", type = String.class, optional = true, description = "Execute a named example")
 	public void executeExample(final Map<String, Object> parameters) {
-		final Optional<String> example = getAndCastNullable(parameters, "example", String.class);
-		final Optional<String> config = getAndCastNullable(parameters, "config", String.class);
+		final String example = getAndCast(parameters, "example", String.class);
 
-		if (!example.isPresent() && !config.isPresent()) {
-			writer.println("Provide --config or --example.");
-			return;
-		}
+		logger.debug("Executing example");
 
 		try {
-			final WorkerConfiguration configuration = config.isPresent() ? runConfig(config.get())
-			                                                             : runExample(example.get());
-
+			final WorkerConfiguration configuration = new SingleClassConfiguration(EXAMPLES_PACKAGE + '.' + example);
 			TimeUnit.SECONDS.sleep(1L);
 			logger.debug("Sending {}", configuration);
 			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(1L);
 			workerServiceClient.startComputation();
-		} catch (final IOException e) {
-			writer.println("File " + config + " does not exist.");
 		} catch (final InterruptedException e) {
-			logger.debug("Interrupted.", e);
+			logger.debug("Interrupted", e);
 		}
 	}
 
-	private static WorkerConfiguration runExample(final String example) {
-		logger.debug("Executing example");
-		final String className = EXAMPLES_PACKAGE + '.' + example;
-
-		return new SingleClassConfiguration(className);
-	}
-
-	private static WorkerConfiguration runConfig(final String config) throws IOException {
-		logger.debug("Running config");
-		return SpringConfiguration.fromFilesystem(config);
-	}
 
 	/**
 	 * Operation to test interrupted computation.
@@ -154,7 +130,7 @@ public final class TestCommand implements Command {
 	 * # a computation stopping because of its own error.
 	 */
 	@Operation(description = "Executes an interrupted computation")
-	@Parameter(name = "type", type = String.class, optional = true, description = "")
+	@Parameter(name = "type", type = String.class, optional = true, description = "Type of the computation")
 	public void computationInterrupted(final Map<String, Object> parameters) {
 		final String type = getAndCast(parameters, "type", String.class);
 
@@ -184,5 +160,4 @@ public final class TestCommand implements Command {
 	@Override public String toString() {
 		return toStringHelper(this).toString();
 	}
-
 }

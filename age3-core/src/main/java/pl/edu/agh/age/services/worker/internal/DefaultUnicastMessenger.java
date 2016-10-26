@@ -113,7 +113,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 			if (unicastMessage.isRecipient(localWorkerAddress)) {
 				log.debug("Delivering the message {}.", unicastMessage);
 				listeners.parallelStream()
-				         .forEach(listener -> listener.onMessage(unicastMessage.payload(), unicastMessage.sender()));
+				         .forEach(listener -> listener.onUnicastMessage(unicastMessage.payload(), unicastMessage.sender()));
 			}
 
 			return true;

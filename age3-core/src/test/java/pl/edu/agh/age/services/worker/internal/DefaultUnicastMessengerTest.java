@@ -96,7 +96,7 @@ public class DefaultUnicastMessengerTest {
 
 		messenger.onMessage(message);
 
-		verify(listener, atMost(1)).onMessage(NODE_ADDRESS, messenger.address());
+		verify(listener, atMost(1)).onUnicastMessage(NODE_ADDRESS, messenger.address());
 	}
 
 	@Test public void testSubscribedTypes() {

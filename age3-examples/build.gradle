@@ -76,3 +76,16 @@ task(standalone, dependsOn: 'classes') << {
 		.start()
 	proc.waitFor()
 }
+
+task node(type: JavaExec) {
+	main = 'pl.edu.agh.age.node.NodeBootstrapper'
+	classpath = sourceSets.main.runtimeClasspath
+	standardOutput = System.out
+	standardInput = System.in
+	jvmArgs '-enableassertions'
+	systemProperty 'age.node.config', 'spring-examples-node.xml'
+	systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
+	if (project.hasProperty('appArgs') ) {
+		args Eval.me(appArgs)
+	}
+}

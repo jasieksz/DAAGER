@@ -16,28 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pl.edu.agh.age.examples;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * This example shows how the minimal runnable should be configured.
- *
- * There is a Spring configuration file: `pl/edu/agh/age/examples/spring-simple.xml` that demonstrates how the basic
- * configuration should looks like if it is required.
+ * Integration tests for core services.
  */
-public final class Simple implements Runnable {
-
-	private static final Logger logger = LoggerFactory.getLogger(Simple.class);
-
-	@Override public void run() {
-		logger.info("This is the simplest possible example of a computation.");
-	}
-
-	@Override public String toString() {
-		return toStringHelper(this).toString();
-	}
-}
+package pl.edu.agh.age.integration;

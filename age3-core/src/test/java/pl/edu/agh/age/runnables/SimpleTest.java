@@ -16,10 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-package pl.edu.agh.age.compute.api;
 
-public interface MessageListener<T> {
+package pl.edu.agh.age.runnables;
 
-	void onMessage(T message);
+import static com.google.common.base.MoreObjects.toStringHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class SimpleTest implements Runnable {
+
+	@Override public void run() {}
+
+	@Override public String toString() {
+		return toStringHelper(this).toString();
+	}
 }
