@@ -26,6 +26,8 @@ import pl.edu.agh.age.services.identity.NodeType;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -64,7 +66,7 @@ public final class NodeDescriptor implements pl.edu.agh.age.services.identity.No
 		return Objects.hash(id, type);
 	}
 
-	@Override public boolean equals(final Object obj) {
+	@Override public boolean equals(final @Nullable Object obj) {
 		if (this == obj) {
 			return true;
 		}

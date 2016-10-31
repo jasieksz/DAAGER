@@ -49,7 +49,7 @@ public final class TopologyMessage implements Serializable {
 
 	private final Type type;
 
-	private final Serializable payload;
+	private final @Nullable Serializable payload;
 
 	TopologyMessage(final Type type, final @Nullable Serializable payload) {
 		this.type = requireNonNull(type);
@@ -69,7 +69,7 @@ public final class TopologyMessage implements Serializable {
 		return type == requireNonNull(typeToCheck);
 	}
 
-	public Optional<@Nullable Serializable> getPayload() {
+	public Optional<Serializable> getPayload() {
 		return Optional.ofNullable(payload);
 	}
 

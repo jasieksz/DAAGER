@@ -38,6 +38,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.units.qual.s;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +142,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 	}
 
 	private static final class MapUpdateCallback implements FutureCallback<Object> {
-		@Override public void onSuccess(final Object result) {
+		@Override public void onSuccess(final @Nullable Object result) {
 			// Empty
 		}
 

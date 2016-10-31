@@ -38,7 +38,7 @@ allprojects {
 	publishing {
 		repositories {
 			maven {
-				if(project.version.endsWith('-SNAPSHOT')) {
+				if (project.version.endsWith('-SNAPSHOT')) {
 					url "${nexusUrl}/repository/maven-snapshots"
 				} else {
 					url "${nexusUrl}/repository/maven-releases"
@@ -58,6 +58,7 @@ subprojects {
 	apply plugin: 'ch.raffael.pegdown-doclet'
 
 	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 
 	configurations {
 		checkerFrameworkAnnotatedJDK
@@ -77,10 +78,9 @@ subprojects {
 		compile 'org.slf4j:slf4j-api:+'
 		compile 'org.slf4j:jcl-over-slf4j:+'
 		compile 'com.google.code.findbugs:jsr305:+'
-		compile 'com.google.guava:guava:+'
 		compile 'io.javaslang:javaslang:2.+'
 		compile 'org.apache.commons:commons-lang3:+'
-		//compile files('/opt/checker-framework-2.1.0/checker/lib/guava-19.0.jar')
+		compile 'com.google.guava:guava:+'
 
 		runtime 'org.codehaus.groovy:groovy:+'
 		compile 'ch.qos.logback:logback-classic:+'
@@ -95,17 +95,20 @@ subprojects {
 		compile 'org.checkerframework:checker-qual:+'
 	}
 
-//	tasks.withType(JavaCompile).all { JavaCompile compile ->
-//		compile.options.compilerArgs = [
-//				'-processor', 'org.checkerframework.checker.nullness.NullnessChecker',
-//				'-processorpath', "${configurations.checkerFramework.asPath}",
-//				// uncomment to turn Checker Framework errors into warnings
-//				// '-Awarns',
-//				'-AassumeAssertionsAreEnabled',
-//				'-cp', '/opt/checker-framework-2.1.0/checker/lib/guava-19.0.jar',
-//				"-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
-//		]
-//	}
+	if (project.hasProperty('withChecker')) {
+		println('Compiling with checker framework')
+		tasks.withType(JavaCompile).all { JavaCompile compile ->
+			compile.options.compilerArgs = [
+				'-processor', 'org.checkerframework.checker.nullness.NullnessChecker',
+				'-processorpath', "${configurations.checkerFramework.asPath}",
+				// uncomment to turn Checker Framework errors into warnings
+				// '-Awarns',
+				'-AassumeAssertionsAreEnabled',
+				'-Astubs=checkerframework/stubs',
+				"-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
+			]
+		}
+	}
 }
 
 def exportedProjects = [

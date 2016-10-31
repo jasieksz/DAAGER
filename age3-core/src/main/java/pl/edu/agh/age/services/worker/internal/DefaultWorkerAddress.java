@@ -22,6 +22,8 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 
 import pl.edu.agh.age.compute.api.WorkerAddress;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -40,7 +42,7 @@ public final class DefaultWorkerAddress implements WorkerAddress {
 
 	private final String encodedUUID = uuid.toString();
 
-	@Override public boolean equals(final Object obj) {
+	@Override public boolean equals(final @Nullable Object obj) {
 		if (this == obj) {
 			return true;
 		}

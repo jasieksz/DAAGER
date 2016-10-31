@@ -41,4 +41,8 @@ public class FailedComputationSetupException extends RuntimeException {
 	public FailedComputationSetupException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
+
+	public FailedComputationSetupException(final String message) {
+		super(message);
+	}
 }

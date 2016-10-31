@@ -145,6 +145,9 @@ public final class TaskBuilder {
 		try {
 			final Runnable runnable = (Runnable)springContext.getBean("runnable");
 			final String className = springContext.getType("runnable").getCanonicalName();
+			if (className == null) {
+				throw new FailedComputationSetupException("Provided class has no name.");
+			}
 
 			logger.info("Starting execution of {}.", runnable);
 			final ListenableScheduledFuture<?> future = executorService.schedule(withThreadName("COMPUTE", runnable),

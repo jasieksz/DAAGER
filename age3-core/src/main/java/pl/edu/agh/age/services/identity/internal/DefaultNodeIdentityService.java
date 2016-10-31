@@ -28,6 +28,8 @@ import pl.edu.agh.age.services.identity.NodeType;
 import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.HazelcastInstance;
 
+import org.checkerframework.checker.initialization.qual.Initialized;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -35,6 +37,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -94,7 +97,7 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 				log.debug("No service {} - {}.", service, e.getMessage());
 				return false;
 			}
-		}).collect(toSet());
+		}).collect(Collectors.<@Initialized @NonNull String> toSet());
 	}
 
 	@Override public boolean isCompute() {

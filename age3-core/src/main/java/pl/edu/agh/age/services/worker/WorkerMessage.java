@@ -27,7 +27,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -87,9 +89,9 @@ public final class WorkerMessage<T extends Serializable> implements Serializable
 
 	private final ImmutableSet<String> recipients;
 
-	private final T payload;
+	private final @Nullable T payload;
 
-	WorkerMessage(final Type type, @Nullable final T payload) {
+	WorkerMessage(final Type type, final @Nullable T payload) {
 		this.type = requireNonNull(type);
 		checkArgument(type.isBroadcast(), "Message type must allow broadcasts.");
 		this.payload = payload;
@@ -97,7 +99,7 @@ public final class WorkerMessage<T extends Serializable> implements Serializable
 		broadcast = true;
 	}
 
-	WorkerMessage(final Type type, final Set<String> recipients, @Nullable final T payload) {
+	WorkerMessage(final Type type, final Set<String> recipients, final @Nullable T payload) {
 		this.type = requireNonNull(type);
 		this.recipients = ImmutableSet.copyOf(requireNonNull(recipients));
 		checkArgument(!recipients.isEmpty(), "Recipients cannot be empty.");
@@ -141,7 +143,7 @@ public final class WorkerMessage<T extends Serializable> implements Serializable
 	}
 
 	public <X extends T> X requiredPayload() {
-		checkState(nonNull(payload), "No payload to provide.");
+		checkState(payload != null, "No payload to provide");
 		return (X)payload;
 	}
 

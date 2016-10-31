@@ -45,7 +45,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("unchecked")
 final class TransitionDescriptor<S extends Enum<S>, E extends Enum<E>> {
 
-	private static final Consumer<FSM<?, ?>> ILLEGAL_ACTION = fsm -> {
+	private static final Consumer<FSM<Dummy, Dummy>> ILLEGAL_ACTION = fsm -> {
 		throw new IllegalTransitionException("Transition is illegal.");
 	};
 
@@ -56,9 +56,9 @@ final class TransitionDescriptor<S extends Enum<S>, E extends Enum<E>> {
 		NULL
 	}
 
-	public static final TransitionDescriptor<?, ?> NULL = new TransitionDescriptor(Dummy.NULL, Dummy.NULL,
-	                                                                               Collections.emptySet(),
-	                                                                               ILLEGAL_ACTION);
+	private static final TransitionDescriptor<Dummy, Dummy> NULL = new TransitionDescriptor<Dummy, Dummy>(Dummy.NULL, Dummy.NULL,
+	                                                                               Collections.<Dummy>emptySet(),
+	                                                                                                     (Consumer<FSM<Dummy, Dummy>>)ILLEGAL_ACTION);
 
 	private static final Consumer<?> EMPTY_ACTION = fsm -> {};
 
@@ -74,7 +74,7 @@ final class TransitionDescriptor<S extends Enum<S>, E extends Enum<E>> {
 	                     final @Nullable Consumer<FSM<S, E>> action) {
 		this.initial = initial;
 		this.event = event;
-		this.action = isNull(action) ? (Consumer<FSM<S, E>>)EMPTY_ACTION : action;
+		this.action = (action == null) ? (Consumer<FSM<S, E>>)EMPTY_ACTION : action;
 		this.target = ImmutableSet.copyOf(requireNonNull(target));
 	}
 

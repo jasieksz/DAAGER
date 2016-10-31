@@ -23,6 +23,7 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -79,7 +80,7 @@ public final class NullTask implements Task {
 		logger.warn("Cancelling NULL task.");
 	}
 
-	@Override public boolean equals(final Object obj) {
+	@Override public boolean equals(final @Nullable Object obj) {
 		return obj instanceof NullTask;
 	}
 

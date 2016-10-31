@@ -27,6 +27,8 @@ import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +62,14 @@ public final class SpringConfiguration implements WorkerConfiguration {
 	public static SpringConfiguration fromClasspath(final String pathToFile) throws IOException {
 		requireNonNull(pathToFile);
 
-		try (final InputStream in = SpringConfiguration.class.getClassLoader().getResourceAsStream(pathToFile)) {
+		final @Nullable ClassLoader classLoader = SpringConfiguration.class.getClassLoader();
+		if (classLoader == null) {
+			throw new RuntimeException("No classloader"); // FIXME
+		}
+		try (final @Nullable InputStream in = classLoader.getResourceAsStream(pathToFile)) {
+			if (in == null) {
+				throw new IOException("File " + pathToFile + " could not be found");
+			}
 			return new SpringConfiguration(CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8)));
 		}
 	}

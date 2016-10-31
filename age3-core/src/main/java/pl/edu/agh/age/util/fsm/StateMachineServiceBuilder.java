@@ -135,7 +135,7 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		return this;
 	}
 
-	@EnsuresNonNull("name") public StateMachineServiceBuilder<S, E> withName(final String name) {
+	@EnsuresNonNull("this.name") public StateMachineServiceBuilder<S, E> withName(final String name) {
 		this.name = requireNonNull(name);
 		return this;
 	}
@@ -200,7 +200,7 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		return failureBehaviorBuilder;
 	}
 
-	@EnsuresNonNull("eventBus") public StateMachineServiceBuilder<S, E> withEventBus(final EventBus eventBus) {
+	@EnsuresNonNull("this.eventBus") public StateMachineServiceBuilder<S, E> withEventBus(final EventBus eventBus) {
 		this.eventBus = requireNonNull(eventBus);
 		return this;
 	}
@@ -212,12 +212,10 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 */
 	@RequiresNonNull({"name", "initialState", "terminalStates"}) public StateMachineService<S, E> build() {
 		log.debug("Building a state machine: N={}, S={}, E={}.", name, stateClass, eventClass);
-		checkState(nonNull(name));
-		checkState(nonNull(stateClass));
-		checkState(nonNull(eventClass));
-		checkState(nonNull(initialState));
-		checkState(nonNull(terminalStates));
-		checkState(nonNull(getFailureEvent()));
+		checkState(name != null);
+		checkState(initialState != null);
+		checkState(terminalStates != null);
+		checkState(getFailureEvent() != null);
 
 		return new DefaultStateMachineService<>(this);
 	}
@@ -365,7 +363,7 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 
 		private final S entry;
 
-		@Nullable private E event;
+		private @Nullable E event;
 
 		private @Nullable Set<S> exit;
 
@@ -386,8 +384,8 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 */
 		public ActionBuilder on(final E initiatingEvent) {
 			requireNonNull(initiatingEvent);
-			if (nonNull(event)) {
-				checkState(nonNull(exit), "Declaring new event without configuring previous.");
+			if (event != null) {
+				checkState(exit != null, "Declaring new event without configuring previous.");
 				transitions.put(entry, event, exit);
 				actions.put(entry, event, action);
 				event = null;
@@ -433,8 +431,8 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 * @return a state machine builder.
 		 */
 		public StateMachineServiceBuilder<S, E> commit() {
-			checkState(nonNull(event), "Event not provided.");
-			checkState(nonNull(exit), "Transition targets not provided.");
+			checkState(event != null, "Event not provided.");
+			checkState(exit != null, "Transition targets not provided.");
 			checkState(!exit.isEmpty(), "Transition targets not provided.");
 
 			transitions.put(entry, event, exit);
@@ -467,8 +465,8 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 */
 		public AnyStateActionBuilder on(final E initiatingEvent) {
 			requireNonNull(initiatingEvent);
-			if (nonNull(event)) {
-				checkState(nonNull(exit), "Declaring new event without configuring previous.");
+			if (event != null) {
+				checkState(exit != null, "Declaring new event without configuring previous.");
 				noStateTransitions.put(event, exit);
 				noStateActions.put(event, action);
 				event = null;
@@ -514,8 +512,8 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 * @return a state machine builder.
 		 */
 		public StateMachineServiceBuilder<S, E> commit() {
-			checkState(nonNull(event), "Event not provided.");
-			checkState(nonNull(exit), "Transition targets not provided.");
+			checkState(event != null, "Event not provided.");
+			checkState(exit != null, "Transition targets not provided.");
 			checkState(!exit.isEmpty(), "Transition targets not provided.");
 
 			noStateTransitions.put(event, exit);
