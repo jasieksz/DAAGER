@@ -22,6 +22,7 @@ package pl.edu.agh.age.node
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
+import ch.qos.logback.ext.spring.DelegatingLogbackAppender
 
 def bySecond = timestamp("yyyyMMdd'T'HHmmss")
 
@@ -42,7 +43,10 @@ appender("CONSOLE", ConsoleAppender) {
 	}
 }
 
-root(ALL, ["FILE"])
+appender("hazelcastAppender", DelegatingLogbackAppender) {
+}
+
+root(ALL, ["FILE", "hazelcastAppender"])
 logger("pl.edu.agh.age", DEBUG, ["CONSOLE"])
 logger("com.hazelcast", INFO)
 logger("org.springframework", INFO)

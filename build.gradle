@@ -84,6 +84,7 @@ subprojects {
 
 		runtime 'org.codehaus.groovy:groovy:+'
 		compile 'ch.qos.logback:logback-classic:+'
+		compile 'org.logback-extensions:logback-ext-spring:+'
 
 		testCompile 'junit:junit:+'
 		testCompile 'org.mockito:mockito-all:+'

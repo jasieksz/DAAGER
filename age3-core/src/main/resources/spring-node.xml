@@ -38,6 +38,11 @@
 		</hz:config>
 	</hz:hazelcast>
 
+	<bean class="ch.qos.logback.ext.spring.ApplicationContextHolder"/>
+	<bean id="hazelcastAppender" class="pl.edu.agh.age.util.HazelcastAppender" init-method="start" destroy-method="stop">
+		<property name="context" value="#{ T(org.slf4j.LoggerFactory).getILoggerFactory() }"/>
+	</bean>
+
 	<context:component-scan base-package="pl.edu.agh.age">
 	</context:component-scan>
 
