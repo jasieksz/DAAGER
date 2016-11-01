@@ -1,7 +1,6 @@
 # Coding Guidelines for AgE3
 
-We base our guidelines loosely on
-[Google Java Guidelines](https://google-styleguide.googlecode.com/svn/trunk/javaguide.html).
+We base our guidelines loosely on [Google Java Guidelines](https://google.github.io/styleguide/javaguide.html).
 Notes below are extensions to them.
 
 ## Formatting
@@ -42,3 +41,13 @@ Use Markdown in Javadocs, not raw HTML.
   (in public methods).
 * For non-public methods use assertions (possibly with description). Assertions are enabled by default in Gradle
   configuration and should always be.
+
+## Checker Framework
+
+We use [Checker Framework](http://types.cs.washington.edu/checker-framework/) for analysing some nullness-related
+issues. If you want to check your code using it, you can execute `compileJava` task with the additional `withChecker`
+property:
+
+```bash
+./gradlew compileJava -PwithChecker
+```
