@@ -103,7 +103,7 @@ public final class TestCommand implements Command {
 	}
 
 	@Operation(description = "Executes a single example")
-	@Parameter(name = "example", type = String.class, optional = true, description = "Execute a named example")
+	@Parameter(name = "example", type = String.class, optional = false, description = "Execute a named example")
 	public void executeExample(final Map<String, Object> parameters) {
 		final String example = getAndCast(parameters, "example", String.class);
 

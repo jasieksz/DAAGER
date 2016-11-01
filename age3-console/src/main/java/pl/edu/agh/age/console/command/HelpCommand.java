@@ -132,6 +132,13 @@ public final class HelpCommand implements Command {
 					writer.println(p.toAnsi(terminal));
 				}
 			}
+			if (method.isAnnotationPresent(Parameter.class)) {
+				final Parameter parameter = method.getAnnotation(Parameter.class);
+				final String str = parameter.optional() ? "\t[%s] - %s" : "\t%s - %s";
+				final AttributedString p = new AttributedString(format(str, parameter.name(),
+				                                                       parameter.description()));
+				writer.println(p.toAnsi(terminal));
+			}
 		}
 		writer.println();
 	}
