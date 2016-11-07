@@ -43,10 +43,9 @@ final class PauseableStartedTask extends StartedTask {
 
 	private final AtomicBoolean paused = new AtomicBoolean(false);
 
-	PauseableStartedTask(final String className, final AbstractApplicationContext springContext,
-	                     @SuppressWarnings("TypeMayBeWeakened") final Pauseable runnable,
+	PauseableStartedTask(final String className, @SuppressWarnings("TypeMayBeWeakened") final Pauseable runnable,
 	                     final ListenableScheduledFuture<?> future) {
-		super(className, springContext, runnable, future);
+		super(className, runnable, future);
 	}
 
 	@Override public void pause() {

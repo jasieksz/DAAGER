@@ -34,8 +34,6 @@ public interface Task {
 
 	String className();
 
-	AbstractApplicationContext springContext();
-
 	/**
 	 * @return a future for the running task.
 	 *

@@ -27,7 +27,6 @@ import com.google.common.util.concurrent.ListenableScheduledFuture;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.AbstractApplicationContext;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -48,18 +47,14 @@ class StartedTask implements Task {
 
 	private final String className;
 
-	private final AbstractApplicationContext springContext;
-
 	protected final @GuardedBy("lock") Runnable runnable;
 
 	private final @GuardedBy("lock") ListenableScheduledFuture<?> future;
 
-	StartedTask(final String className, final AbstractApplicationContext springContext, final Runnable runnable,
-	            final ListenableScheduledFuture<?> future) {
-		assert (className != null) && (springContext != null) && (runnable != null) && (future != null);
+	StartedTask(final String className, final Runnable runnable, final ListenableScheduledFuture<?> future) {
+		assert (className != null) && (runnable != null) && (future != null);
 
 		this.className = className;
-		this.springContext = springContext;
 		this.runnable = runnable;
 		this.future = future;
 	}
@@ -75,10 +70,6 @@ class StartedTask implements Task {
 
 	@Override public final String className() {
 		return className;
-	}
-
-	@Override public final AbstractApplicationContext springContext() {
-		return springContext;
 	}
 
 	/**
@@ -120,17 +111,17 @@ class StartedTask implements Task {
 	}
 
 	@Override public void stop() {
-		if (!isRunning()) {
-			logger.warn("Task is already stopped.");
-			return;
-		}
-
-		logger.debug("Stopping task {}.", runnable);
 		lock.writeLock().lock();
 		try {
+			if (!isRunning()) {
+				logger.warn("Task is already stopped.");
+				return;
+			}
+
+			logger.debug("Stopping task {}.", runnable);
 			final boolean canceled = future.cancel(true);
 			if (!canceled) {
-				logger.warn("Could not cancel the task. Maybe it already stopped?");
+				logger.warn("Could not cancel the task. Maybe it has already stopped?");
 			}
 		} finally {
 			lock.writeLock().unlock();
@@ -139,27 +130,10 @@ class StartedTask implements Task {
 
 	@Override public void cleanUp() {
 		checkState(!isRunning(), "Task is not stopped.");
-
-		logger.debug("Cleaning up after task.");
-		springContext.destroy();
 	}
 
 	@Override public void cancel() {
-		if (!isRunning()) {
-			logger.warn("Task is already stopped.");
-			return;
-		}
-
-		logger.debug("Stopping task {}.", runnable);
-		lock.writeLock().lock();
-		try {
-			final boolean canceled = future.cancel(true);
-			if (!canceled) {
-				logger.warn("Could not cancel the task. Maybe it already stopped?");
-			}
-		} finally {
-			lock.writeLock().unlock();
-		}
+		stop();
 	}
 
 	@Override public String toString() {

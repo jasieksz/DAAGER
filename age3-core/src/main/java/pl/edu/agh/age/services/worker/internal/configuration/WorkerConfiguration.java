@@ -17,28 +17,13 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.services.worker.internal;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
-import static java.util.Objects.requireNonNull;
+package pl.edu.agh.age.services.worker.internal.configuration;
 
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
-public final class SingleClassConfiguration implements WorkerConfiguration {
+import java.io.Serializable;
 
-	private static final long serialVersionUID = 1113065883705198832L;
+public interface WorkerConfiguration extends Serializable {
 
-	private final String className;
-
-	public SingleClassConfiguration(final String className) {
-		this.className = requireNonNull(className);
-	}
-
-	@Override public TaskBuilder taskBuilder() {
-		return TaskBuilder.fromClass(className);
-	}
-
-	@Override public String toString() {
-		return toStringHelper(this).addValue(className).toString();
-	}
+	TaskBuilder taskBuilder();
 }

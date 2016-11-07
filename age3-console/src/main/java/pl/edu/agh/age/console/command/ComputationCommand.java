@@ -20,19 +20,23 @@
 package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
+import static pl.edu.agh.age.console.command.Command.getAndCastDefault;
 import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
 import pl.edu.agh.age.client.DiscoveryServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
-import pl.edu.agh.age.services.worker.internal.SingleClassConfiguration;
-import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
-import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -57,11 +61,15 @@ public final class ComputationCommand implements Command {
 
 	private final PrintWriter writer;
 
+	private final ResourceLoader resourceLoader;
+
 	@Inject
 	public ComputationCommand(final WorkerServiceClient workerServiceClient,
-	                          final DiscoveryServiceClient discoveryService, final Terminal terminal) {
+	                          final DiscoveryServiceClient discoveryService, final Terminal terminal,
+	                          final ResourceLoader resourceLoader) {
 		this.workerServiceClient = requireNonNull(workerServiceClient);
 		this.discoveryService = requireNonNull(discoveryService);
+		this.resourceLoader = requireNonNull(resourceLoader);
 		writer = terminal.writer();
 	}
 
@@ -69,49 +77,49 @@ public final class ComputationCommand implements Command {
 		return "computation";
 	}
 
-	@Operation(description = "Loads the configuration")
-	@Parameter(name = "class", type = String.class, optional = true, description = "")
-	@Parameter(name = "fs-config", type = String.class, optional = true, description = "")
-	@Parameter(name = "cp-config", type = String.class, optional = true, description = "")
+	@Operation(description = "Loads the configuration. One of the `class` and `config` is required.")
+	@Parameter(name = "class", type = String.class, optional = true, description = "Fully-qualified class name to load")
+	@Parameter(name = "config", type = String.class, optional = true, description = "Spring configuration file to load")
+	@Parameter(name = "properties",
+	           type = Map.class,
+	           optional = true,
+	           description = "Java properties to use with the provided configuration file as a Map<String, Object>")
 	public void load(final Map<String, Object> parameters) {
 		final Optional<String> classToLoad = getAndCastNullable(parameters, "class", String.class);
-		final Optional<String> fsConfig = getAndCastNullable(parameters, "fs-config", String.class);
-		final Optional<String> cpConfig = getAndCastNullable(parameters, "cp-config", String.class);
+		final Optional<String> configToLoad = getAndCastNullable(parameters, "config", String.class);
+		final Map<String, Object> properties = getAndCastDefault(parameters, "properties", Map.class, emptyMap());
 
 		final WorkerConfiguration configuration;
 		if (classToLoad.isPresent()) {
-			logger.debug("Loading class {}.", classToLoad);
+			logger.debug("Loading class {}", classToLoad);
 			configuration = new SingleClassConfiguration(classToLoad.get());
-		} else if (fsConfig.isPresent()) {
-			logger.debug("Loading config from {}.", fsConfig);
-			try {
-				configuration = SpringConfiguration.fromFilesystem(fsConfig.get());
-			} catch (final IOException e) {
-				writer.println("File " + fsConfig + " cannot be loaded: " + e.getMessage());
-				return;
-			}
-		} else if (cpConfig.isPresent()) {
-			logger.debug("Loading config from {}.", cpConfig);
-			try {
-				configuration = SpringConfiguration.fromClasspath(cpConfig.get());
-			} catch (final IOException e) {
-				writer.println("File " + cpConfig + " cannot be loaded: " + e.getMessage());
+		} else if (configToLoad.isPresent()) {
+			logger.debug("Loading config from {}", configToLoad);
+			final Resource resource = resourceLoader.getResource(configToLoad.get());
+			if (resource.exists() && resource.isReadable()) {
+				try {
+					configuration = new SpringConfiguration(resource, properties);
+				} catch (final IOException e) {
+					writer.printf("File %s cannot be loaded due to an exception: %s.%n", configToLoad, e.getMessage());
+					return;
+				}
+			} else {
+				writer.printf("File %s cannot be loaded.%n", configToLoad);
 				return;
 			}
 		} else {
-			writer.println("No class or config to load.");
+			writer.println("You need to provide `config` or `class`.");
 			return;
 		}
 
 		try {
 			workerServiceClient.prepareConfiguration(configuration);
 		} catch (final InterruptedException e) {
-			logger.debug("Interrupted.", e);
+			logger.debug("Interrupted", e);
 		}
 	}
 
-	@Operation(description = "Prints info about computation") public void info() {
-		logger.debug("Printing information about info.");
+	@Operation(description = "Prints info about the computation") public void info() {
 		final Set<NodeDescriptor> neighbours = discoveryService.allMembers();
 		neighbours.forEach(writer::println);
 	}
@@ -124,7 +132,12 @@ public final class ComputationCommand implements Command {
 		workerServiceClient.stopComputation();
 	}
 
+	@Operation(description = "Clean the configuration") public void clean() {
+		workerServiceClient.cleanConfiguration();
+	}
+
 	@Override public String toString() {
 		return toStringHelper(this).toString();
 	}
 }
+

@@ -20,13 +20,14 @@
 package pl.edu.agh.age.integration;
 
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.TaskStartedEvent;
 import pl.edu.agh.age.services.worker.WorkerServiceEvent;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -34,6 +35,7 @@ import com.google.common.eventbus.Subscribe;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -53,6 +55,8 @@ public final class MultipleComputationsIT {
 
 	@Inject private WorkerServiceClient workerServiceClient;
 
+	@Inject private ResourceLoader resourceLoader;
+
 	private final List<WorkerServiceEvent> events = newCopyOnWriteArrayList();
 
 	@Before public void setUp() {
@@ -62,7 +66,7 @@ public final class MultipleComputationsIT {
 	@Test public void testMultipleComputations() throws IOException, InterruptedException {
 		for (int i = 0; i < 2; i++) {
 			// Configure
-			final SpringConfiguration configuration = SpringConfiguration.fromClasspath("spring-simple-test.xml");
+			final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:spring-simple-test.xml"), emptyMap());
 			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(3L);
 			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);

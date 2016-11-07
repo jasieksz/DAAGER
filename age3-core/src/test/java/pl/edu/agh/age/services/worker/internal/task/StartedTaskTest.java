@@ -33,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.support.AbstractApplicationContext;
 
-public class StartedTaskTest {
+public final class StartedTaskTest {
 
 	@Mock private AbstractApplicationContext context;
 
@@ -46,7 +46,7 @@ public class StartedTaskTest {
 	@Before public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
-		task = new StartedTask("", context, runnable, future);
+		task = new StartedTask("", runnable, future);
 	}
 
 	@Test public void testIsRunning() {
@@ -96,8 +96,6 @@ public class StartedTaskTest {
 		when(future.isDone()).thenReturn(true);
 
 		task.cleanUp();
-
-		verify(context).destroy();
 	}
 
 	@Test(expected = IllegalStateException.class) public void testCleanUp_shouldNotWorkOnRunningTasks() {

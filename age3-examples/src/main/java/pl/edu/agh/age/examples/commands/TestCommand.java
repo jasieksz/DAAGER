@@ -29,8 +29,8 @@ import pl.edu.agh.age.console.command.Operation;
 import pl.edu.agh.age.console.command.Parameter;
 import pl.edu.agh.age.examples.SimpleLongRunning;
 import pl.edu.agh.age.examples.SimpleLongRunningWithError;
-import pl.edu.agh.age.services.worker.internal.SingleClassConfiguration;
-import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;

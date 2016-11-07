@@ -17,7 +17,7 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.services.worker.internal;
+package pl.edu.agh.age.services.worker.internal.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -25,9 +25,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.when;
 
+import pl.edu.agh.age.runnables.SimpleTestWithProperty;
 import pl.edu.agh.age.services.worker.FailedComputationSetupException;
-import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
@@ -37,9 +40,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
-public class TaskBuilderTest {
+public final class TaskBuilderTest {
 
 	@Mock private ListeningScheduledExecutorService executorService;
 
@@ -95,4 +101,29 @@ public class TaskBuilderTest {
 		taskBuilder.registerSingleton(new Object());
 	}
 
+	@Test public void testCreateFromStringAndProperties() throws IOException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+
+		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
+			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of("age.property", "Test property"));
+			taskBuilder.finishConfiguration();
+			final Task task = taskBuilder.buildAndSchedule(executorService, callback);
+			final SimpleTestWithProperty runnable = (SimpleTestWithProperty)task.runnable();
+
+			assertThat(runnable.property).as("Check if runnable has received correct property")
+			                             .isEqualTo("Test property");
+		}
+	}
+
+	@Test(expected = FailedComputationSetupException.class) public void testThrowExceptionWhenLackingProperties()
+		throws IOException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+
+		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
+			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of());
+			taskBuilder.finishConfiguration();
+		}
+	}
 }

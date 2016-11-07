@@ -17,22 +17,16 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.client;
+package pl.edu.agh.age.runnables;
 
-import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
+public final class SimpleTestWithProperty implements Runnable {
 
-public interface WorkerServiceClient {
+	public final String property;
 
-	void startComputation();
+	public SimpleTestWithProperty(final String property) {
+		this.property = property;
+	}
 
-	void stopComputation();
+	@Override public void run() {}
 
-	void cleanConfiguration();
-
-	void prepareConfiguration(WorkerConfiguration configuration) throws InterruptedException;
-
-	boolean isComputationRunning();
-
-	ComputationState computationState();
 }

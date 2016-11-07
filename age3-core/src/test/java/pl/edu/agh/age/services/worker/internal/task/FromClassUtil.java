@@ -17,13 +17,10 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.services.worker.internal;
+package pl.edu.agh.age.services.worker.internal.task;
 
-import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
+public class FromClassUtil implements Runnable {
+	@Override public void run() {
 
-import java.io.Serializable;
-
-public interface WorkerConfiguration extends Serializable {
-
-	TaskBuilder taskBuilder();
+	}
 }

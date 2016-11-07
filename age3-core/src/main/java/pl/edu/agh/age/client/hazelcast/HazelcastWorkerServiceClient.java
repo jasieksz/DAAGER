@@ -23,7 +23,7 @@ import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.WorkerMessage;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
 import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
-import pl.edu.agh.age.services.worker.internal.WorkerConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;

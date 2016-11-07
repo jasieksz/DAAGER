@@ -23,15 +23,17 @@ import static java.util.Objects.isNull;
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
-import pl.edu.agh.age.services.worker.internal.SpringConfiguration;
+import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -70,7 +72,8 @@ public final class NodeBootstrapper {
 
 				for (final String arg : args) {
 					logger.info("Loading: {}", arg);
-					workerServiceClient.prepareConfiguration(SpringConfiguration.fromFilesystem(arg));
+					final Resource resource = context.getResource(arg);
+					workerServiceClient.prepareConfiguration(new SpringConfiguration(resource, Collections.emptyMap()));
 					TimeUnit.SECONDS.sleep(1);
 					workerServiceClient.startComputation();
 					TimeUnit.SECONDS.sleep(1);

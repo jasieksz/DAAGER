@@ -17,10 +17,28 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.services.worker.internal;
+package pl.edu.agh.age.services.worker.internal.configuration;
 
-public class FromClassUtil implements Runnable {
-	@Override public void run() {
+import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.util.Objects.requireNonNull;
 
+import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
+
+public final class SingleClassConfiguration implements WorkerConfiguration {
+
+	private static final long serialVersionUID = 1113065883705198832L;
+
+	private final String className;
+
+	public SingleClassConfiguration(final String className) {
+		this.className = requireNonNull(className);
+	}
+
+	@Override public TaskBuilder taskBuilder() {
+		return TaskBuilder.fromClass(className);
+	}
+
+	@Override public String toString() {
+		return toStringHelper(this).addValue(className).toString();
 	}
 }
