@@ -19,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javaslang.Tuple2;
 
-@SuppressWarnings("InstanceVariableMayNotBeInitialized")
+@SuppressWarnings({"InstanceVariableMayNotBeInitialized", "ReturnValueIgnored"})
 @RunWith(MockitoJUnitRunner.class)
 public final class BasicSexualReproductionTest {
 

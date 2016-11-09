@@ -20,9 +20,13 @@
 buildscript {
 	repositories {
 		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
 	}
 	dependencies {
 		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:+'
+		classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.8'
 	}
 }
 
@@ -56,6 +60,7 @@ allprojects {
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'ch.raffael.pegdown-doclet'
+	apply plugin: 'net.ltgt.errorprone'
 
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
