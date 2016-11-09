@@ -93,7 +93,7 @@ public class Workplace<T extends Agent> implements Runnable {
 		logger.debug("[W{}] Initial population: {}", id, initialPopulation);
 
 		List<T> population = initialPopulation;
-		while (!Thread.currentThread().isInterrupted()) {
+		while (!Thread.currentThread().isInterrupted() && !manager.isStopConditionReached()) {
 			// Before step
 			population = beforeStepAction.apply(population, incomingAgents.getAndSet(List.empty()));
 

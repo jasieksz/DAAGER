@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -113,7 +114,18 @@ public final class StreamAgents implements Runnable, Manager {
 			Thread.currentThread().interrupt();
 		}
 
+		// Cancel all workplaces and wait for them. They do not return any
+		// values so we just want to be sure that they are finished.
 		workplaceFutures.forEach(f -> f.cancel(true));
+		workplaceFutures.forEach(f -> {
+			try {
+				f.get();
+			} catch (final InterruptedException ignored) {
+				logger.debug("Waiting for the workplace was interrupted");
+			} catch (final ExecutionException e) {
+				logger.error("Computation threw an exception that was not caught. Possible bug in core?", e);
+			}
+		});
 
 		logger.info("Stream agents finished");
 	}
@@ -150,6 +162,10 @@ public final class StreamAgents implements Runnable, Manager {
 
 		logger.debug("Sending {} to {}", agent, targetAddress);
 		messenger.send(targetAddress, new MigrationMessage(targetWorkplace, agent));
+	}
+
+	@Override public boolean isStopConditionReached() {
+		return stopCondition.isReached();
 	}
 
 	@Override public String toString() {

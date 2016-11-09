@@ -41,4 +41,6 @@ public interface Manager {
 	Map<Long, Map<Object, Object>> getStatistics();
 
 	void migrate(Agent agent, long targetWorkplace);
+
+	boolean isStopConditionReached();
 }

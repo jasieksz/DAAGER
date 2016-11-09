@@ -23,17 +23,24 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import org.checkerframework.checker.units.qual.Prefix;
+import org.checkerframework.checker.units.qual.s;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import javax.annotation.concurrent.ThreadSafe;
+
+@ThreadSafe
 public final class TimedStopCondition implements StopCondition {
 
 	private static final Logger logger = LoggerFactory.getLogger(TimedStopCondition.class);
 
 	private final Duration desiredDuration;
+
+	private final @s(Prefix.milli) long desiredDurationAsMillis;
 
 	private final LocalDateTime startedAt = LocalDateTime.now();
 
@@ -41,6 +48,7 @@ public final class TimedStopCondition implements StopCondition {
 		requireNonNull(desiredDuration);
 		checkArgument(desiredDuration.getSeconds() > 0L, "Duration cannot be shorter than 1 second.");
 		this.desiredDuration = desiredDuration;
+		this.desiredDurationAsMillis = desiredDuration.toMillis();
 	}
 
 	public TimedStopCondition(final long seconds) {
@@ -48,7 +56,7 @@ public final class TimedStopCondition implements StopCondition {
 	}
 
 	@Override public boolean isReached() {
-		if (Duration.between(startedAt, LocalDateTime.now()).toMillis() >= desiredDuration.toMillis()) {
+		if (Duration.between(startedAt, LocalDateTime.now()).toMillis() >= desiredDurationAsMillis) {
 			logger.info("Time's up");
 			return true;
 		}
