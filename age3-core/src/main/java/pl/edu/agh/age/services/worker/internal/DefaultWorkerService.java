@@ -290,9 +290,9 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	private void terminate(final FSM<State, Event> fsm) {
-		logger.debug("Topology service stopping.");
+		logger.debug("Worker service stopping.");
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
-		logger.info("Topology service stopped.");
+		logger.info("Worker service stopped.");
 	}
 
 	private void handleError(final FSM<State, Event> fsm) {
