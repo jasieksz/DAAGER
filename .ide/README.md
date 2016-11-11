@@ -1,7 +1,7 @@
 IDE default settings
 ====================
 
-This directory contains default settings for IDE-s. Currently only configuration for IntelliJ IDEA is available.
+This directory contains default settings for IDE-s. Configurations for IntelliJ IDEA and Eclipse are available.
 
 IntelliJ IDEA
 -------------
@@ -24,3 +24,11 @@ project dir: `cp -rfv .ide/IDEA/* .idea/`
 
 Both run and modules configurations depend on the IDEA 2016.1+ style of creating modules for Gradle projects (separate
 module for each source set): https://www.jetbrains.com/idea/whatsnew/#v2016-1-gradle
+
+Eclipse
+-------
+
+To import settings preferred by AgE to Eclipse, find: **Java / Code Style** options in Settings and import files from
+the `Eclipse` directory.
+
+There may be some differences regarding formatter behavior between Eclipse and IDEA.
