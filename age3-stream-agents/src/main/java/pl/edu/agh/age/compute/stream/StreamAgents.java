@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -120,6 +121,8 @@ public final class StreamAgents implements Runnable, Manager {
 		workplaceFutures.forEach(f -> {
 			try {
 				f.get();
+			} catch (final CancellationException ignored) {
+				logger.debug("Task cancelled (probably by us)");
 			} catch (final InterruptedException ignored) {
 				logger.debug("Waiting for the workplace was interrupted");
 			} catch (final ExecutionException e) {
