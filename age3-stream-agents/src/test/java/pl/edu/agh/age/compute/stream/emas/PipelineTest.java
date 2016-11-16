@@ -87,6 +87,18 @@ public final class PipelineTest {
 		softly.assertThat(pipeline.extract()).hasSize(1);
 	}
 
+	@Test public void testSelectPairsWithRepetitions() {
+		final List<EmasAgent> agents = Stream.range(0, 5)
+		                                     .map(i -> EmasAgent.create(10, Solutions.simple(0)))
+		                                     .toList();
+
+		final PairPipeline pipeline = Pipeline.on(agents).selectPairsWithRepetitions((emasAgent, emasAgents) -> {
+			softly.assertThat(emasAgent).isNotIn(emasAgents);
+			softly.assertThat(emasAgents).isNotEmpty();
+			return Tuple.of(emasAgent, emasAgents.get());
+		});
+	}
+
 	/**
 	 * This is the same test as {@link PipelineTest#testPipeline()} but with an empty population
 	 */

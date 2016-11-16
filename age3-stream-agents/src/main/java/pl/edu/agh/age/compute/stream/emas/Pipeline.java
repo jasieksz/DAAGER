@@ -22,6 +22,7 @@ package pl.edu.agh.age.compute.stream.emas;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
+import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
 
@@ -65,9 +66,17 @@ public final class Pipeline extends pl.edu.agh.age.compute.stream.Pipeline<EmasA
 	 * @see Selectors
 	 */
 	public PairPipeline selectPairsWithRepetitions(final BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector) {
-		final List<Tuple2<EmasAgent, EmasAgent>> map = population.map(
-			agent -> selector.apply(agent, population.remove(agent)));
-		return new PairPipeline(map);
+		List<EmasAgent> remainingAgents = population;
+		List<Tuple2<EmasAgent, EmasAgent>> pairs = List.empty();
+
+		while (remainingAgents.size() > 1) {
+			final EmasAgent agent = remainingAgents.get();
+			remainingAgents = remainingAgents.remove(agent);
+
+			final Tuple2<EmasAgent, EmasAgent> selectedPair = selector.apply(agent, remainingAgents);
+			pairs = pairs.append(selectedPair);
+		}
+		return new PairPipeline(pairs);
 	}
 
 	/**
@@ -96,7 +105,7 @@ public final class Pipeline extends pl.edu.agh.age.compute.stream.Pipeline<EmasA
 
 			pairs = pairs.append(selectedPair);
 		}
-		return new Tuple2<>(new PairPipeline(pairs), new Pipeline(remainingAgents));
+		return Tuple.of(new PairPipeline(pairs), new Pipeline(remainingAgents));
 	}
 
 	/**
