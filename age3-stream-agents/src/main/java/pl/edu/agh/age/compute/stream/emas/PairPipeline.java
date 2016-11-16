@@ -20,6 +20,7 @@
 package pl.edu.agh.age.compute.stream.emas;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javaslang.Function2;
 import javaslang.Tuple2;
@@ -73,5 +74,37 @@ public final class PairPipeline {
 
 	public Pipeline fight(final Function2<EmasAgent, EmasAgent, Seq<EmasAgent>> fightingStrategy) {
 		return fight(fightingStrategy.tupled());
+	}
+
+	/**
+	 * Performs an agent encounter. If both agents meet a given reproduction predicate - they reproduce themselves with
+	 * a given reproduction strategy. Otherwise they fight with each other with a given fight strategy.
+	 *
+	 * @param reproductionStrategy
+	 * 		a function taking a pair of agents as an argument and returning a new set of agents that should replace
+	 * 		this pair. Parents should also be returned in this set if they should stay in the new population.
+	 * @param fightingStrategy
+	 * 		a function taking a pair of agents as an argument and returning a new set of agents that should replace
+	 * 		this pair.
+	 *
+	 * @return a new Pipeline for new population
+	 */
+	public Pipeline encounter(final Predicate<EmasAgent> reproductionPredicate,
+	                          final Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> reproductionStrategy,
+	                          final Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> fightingStrategy) {
+		final List<EmasAgent> ts = pairs.flatMap(
+			pair -> encounterPair(pair, reproductionPredicate, reproductionStrategy, fightingStrategy)).distinct();
+		return new Pipeline(ts);
+	}
+
+	private static Seq<EmasAgent> encounterPair(final Tuple2<EmasAgent, EmasAgent> pair,
+	                                            final Predicate<EmasAgent> reproductionPredicate,
+	                                            final Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> reproductionStrategy,
+	                                            final Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> fightingStrategy) {
+		if (reproductionPredicate.test(pair._1) && reproductionPredicate.test(pair._2)) {
+			return reproductionStrategy.apply(pair); // reproduce
+		} else {
+			return fightingStrategy.apply(pair); // fight
+		}
 	}
 }

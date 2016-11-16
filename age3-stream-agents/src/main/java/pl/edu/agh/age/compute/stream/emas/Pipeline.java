@@ -64,10 +64,39 @@ public final class Pipeline extends pl.edu.agh.age.compute.stream.Pipeline<EmasA
 	 *
 	 * @see Selectors
 	 */
-	public PairPipeline selectPairs(final BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector) {
+	public PairPipeline selectPairsWithRepetitions(final BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector) {
 		final List<Tuple2<EmasAgent, EmasAgent>> map = population.map(
 			agent -> selector.apply(agent, population.remove(agent)));
 		return new PairPipeline(map);
+	}
+
+	/**
+	 * Select pairs from the current population in this pipeline with regards to the given selector function.
+	 *
+	 * @param selector
+	 * 		a function of two arguments. The first argument is an agent and the second one - the rest of the current
+	 * 		population. The selector should return a pair of agents selected for this agent. Usually it will be the given
+	 * 		agent and another one.
+	 *
+	 * @return a pair of pipelines - the first one is a {@link PairPipeline} containing the selected pairs, the second
+	 * one - pipeline containing all agents which have not been selected.
+	 *
+	 * @see Selectors
+	 */
+	public Tuple2<PairPipeline, Pipeline> selectPairs(final BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector) {
+		List<EmasAgent> remainingAgents = population;
+		List<Tuple2<EmasAgent, EmasAgent>> pairs = List.empty();
+
+		while (remainingAgents.size() > 1) {
+			final EmasAgent agent = remainingAgents.get();
+			remainingAgents = remainingAgents.remove(agent);
+
+			final Tuple2<EmasAgent, EmasAgent> selectedPair = selector.apply(agent, remainingAgents);
+			remainingAgents.remove(selectedPair._2);
+
+			pairs = pairs.append(selectedPair);
+		}
+		return new Tuple2<>(new PairPipeline(pairs), new Pipeline(remainingAgents));
 	}
 
 	/**

@@ -46,9 +46,9 @@ public final class SampleStep implements Step<EmasAgent> {
 			recombination).withEnergyTransfer(EnergyTransfer.equal()).build();
 
 		final Pipeline pipeline = Pipeline.on(population)
-		                                  .selectPairs(Selectors.random())
+		                                  .selectPairsWithRepetitions(Selectors.random())
 		                                  .reproduce(reproduction)
-		                                  .selectPairs(Selectors.random())
+		                                  .selectPairsWithRepetitions(Selectors.random())
 		                                  .fight(pair -> List.of(pair._1, pair._2));
 		final Tuple2<Pipeline, Pipeline> afterMigration = pipeline.migrateWhen(Predicates.random(0.2));
 		final List<EmasAgent> migrated = afterMigration._1.extract();

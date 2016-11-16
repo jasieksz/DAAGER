@@ -39,9 +39,31 @@ public class Pipeline<T, P extends Pipeline<T, P>> {
 		this.pipelineFactory = requireNonNull(pipelineFactory);
 	}
 
+	/**
+	 * Splits this pipeline according to the provided predicate.
+	 *
+	 * Elements matching predicate are in the first element (`Tuple2._1`) and the rest in the second one (`Tuple2._2`).
+	 *
+	 * @param predicate
+	 * 		a predicate to grade the population.
+	 *
+	 * @return a tuple of two pipelines.
+	 */
 	public Tuple2<P, P> split(final Predicate<? super T> predicate) {
 		final Tuple2<List<T>, List<T>> tuple = population.partition(predicate);
 		return Tuple.of(pipelineFactory.apply(tuple._1), pipelineFactory.apply(tuple._2));
+	}
+
+	/**
+	 * Merges this pipeline with the provided one omitting any repetitions (it behaves as set).
+	 *
+	 * @param otherPipeline
+	 * 		a pipeline of the same type.
+	 *
+	 * @return a new pipeline with a new population.
+	 */
+	public P mergeWith(final P otherPipeline) {
+		return pipelineFactory.apply(population.toSet().addAll(otherPipeline.population).toList());
 	}
 
 	/**
