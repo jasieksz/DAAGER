@@ -69,7 +69,7 @@ Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it a
 7. Run your computation in AgE:
 
     ```bash
-    java -cp YOUR_CLASSPATH -enableassertions -Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy pl.edu.agh.age.node.NodeBootstrapper src/main/resources/spring-sample.xml
+    java -cp YOUR_CLASSPATH -enableassertions -Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy pl.edu.agh.age.node.NodeBootstrapper file:src/main/resources/spring-sample.xml
     ```
     
     Two things are important in this command:   
@@ -88,7 +88,7 @@ Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it a
 	    standardInput = System.in
 	    jvmArgs '-enableassertions'
 	    systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
-	    args 'src/main/resources/spring-sample.xml'
+	    args 'file:src/main/resources/spring-sample.xml'
     }
     ```
     
