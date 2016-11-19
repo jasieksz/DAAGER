@@ -10,6 +10,8 @@ Notes below are extensions to them.
 * Annotations for fields should be placed in the same line.
 * Annotations for methods - chopped down if more than one or two.
 
+If in doubt — refer to the provided IntelliJ IDEA formatter (`.ide/IDEA` directory).
+
 ## Mutability, `final`
 
 Decrease mutability and prefer immutable collections (from Javaslang or Guava).

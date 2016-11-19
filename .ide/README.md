@@ -7,7 +7,8 @@ IntelliJ IDEA
 -------------
 
 After creating a project, simply copy (or symlink) contents of `IDEA` directory to your `.idea` directory in the main
-project dir: `cp -rfv .ide/IDEA/* .idea/`
+project dir: `cp -rfv .ide/IDEA/* .idea/`.
+*Do not* import them – these are not exported files but a configuration skeleton.
 
 ### Contents
 
