@@ -42,15 +42,15 @@ jmh {
 dependencies {
 	compile project(':age3-core')
 
-	compile 'org.openjdk.jmh:jmh-core:+'
-	compile 'org.openjdk.jmh:jmh-generator-annprocess:+'
-	testCompile 'org.springframework:spring-test:+'
-	testCompile "org.mockito:mockito-core:1.+"
+	compile 'org.openjdk.jmh:jmh-core:1.17'
+	compile 'org.openjdk.jmh:jmh-generator-annprocess:1.17'
+	testCompile 'org.springframework:spring-test:4.3.4.RELEASE'
 }
 
 jmh {
 	includeTests = false
 	duplicateClassesStrategy = 'warn'
+	jmhVersion = '1.17'
 }
 
 jmhJar {

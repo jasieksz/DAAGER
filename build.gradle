@@ -94,24 +94,24 @@ subprojects {
 
 	dependencies {
 		compile 'javax.inject:javax.inject:1'
-		compile 'org.slf4j:slf4j-api:+'
-		compile 'org.slf4j:jcl-over-slf4j:+'
-		compile 'com.google.code.findbugs:jsr305:+'
-		compile 'io.javaslang:javaslang:2.+'
-		compile 'org.apache.commons:commons-lang3:+'
-		compile 'com.google.guava:guava:+'
+		compile 'org.slf4j:slf4j-api:1.7.21'
+		compile 'org.slf4j:jcl-over-slf4j:1.7.21'
+		compile 'com.google.code.findbugs:jsr305:3.0.1'
+		compile 'io.javaslang:javaslang:2.0.5'
+		compile 'org.apache.commons:commons-lang3:3.5'
+		compile 'com.google.guava:guava:20.0'
 
-		runtime 'org.codehaus.groovy:groovy:+'
-		compile 'ch.qos.logback:logback-classic:+'
-		compile 'org.logback-extensions:logback-ext-spring:+'
+		runtime 'org.codehaus.groovy:groovy:2.4.7'
+		compile 'ch.qos.logback:logback-classic:1.1.7'
+		compile 'org.logback-extensions:logback-ext-spring:0.1.4'
 
-		testCompile 'junit:junit:+'
-		testCompile 'org.mockito:mockito-all:+'
-		testCompile 'org.assertj:assertj-core:+'
+		testCompile 'junit:junit:4.12'
+		testCompile 'org.mockito:mockito-all:2.0.2-beta'
+		testCompile 'org.assertj:assertj-core:3.6.1'
 
-		checkerFrameworkAnnotatedJDK 'org.checkerframework:jdk8:+'
-		checkerFramework 'org.checkerframework:checker:+'
-		compile 'org.checkerframework:checker-qual:+'
+		checkerFrameworkAnnotatedJDK 'org.checkerframework:jdk8:2.1.5'
+		checkerFramework 'org.checkerframework:checker:2.1.5'
+		compile 'org.checkerframework:checker-qual:2.1.5'
 	}
 
 	if (project.hasProperty('withChecker')) {

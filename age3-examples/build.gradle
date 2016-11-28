@@ -33,7 +33,7 @@ dependencies {
 	compile project(':age3-core')
 	compile project(':age3-console')
 
-	testCompile 'org.springframework:spring-test:+'
+	testCompile 'org.springframework:spring-test:4.3.4.RELEASE'
 }
 
 shadowJar {
