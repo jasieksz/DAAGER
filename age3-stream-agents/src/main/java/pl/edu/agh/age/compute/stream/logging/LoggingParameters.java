@@ -40,8 +40,6 @@ public final class LoggingParameters {
 	 * @param loggingInterval
 	 * 		the logging interval in milliseconds. Logging will be enabled if and only if this value is greater than 0.
 	 * 		Otherwise (negative value or 0) logging will be switched off.
-	 * @param consoleLogging
-	 * 		if <code>true</code> - console logging will be enabled along with the file logging
 	 */
 	public LoggingParameters(final ProblemDefinition problemDefinition, final Duration loggingInterval) {
 		this.problemDefinition = requireNonNull(problemDefinition);

@@ -42,8 +42,6 @@ public interface NodeIdentityService {
 
 	/**
 	 * Tells whether the node is compute node.
-	 *
-	 * A node is compute when it has {@link #nodeType()} equal to {@link NodeType#COMPUTE}.
 	 */
 	boolean isCompute();
 

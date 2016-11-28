@@ -39,7 +39,7 @@ import ch.qos.logback.core.AppenderBase;
  * The stored objects are {@link LoggingEventVO} instances.
  *
  * Configuration is done as described in <https://github.com/qos-ch/logback-extensions/wiki/Spring>.
- * In the logback config {@link ch.qos.logback.ext.spring.DelegatingLogbackAppender} is used, then this appender is
+ * In the logback config `ch.qos.logback.ext.spring.DelegatingLogbackAppender` is used, then this appender is
  * loaded in the Spring config.
  */
 public final class HazelcastAppender extends AppenderBase<ILoggingEvent> {
