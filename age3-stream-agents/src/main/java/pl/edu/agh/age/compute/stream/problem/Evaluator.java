@@ -26,10 +26,8 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
  *
  * @param <S>
  * 		type of the solution.
- * @param <R>
- * 		type of the results (fitness).
  */
 @FunctionalInterface
-public interface Evaluator<S extends Solution<?>, R> {
-	R evaluate(S value);
+public interface Evaluator<S extends Solution<?>> {
+	double evaluate(S value);
 }

@@ -30,6 +30,7 @@ import pl.edu.agh.age.compute.api.UnicastMessenger;
 import pl.edu.agh.age.compute.api.WorkerAddress;
 import pl.edu.agh.age.compute.stream.configuration.Configuration;
 import pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration;
+import pl.edu.agh.age.compute.stream.logging.LoggingService;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hazelcast.core.IMap;
@@ -71,6 +72,8 @@ public final class StreamAgents implements Runnable, Manager {
 
 	private final StopCondition stopCondition;
 
+	private final LoggingService loggingService;
+
 	@Inject
 	public StreamAgents(final Configuration configuration, final ThreadPool threadPool,
 	                    final DistributionUtilities distributionUtilities, final UnicastMessenger messenger) {
@@ -79,12 +82,14 @@ public final class StreamAgents implements Runnable, Manager {
 		this.distributionUtilities = requireNonNull(distributionUtilities);
 		this.messenger = requireNonNull(messenger);
 
+
 		workplaceIdGenerator = this.distributionUtilities.getIdGenerator("workplace");
 		statistics = this.distributionUtilities.getMap("statistics");
 		workplacesLocations = this.distributionUtilities.getMap("workplace-locations");
 
 		// Process configuration
 		stopCondition = configuration.stopCondition();
+		loggingService = configuration.loggingService();
 		final List<WorkplaceConfiguration<Agent>> workplaceConfigurations = configuration.workplaces();
 		localWorkplaces = workplaceConfigurations.stream()
 		                                         .map(c -> c.toWorkplace(workplaceIdGenerator.newId(), this))
@@ -105,6 +110,7 @@ public final class StreamAgents implements Runnable, Manager {
 
 	@Override public void run() {
 		logger.info("Stream agents starting");
+		loggingService.schedule(this, threadPool);
 
 		// Submit workplaces and wait for finalization
 		final List<ListenableFuture<?>> workplaceFutures = threadPool.submitAll(localWorkplaces);
@@ -129,6 +135,7 @@ public final class StreamAgents implements Runnable, Manager {
 				logger.error("Computation threw an exception that was not caught. Possible bug in core?", e);
 			}
 		});
+		loggingService.stop();
 
 		logger.info("Stream agents finished");
 	}

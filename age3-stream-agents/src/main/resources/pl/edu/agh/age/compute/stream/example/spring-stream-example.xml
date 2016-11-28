@@ -65,6 +65,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		<ref bean="workplace-2"/>
 	</util:list>
 
+	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.NoOpLoggingService"/>
+
 	<!-- Initialize configuration -->
 	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
 

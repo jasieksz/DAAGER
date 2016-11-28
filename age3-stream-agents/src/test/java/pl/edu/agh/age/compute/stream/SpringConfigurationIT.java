@@ -70,7 +70,7 @@ public final class SpringConfigurationIT {
 
 		softly.assertThat(agentsAfterStep).isNotEmpty();
 
-		final Map<?, Object> stats = afterStepAction.apply(agentsAfterStep);
+		final Map<?, Object> stats = afterStepAction.apply(1L, 1L, agentsAfterStep);
 
 		softly.assertThat(stats).isNotEmpty();
 	}

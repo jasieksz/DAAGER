@@ -20,6 +20,8 @@
 package pl.edu.agh.age.compute.stream.emas.reproduction.transfer;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
 
 /**
@@ -44,6 +46,36 @@ public interface EnergyTransfer {
 		return (first, second) -> {
 			final double v = (first.energy + second.energy) / 3.0;
 			return new double[] {v, v, v};
+		};
+	}
+
+	/**
+	 * Returns an energy transfer operator that distributes energy proportionally with given proportions between all
+	 * three agents.
+	 *
+	 * @param parentsProportion
+	 * 		proportion of energy that parents should receive
+	 * @param childProportion
+	 * 		proportion of energy that child should receive
+	 * @param minimumAgentEnergy
+	 * 		minimum agent energy that agent can have
+	 */
+	static EnergyTransfer proportional(final double parentsProportion, final double childProportion,
+	                                   final double minimumAgentEnergy) {
+		// FIXME: minimumAgentEnergy does not fit here - it's not the responsibility of transfer to kill parents
+		checkArgument((parentsProportion >= 0) && (parentsProportion <= 1));
+		checkArgument((childProportion >= 0) && (childProportion <= 1));
+		checkArgument(Math.abs(parentsProportion + childProportion - 1) <= 0.0001,
+		              "Proportion sum is not equal to 1.0");
+		return (first, second) -> {
+			final double energySum = first.energy + second.energy;
+			final double parentEnergy = (energySum * parentsProportion) / 2.0;
+			final double childEnergy = energySum * childProportion;
+			// XXX: really for childEnergy <= minimum?
+			if ((parentEnergy <= minimumAgentEnergy) || (childEnergy <= minimumAgentEnergy)) {
+				return new double[] {0.0, 0.0, energySum};
+			}
+			return new double[] {parentEnergy, parentEnergy, childEnergy};
 		};
 	}
 }

@@ -26,12 +26,25 @@ import pl.edu.agh.age.compute.stream.emas.StatisticsKeys;
 import javaslang.collection.HashMap;
 import javaslang.collection.List;
 import javaslang.collection.Map;
+import javaslang.collection.Seq;
 
-/**
- * Population analyzer that only sums energy.
- */
 public final class SampleAfterStepAction implements AfterStepAction<EmasAgent, StatisticsKeys> {
-	@Override public Map<StatisticsKeys, Object> apply(final List<EmasAgent> population) {
-		return HashMap.of(StatisticsKeys.ENERGY_SUM, population.map(emasAgent -> emasAgent.energy).sum());
+	@Override
+	public Map<StatisticsKeys, Object> apply(final Long workplaceId, final Long step,
+	                                         final List<EmasAgent> population) {
+		return HashMap.of(StatisticsKeys.STEP_NUMBER, step, StatisticsKeys.ENERGY_SUM, sumEnergy(population),
+		                  StatisticsKeys.AVERAGE_FITNESS, computeAverageFitness(population),
+		                  StatisticsKeys.POPULATION_SIZE, population.size());
+	}
+
+
+	// FIXME: Utility class?
+	private static double computeAverageFitness(final Seq<EmasAgent> population) {
+		return population.map(agent -> agent.solution.fitnessValue()).average().getOrElse(0.0);
+	}
+
+	// FIXME: Utility class?
+	private static double sumEnergy(final Seq<EmasAgent> population) {
+		return population.map(emasAgent -> emasAgent.energy).sum().doubleValue();
 	}
 }

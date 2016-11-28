@@ -20,9 +20,13 @@
 package pl.edu.agh.age.compute.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableScheduledFuture;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public interface ThreadPool {
 	List<ListenableFuture<?>> submitAll(List<? extends Runnable> runnables);
+
+	ListenableScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit);
 }

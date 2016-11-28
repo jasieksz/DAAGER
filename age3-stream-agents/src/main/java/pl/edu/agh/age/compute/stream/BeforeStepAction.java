@@ -19,27 +19,34 @@
 
 package pl.edu.agh.age.compute.stream;
 
-import javaslang.Function2;
+import javaslang.Function3;
 import javaslang.collection.List;
 
 /**
  * Interface for functions executed before the step execution in a workplace.
  *
+ * The parameters of the function are:
+ * - step number (as Long),
+ * - current population (as {@link List}),
+ * - incoming population - from migrations (as {@link List}),
+ *
+ * The function should return the population to process in the current step.
+ *
  * @param <T>
  * 		type of agents.
  */
 @FunctionalInterface
-public interface BeforeStepAction<T extends Agent> extends Function2<List<T>, List<T>, List<T>> {
+public interface BeforeStepAction<T extends Agent> extends Function3<Long, List<T>, List<T>, List<T>> {
 
 	/**
 	 * Simple merge action - adds all incoming agents to the population.
 	 *
 	 * @param <T>
-	 * 		agents type.
+	 * 		agents type
 	 *
 	 * @return new population
 	 */
 	static <T extends Agent> BeforeStepAction<T> simpleMerge() {
-		return List::appendAll;
+		return (step, population, newAgents) -> population.appendAll(newAgents);
 	}
 }

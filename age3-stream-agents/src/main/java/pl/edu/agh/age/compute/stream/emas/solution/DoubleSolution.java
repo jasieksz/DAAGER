@@ -19,21 +19,38 @@
 
 package pl.edu.agh.age.compute.stream.emas.solution;
 
-import com.google.common.base.MoreObjects;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
 /**
- * Solution optimized for a single double
+ * Solution optimized for a single double number.
  */
 public final class DoubleSolution implements Solution<Double> {
 
+	private static final long serialVersionUID = -1330253069016370993L;
+
 	private final double value;
 
-	public DoubleSolution(final double value) {
+	private final double fitness;
+
+	public DoubleSolution(final double value, final double fitness) {
 		this.value = value;
+		this.fitness = fitness;
+	}
+
+	public DoubleSolution(final double value) {
+		this(value, Double.NaN);
 	}
 
 	public double value() {
 		return value;
+	}
+
+	@Override public double fitnessValue() {
+		return fitness;
+	}
+
+	@Override public DoubleSolution updateFitness(final double newFitness) {
+		return new DoubleSolution(value, newFitness);
 	}
 
 	@Override public Double unwrap() {
@@ -41,6 +58,6 @@ public final class DoubleSolution implements Solution<Double> {
 	}
 
 	@Override public String toString() {
-		return MoreObjects.toStringHelper(this).addValue(value).toString();
+		return toStringHelper(this).addValue(value).toString();
 	}
 }

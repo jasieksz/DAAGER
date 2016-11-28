@@ -19,11 +19,16 @@
 
 package pl.edu.agh.age.compute.stream.emas.solution;
 
+import java.io.Serializable;
+
+/**
+ * Utilities and factory methods for solutions.
+ */
 public final class Solutions {
 	private Solutions() {}
 
-	public static <T> Solution<T> simple(final T value) {
-		return () -> value;
+	public static <T extends Serializable> Solution<T> simple(final T value) {
+		return new SimpleSolution<>(value);
 	}
 
 	public static DoubleSolution singleDouble(final double value) {

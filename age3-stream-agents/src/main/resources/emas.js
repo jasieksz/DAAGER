@@ -28,3 +28,4 @@ var Selectors = Java.type('pl.edu.agh.age.compute.stream.emas.Selectors');
 var Predicates = Java.type('pl.edu.agh.age.compute.stream.emas.Predicates');
 var Generators = Java.type('pl.edu.agh.age.compute.stream.emas.Generators');
 var StatisticsKeys = Java.type('pl.edu.agh.age.compute.stream.emas.StatisticsKeys');
+var NoOpLoggingService = Java.type('pl.edu.agh.age.compute.stream.logging.NoOpLoggingService');

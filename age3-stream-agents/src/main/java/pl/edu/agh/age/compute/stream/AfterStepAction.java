@@ -19,19 +19,25 @@
 
 package pl.edu.agh.age.compute.stream;
 
-import javaslang.Function1;
+import javaslang.Function3;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 
 /**
  * Interface for functions executed after the step execution in a workplace.
  *
+ * The parameters of the function are:
+ * - step number (as Long),
+ * - current population (as {@link List}).
+ *
+ * The function should return statistics map for the current step.
+ *
  * @param <T>
- * 		type of agents.
+ * 		type of agents
  * @param <K>
- * 		type of keys in the returned map.
+ * 		type of keys in the returned map
  */
 @FunctionalInterface
-public interface AfterStepAction<T extends Agent, K> extends Function1<List<T>, Map<K, Object>> {
+public interface AfterStepAction<T extends Agent, K> extends Function3<Long, Long, List<T>, Map<K, Object>> {
 
 }

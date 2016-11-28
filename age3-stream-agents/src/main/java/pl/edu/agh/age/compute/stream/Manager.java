@@ -23,6 +23,8 @@ import javaslang.collection.Map;
 
 /**
  * Interface for workplaces to interact with the global state of computation.
+ *
+ * @implSpec implementations must be aware that this can be used from multiple threads
  */
 public interface Manager {
 	/**

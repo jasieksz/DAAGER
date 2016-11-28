@@ -25,8 +25,8 @@ public final class RastriginEvaluatorWithCache {
 
 	private double cache;
 
-	public double evaluate(double[] representation, int ithToChange) {
-		int n = representation.length;
+	public double evaluate(final double[] representation, final int ithToChange) {
+		final int n = representation.length;
 		double res = A * n;
 		double changableValue = 0.0;
 		for (int i = 0; i < n; i++) {
@@ -39,8 +39,8 @@ public final class RastriginEvaluatorWithCache {
 		return res;
 	}
 
-	public double evaluate(double ithValue) {
-		return cache + ithValue * ithValue - A * Math.cos(2 * Math.PI * ithValue);
+	public double evaluate(final double ithValue) {
+		return (cache + (ithValue * ithValue)) - (A * Math.cos(2 * Math.PI * ithValue));
 	}
 
 

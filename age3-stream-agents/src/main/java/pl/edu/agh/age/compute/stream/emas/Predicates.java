@@ -20,13 +20,22 @@
 package pl.edu.agh.age.compute.stream.emas;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public final class Predicates {
 	private Predicates() {}
 
 	public static <T> Predicate<T> random(final double probability) {
-		final Random random = new Random();
+		final Random random = ThreadLocalRandom.current();
 		return x -> random.nextDouble() < probability;
+	}
+
+	public static Predicate<EmasAgent> energyAboveThreshold(final double energyThreshold) {
+		return agent -> agent.energy >= energyThreshold;
+	}
+
+	public static Predicate<EmasAgent> energyBelowThreshold(final double energyThreshold) {
+		return agent -> agent.energy <= energyThreshold;
 	}
 }

@@ -19,7 +19,7 @@
 
 package pl.edu.agh.age.compute.stream.emas;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 
 import javaslang.Tuple;
@@ -27,10 +27,11 @@ import javaslang.Tuple2;
 import javaslang.collection.List;
 
 public final class Selectors {
+
 	private Selectors() {}
 
 	public static <T> BiFunction<T, List<T>, Tuple2<T, T>> random() {
-		final Random random = new Random();
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
 		return (emasAgent, listOfAgents) -> Tuple.of(emasAgent, listOfAgents.get(random.nextInt(listOfAgents.size())));
 	}
 }

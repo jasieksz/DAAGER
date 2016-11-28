@@ -43,7 +43,7 @@ public final class SampleStep implements Step<EmasAgent> {
 			= (firstSolution, secondSolution) -> new DoubleSolution((firstSolution.value() * 0.1)
 			                                                        + (secondSolution.value() * 0.9));
 		final SexualReproduction reproduction = SexualReproduction.<DoubleSolution>builder().withRecombination(
-			recombination).withEnergyTransfer(EnergyTransfer.equal()).build();
+			recombination).withEnergyTransfer(EnergyTransfer.equal()).withEvaluator(DoubleSolution::value).build();
 
 		final Pipeline pipeline = Pipeline.on(population)
 		                                  .selectPairsWithRepetitions(Selectors.random())

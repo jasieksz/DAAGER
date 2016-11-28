@@ -11,12 +11,14 @@ import pl.edu.agh.age.compute.stream.emas.reproduction.mutation.Mutation;
 import pl.edu.agh.age.compute.stream.emas.reproduction.recombination.Recombination;
 import pl.edu.agh.age.compute.stream.emas.reproduction.transfer.EnergyTransfer;
 import pl.edu.agh.age.compute.stream.emas.solution.Solution;
+import pl.edu.agh.age.compute.stream.problem.Evaluator;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javaslang.Tuple;
 import javaslang.Tuple2;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "ReturnValueIgnored"})
@@ -29,11 +31,13 @@ public final class BasicSexualReproductionTest {
 
 	@Mock private EnergyTransfer energyTransfer;
 
+	@Mock private Evaluator<Solution<?>> evaluator;
+
 	private final EmasAgent firstParent = EmasAgent.create(1.0, mock(Solution.class));
 
 	private final EmasAgent secondParent = EmasAgent.create(1.0, mock(Solution.class));
 
-	private final Tuple2<EmasAgent, EmasAgent> parents = new Tuple2<>(firstParent, secondParent);
+	private final Tuple2<EmasAgent, EmasAgent> parents = Tuple.of(firstParent, secondParent);
 
 	@Test public void testReproductionFlow() {
 		// given
@@ -41,8 +45,12 @@ public final class BasicSexualReproductionTest {
 		                                                          .withMutation(mutation)
 		                                                          .withRecombination(recombination)
 		                                                          .withEnergyTransfer(energyTransfer)
+		                                                          .withEvaluator(evaluator)
 		                                                          .build();
 		given(energyTransfer.transfer(firstParent, secondParent)).willReturn(new double[] {0.0, 0.0, 0.0});
+		given(mutation.mutate(any())).willReturn(mock(Solution.class));
+		given(recombination.recombine(firstParent.solution, secondParent.solution)).willReturn(mock(Solution.class));
+		given(evaluator.evaluate(any())).willReturn(1.0);
 
 		// when
 		reproduction.apply(parents);

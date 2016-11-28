@@ -46,6 +46,7 @@ var afterStep = function (population) {
 // Only these two variables must be defined, as the loader is looking for them
 
 var stopCondition = new TimedStopCondition(10);
+var loggingService = new NoOpLoggingService();
 
 var workplaces = [
 	{agents: Generators.randomAgents(5), step: step, after: afterStep},

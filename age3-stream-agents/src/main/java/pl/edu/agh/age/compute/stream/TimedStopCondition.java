@@ -48,7 +48,7 @@ public final class TimedStopCondition implements StopCondition {
 		requireNonNull(desiredDuration);
 		checkArgument(desiredDuration.getSeconds() > 0L, "Duration cannot be shorter than 1 second.");
 		this.desiredDuration = desiredDuration;
-		this.desiredDurationAsMillis = desiredDuration.toMillis();
+		desiredDurationAsMillis = desiredDuration.toMillis();
 	}
 
 	public TimedStopCondition(final long seconds) {

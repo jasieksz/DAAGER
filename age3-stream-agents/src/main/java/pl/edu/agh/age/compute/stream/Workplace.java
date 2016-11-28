@@ -95,14 +95,14 @@ public class Workplace<T extends Agent> implements Runnable {
 		List<T> population = initialPopulation;
 		while (!Thread.currentThread().isInterrupted() && !manager.isStopConditionReached()) {
 			// Before step
-			population = beforeStepAction.apply(population, incomingAgents.getAndSet(List.empty()));
+			population = beforeStepAction.apply(step.get(), population, incomingAgents.getAndSet(List.empty()));
 
 			// Step
 			population = stepOperations.stepOn(population, environment);
 			logger.debug("[W{}] Current population: {}", id, population.length()); // FIXME
 
 			// After step
-			final Map<Object, Object> localStats = (Map<Object, Object>)afterStepAction.apply(population);
+			final Map<Object, Object> localStats = (Map<Object, Object>)afterStepAction.apply(id, step.get(), population);
 			manager.postStatistics(id, localStats);
 			logger.debug("[W{}] Local stats: {}", id, localStats);
 			step.incrementAndGet();

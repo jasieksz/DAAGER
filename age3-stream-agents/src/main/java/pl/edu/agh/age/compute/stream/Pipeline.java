@@ -49,7 +49,7 @@ public class Pipeline<T, P extends Pipeline<T, P>> {
 	 *
 	 * @return a tuple of two pipelines.
 	 */
-	public Tuple2<P, P> split(final Predicate<? super T> predicate) {
+	public final Tuple2<P, P> split(final Predicate<? super T> predicate) {
 		final Tuple2<List<T>, List<T>> tuple = population.partition(predicate);
 		return Tuple.of(pipelineFactory.apply(tuple._1), pipelineFactory.apply(tuple._2));
 	}
@@ -62,7 +62,7 @@ public class Pipeline<T, P extends Pipeline<T, P>> {
 	 *
 	 * @return a new pipeline with a new population.
 	 */
-	public P mergeWith(final P otherPipeline) {
+	public final P mergeWith(final P otherPipeline) {
 		return pipelineFactory.apply(population.toSet().addAll(otherPipeline.population).toList());
 	}
 
@@ -71,7 +71,7 @@ public class Pipeline<T, P extends Pipeline<T, P>> {
 	 *
 	 * @return a current population.
 	 */
-	public List<T> extract() {
+	public final List<T> extract() {
 		return population;
 	}
 }

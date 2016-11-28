@@ -21,6 +21,7 @@ package pl.edu.agh.age.compute.stream.configuration;
 
 import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.StopCondition;
+import pl.edu.agh.age.compute.stream.logging.LoggingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +37,14 @@ public final class Configuration {
 
 	private final StopCondition stopCondition;
 
+	private final LoggingService loggingService;
+
 	@Inject
 	public Configuration(final List<WorkplaceConfiguration<Agent>> workplaceConfigurations,
-	                     final StopCondition stopCondition) {
+	                     final StopCondition stopCondition, final LoggingService loggingService) {
 		this.workplaceConfigurations = new ArrayList<>(workplaceConfigurations);
 		this.stopCondition = stopCondition;
+		this.loggingService = loggingService;
 	}
 
 	public List<WorkplaceConfiguration<Agent>> workplaces() {
@@ -49,5 +53,9 @@ public final class Configuration {
 
 	public StopCondition stopCondition() {
 		return stopCondition;
+	}
+
+	public LoggingService loggingService() {
+		return loggingService;
 	}
 }

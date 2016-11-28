@@ -22,8 +22,33 @@ package pl.edu.agh.age.compute.stream.emas.solution;
 import java.io.Serializable;
 
 /**
+ * Solution is a specific value from the search domain and its fitness
+ *
  * @param <T>
+ * 		type of the value (dependent on the problem)
+ *
+ * @implSpec Implementations should be immutable.
  */
 public interface Solution<T> extends Serializable {
+	/**
+	 * Returns the fitness of this solution. If the fitness was not computed, the returned value will be `Double#NaN`.
+	 */
+	double fitnessValue();
+
+	/**
+	 * Updates the fitness of this solution.
+	 *
+	 * This function returns a new instance.
+	 *
+	 * @param fitness
+	 * 		new fitness value
+	 *
+	 * @return a copy of this solution with new fitness
+	 */
+	Solution<T> updateFitness(double fitness);
+
+	/**
+	 * Returns the real value of this solution.
+	 */
 	T unwrap();
 }

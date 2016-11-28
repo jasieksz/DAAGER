@@ -19,24 +19,33 @@
 
 package pl.edu.agh.age.services.worker.internal;
 
+import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
 import static java.util.stream.Collectors.toList;
+import static pl.edu.agh.age.util.Runnables.swallowingRunnable;
 
 import pl.edu.agh.age.compute.api.ThreadPool;
 import pl.edu.agh.age.util.Runnables;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ListenableScheduledFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class DefaultThreadPool implements ThreadPool {
 
-	private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+	private final ListeningScheduledExecutorService service = listeningDecorator(Executors.newScheduledThreadPool(10));
 
 	@Override public List<ListenableFuture<?>> submitAll(final List<? extends Runnable> runnables) {
 		return runnables.stream().map(Runnables::swallowingRunnable).map(service::submit).collect(toList());
+	}
+
+	@Override
+	public ListenableScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay,
+	                                                        final long period, final TimeUnit unit) {
+		return service.scheduleAtFixedRate(swallowingRunnable(command), initialDelay, period, unit);
 	}
 
 	void shutdownAll() {

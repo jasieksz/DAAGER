@@ -50,6 +50,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<ref bean="workplace-1"/>
 	</util:list>
 
+	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.NoOpLoggingService"/>
+
 	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
 
 	<!-- Commented out, because it would require too many dependencies -->

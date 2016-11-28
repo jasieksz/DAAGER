@@ -29,6 +29,7 @@ import pl.edu.agh.age.compute.stream.AfterStepAction;
 import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.Step;
 import pl.edu.agh.age.compute.stream.StopCondition;
+import pl.edu.agh.age.compute.stream.logging.LoggingService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,9 @@ public final class NashornLoader {
 			final StopCondition stopCondition = (StopCondition)engine.get("stopCondition");
 			logger.debug("Stop condition: {}", stopCondition);
 
+			final LoggingService loggingService = (LoggingService)engine.get("loggingService");
+			logger.debug("Logging service: {}", loggingService);
+
 			final ScriptObjectMirror workplaces = (ScriptObjectMirror)engine.get("workplaces");
 			logger.debug("Workplaces array: {}", workplaces);
 
@@ -85,11 +89,12 @@ public final class NashornLoader {
 				final List<Agent> agents = ((javaslang.collection.List<Agent>)obj.get("agents")).toJavaList();
 				final AfterStepAction<Agent, Object> after = ((ScriptObjectMirror)obj.get("after")).to(
 					AfterStepAction.class);
+				// FIXME: Before step?
 				return new WorkplaceConfiguration<>(agents, step, after);
 			}).collect(toList());
 
 			logger.info("Configuration has been read and built");
-			return new Configuration(configurations, stopCondition);
+			return new Configuration(configurations, stopCondition, loggingService);
 		} catch (final ScriptException e) {
 			throw new LoadingException("An error happened when parsing the script", e);
 		}

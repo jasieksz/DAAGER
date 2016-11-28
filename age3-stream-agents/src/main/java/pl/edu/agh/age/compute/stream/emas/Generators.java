@@ -22,15 +22,19 @@ package pl.edu.agh.age.compute.stream.emas;
 import pl.edu.agh.age.compute.stream.emas.solution.Solutions;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javaslang.collection.List;
 import javaslang.collection.Stream;
 
+/**
+ * Generators for agents
+ */
 public final class Generators {
 	private Generators() {}
 
 	public static List<EmasAgent> randomAgents(final int count) {
-		final Random random = new Random();
+		final Random random = ThreadLocalRandom.current();
 		// TODO: solution
 		return Stream.range(0, count)
 		             .map(i -> EmasAgent.create(random.nextDouble(), Solutions.singleDouble(1.0)))
@@ -38,7 +42,7 @@ public final class Generators {
 	}
 
 	public static EmasAgent randomAgent() {
-		final Random random = new Random();
+		final Random random = ThreadLocalRandom.current();
 		// TODO: solution
 		return EmasAgent.create(random.nextDouble(), Solutions.singleDouble(1.0));
 	}

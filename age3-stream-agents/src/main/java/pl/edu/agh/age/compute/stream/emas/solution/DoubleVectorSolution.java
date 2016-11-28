@@ -32,19 +32,36 @@ import javaslang.collection.Array;
  */
 public final class DoubleVectorSolution implements Solution<Array<Double>> {
 
+	private static final long serialVersionUID = 6732761520984749613L;
+
 	private final double[] values;
 
-	public DoubleVectorSolution(final double[] values) {
+	private final double fitness;
+
+	public DoubleVectorSolution(final double[] values, final double fitness) {
 		checkArgument(values.length > 0, "Size of an array must be greater than 0");
-		this.values = Arrays.copyOf(values, values.length);
+		this.values = values.clone();
+		this.fitness = fitness;
+	}
+
+	public DoubleVectorSolution(final double[] values) {
+		this(values, Double.NaN);
 	}
 
 	public double[] values() {
-		return Arrays.copyOf(values, values.length);
+		return values.clone();
 	}
 
 	public int length() {
 		return values.length;
+	}
+
+	@Override public double fitnessValue() {
+		return fitness;
+	}
+
+	@Override public DoubleVectorSolution updateFitness(final double newFitness) {
+		return new DoubleVectorSolution(values, newFitness);
 	}
 
 	@Override public Array<Double> unwrap() {

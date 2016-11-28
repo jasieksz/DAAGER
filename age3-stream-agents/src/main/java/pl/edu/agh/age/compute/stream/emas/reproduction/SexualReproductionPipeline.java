@@ -23,15 +23,14 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
+import pl.edu.agh.age.compute.stream.emas.reproduction.improvement.Improvement;
 import pl.edu.agh.age.compute.stream.emas.reproduction.mutation.Mutation;
 import pl.edu.agh.age.compute.stream.emas.reproduction.recombination.Recombination;
 import pl.edu.agh.age.compute.stream.emas.reproduction.transfer.EnergyTransfer;
-import pl.edu.agh.age.compute.stream.emas.solution.DoubleVectorSolution;
 import pl.edu.agh.age.compute.stream.emas.solution.Solution;
+import pl.edu.agh.age.compute.stream.problem.Evaluator;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.function.Function;
 
 import javaslang.collection.List;
 import javaslang.collection.Seq;
@@ -111,24 +110,27 @@ public final class SexualReproductionPipeline<S extends Solution<?>> {
 		return new SexualReproductionPipeline<>(firstParent, secondParent, mutation.mutate(childSolution));
 	}
 
-	public SexualReproductionPipeline<S> improve(final Function<S, S> improvement) {
-		return new SexualReproductionPipeline<>(firstParent, secondParent, improvement.apply(childSolution));
+	public SexualReproductionPipeline<S> improve(final Improvement<S> improvement) {
+		return new SexualReproductionPipeline<>(firstParent, secondParent, improvement.improve(childSolution));
 	}
 
 	public SexualReproductionPipeline<S> transferEnergy(final EnergyTransfer energyTransfer) {
 		final double[] energyValue = energyTransfer.transfer(firstParent, secondParent);
 
-		final EmasAgent newChild = (child != null) ? child.withEnergy(energyValue[2])
-		                                           : EmasAgent.create(energyValue[2], childSolution);
+		final EmasAgent newChild = (child != null)
+		                           ? child.withEnergy(energyValue[2])
+		                           : EmasAgent.create(energyValue[2], childSolution);
 
 		return new SexualReproductionPipeline<>(firstParent.withEnergy(energyValue[0]),
 		                                        secondParent.withEnergy(energyValue[1]), newChild);
 	}
 
 	/* terminal */
-	public SexualReproductionPipeline<S> evaluate(final Function<DoubleVectorSolution, DoubleVectorSolution> evaluation) {
-		// TODO: 7/21/2016 implement
-		return this;
+	public SexualReproductionPipeline<S> evaluate(final Evaluator<S> evaluator) {
+		checkState(childSolution != null, "Evaluation requires child soultion");
+
+		final EmasAgent newChild = child.withSolution(childSolution.updateFitness(evaluator.evaluate(childSolution)));
+		return new SexualReproductionPipeline<>(firstParent, secondParent, newChild, childSolution);
 	}
 
 	/**

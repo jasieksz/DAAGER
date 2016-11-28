@@ -20,5 +20,8 @@
 package pl.edu.agh.age.compute.stream.emas;
 
 public enum StatisticsKeys {
-	ENERGY_SUM
+	STEP_NUMBER,
+	ENERGY_SUM,
+	AVERAGE_FITNESS,
+	POPULATION_SIZE
 }

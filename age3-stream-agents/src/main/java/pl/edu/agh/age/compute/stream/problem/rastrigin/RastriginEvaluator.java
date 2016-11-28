@@ -22,10 +22,10 @@ package pl.edu.agh.age.compute.stream.problem.rastrigin;
 import pl.edu.agh.age.compute.stream.emas.solution.DoubleVectorSolution;
 import pl.edu.agh.age.compute.stream.problem.Evaluator;
 
-public final class RastriginEvaluator implements Evaluator<DoubleVectorSolution, Double> {
+public final class RastriginEvaluator implements Evaluator<DoubleVectorSolution> {
 	private static final int A = 10;
 
-	@Override public Double evaluate(final DoubleVectorSolution solution) {
+	@Override public double evaluate(final DoubleVectorSolution solution) {
 		return evaluate(solution.values());
 	}
 

@@ -88,9 +88,7 @@ public final class PipelineTest {
 	}
 
 	@Test public void testSelectPairsWithRepetitions() {
-		final List<EmasAgent> agents = Stream.range(0, 5)
-		                                     .map(i -> EmasAgent.create(10, Solutions.simple(0)))
-		                                     .toList();
+		final List<EmasAgent> agents = Stream.range(0, 5).map(i -> EmasAgent.create(10, Solutions.simple(0))).toList();
 
 		final PairPipeline pipeline = Pipeline.on(agents).selectPairsWithRepetitions((emasAgent, emasAgents) -> {
 			softly.assertThat(emasAgent).isNotIn(emasAgents);
