@@ -9,7 +9,8 @@ stages:
   - deploy
 
 variables:
-  CONTAINER_TEST_IMAGE: registry.gitlab.com/age-agh/age3:node-latest
+  CONTAINER_TEST_IMAGE: registry.gitlab.com/age-agh/age3:$CI_BUILD_REF_NAME
+  CONTAINER_RELEASE_IMAGE: registry.gitlab.com/age-agh/age3:node-latest
 
 cache:
   key: "$CI_BUILD_REF_NAME"
@@ -43,6 +44,7 @@ deploy_age_javadocs:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   stage: deploy
+  allow_failure: true
   only:
     - develop
   script:
@@ -55,6 +57,7 @@ build_core_jar:
   stage: build
   only:
     - develop
+    - /^release\/.*$/
   tags:
     - java
   script:
@@ -78,5 +81,23 @@ build_docker:
     - cp age3-core/build/libs/age3-core.jar docker/age3-core.jar
     - cd docker
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build --pull -t registry.gitlab.com/age-agh/age3 .
-    - docker push registry.gitlab.com/age-agh/age3
+    - docker build --pull -t $CONTAINER_TEST_IMAGE
+    - docker push $CONTAINER_TEST_IMAGE
+
+build_docker_release:
+  stage: deploy
+  image: docker:latest
+  only:
+    - /^release\/.*$/
+  services:
+    - docker:dind
+  tags:
+    - docker
+  dependencies:
+    - build_core_jar
+  script:
+    - cp age3-core/build/libs/age3-core.jar docker/age3-core.jar
+    - cd docker
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build --pull -t $CONTAINER_RELEASE_IMAGE .
+    - docker push $CONTAINER_RELEASE_IMAGE
