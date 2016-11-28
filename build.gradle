@@ -36,7 +36,7 @@ plugins {
 
 allprojects {
 	group 'pl.edu.agh.age'
-	version '0.3-SNAPSHOT'
+	version '0.4-SNAPSHOT'
 	apply plugin: 'maven-publish'
 	apply plugin: 'ch.raffael.pegdown-doclet'
 	apply plugin: 'net.researchgate.release'
