@@ -22,11 +22,11 @@ To run the console or standalone node, firstly build the fatjar and startup scri
 This will create a tar file in the `age3-console/build/distributions/` directory.
 `cd` into it, unpack the tarball, and then run the following command to start the console:
 ```
-age3-console-0.3-SNAPSHOT/bin/age3-console
+age3-console-0.4-SNAPSHOT/bin/age3-console
 ```
 Or, for starting the standalone node:
 ```
-age3-console-0.3-SNAPSHOT/bin/age3-console standalone
+age3-console-0.4-SNAPSHOT/bin/age3-console standalone
 ```
 
 To run the computational node, you can build a fatjar similarly, or start it directly from the Gradle wrapper:
@@ -39,7 +39,7 @@ To run the computational node, you can build a fatjar similarly, or start it dir
 Stream agents module contains a stub for agent-based computations with stream processing. To run an example from Gradle
 one needs to run `node` task with path to Spring configuration file, as follows:
 ```
-./gradlew node -PappArgs="['classpath:pl/edu/agh/age/compute/stream/example/spring-sample-runnable.xml']"
+./gradlew node -PappArgs="['classpath:pl/edu/agh/age/compute/stream/example/spring-stream-example.xml']"
 ```
 
 ## Examples
@@ -49,8 +49,8 @@ standalone node:
 ```
 ./gradlew age3-examples:distShadowTar
 cd age3-examples/build/distribution/
-tar -xvf age3-examples-0.3-SNAPSHOT.tar
-age3-examples-0.3-SNAPSHOT/bin/age3-examples standalone
+tar -xvf age3-examples-0.4-SNAPSHOT.tar
+age3-examples-0.4-SNAPSHOT/bin/age3-examples standalone
 ```
 
 Then check the `test.listExamples()` command.
