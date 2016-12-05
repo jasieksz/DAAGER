@@ -106,7 +106,7 @@ subprojects {
 		compile 'org.logback-extensions:logback-ext-spring:+'
 
 		testCompile 'junit:junit:+'
-		testCompile 'org.mockito:mockito-all:+'
+		testCompile 'org.mockito:mockito-core:+'
 		testCompile 'org.assertj:assertj-core:+'
 
 		checkerFrameworkAnnotatedJDK 'org.checkerframework:jdk8:+'
