@@ -58,7 +58,7 @@ task node(type: JavaExec) {
 	standardInput = System.in
 	jvmArgs '-enableassertions'
 	systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
-	if (project.hasProperty('appArgs') ) {
+	if (project.hasProperty('appArgs')) {
 		args Eval.me(appArgs)
 	}
 }

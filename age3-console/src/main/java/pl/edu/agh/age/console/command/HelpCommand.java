@@ -135,8 +135,7 @@ public final class HelpCommand implements Command {
 			if (method.isAnnotationPresent(Parameter.class)) {
 				final Parameter parameter = method.getAnnotation(Parameter.class);
 				final String str = parameter.optional() ? "\t[%s] - %s" : "\t%s - %s";
-				final AttributedString p = new AttributedString(format(str, parameter.name(),
-				                                                       parameter.description()));
+				final AttributedString p = new AttributedString(format(str, parameter.name(), parameter.description()));
 				writer.println(p.toAnsi(terminal));
 			}
 		}

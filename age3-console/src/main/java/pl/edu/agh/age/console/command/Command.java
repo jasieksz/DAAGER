@@ -165,7 +165,8 @@ public interface Command {
 	 * @throws IllegalArgumentException
 	 * 		when `obj` is not instance of `klass`. `msg` is used as a message string
 	 */
-	static <T, V extends T> T checkAndCastDefault(final @Nullable Object obj, final Class<T> klass, final V def, final String msg) {
+	static <T, V extends T> T checkAndCastDefault(final @Nullable Object obj, final Class<T> klass, final V def,
+	                                              final String msg) {
 		if (obj == null) {
 			return def;
 		}
@@ -197,8 +198,8 @@ public interface Command {
 	 * 		when `obj` the object is not instance of `klass`. `msg` is used as a message string
 	 * @see #checkAndCastDefault(Object, Class, Object, String)
 	 */
-	static <T, V extends T> T getAndCastDefault(final Map<String, Object> parameters, final String name, final Class<T> klass,
-	                               final V def) {
+	static <T, V extends T> T getAndCastDefault(final Map<String, Object> parameters, final String name,
+	                                            final Class<T> klass, final V def) {
 		final Object obj = parameters.get(name);
 		return checkAndCastDefault(obj, klass, def, format("%s is required to be %s, %s provided instead", name, klass,
 		                                                   (obj == null) ? "null" : obj.getClass()));
