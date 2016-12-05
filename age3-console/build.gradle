@@ -55,6 +55,9 @@ task(shell, dependsOn: 'classes') << {
 		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper'
 	]
+	if (project.hasProperty('appArgs') ) {
+		command.addAll(Eval.me(appArgs))
+	}
 	def proc = new ProcessBuilder(command)
 		.redirectOutput(ProcessBuilder.Redirect.INHERIT)
 		.redirectInput(ProcessBuilder.Redirect.INHERIT)
@@ -73,6 +76,9 @@ task(standalone, dependsOn: 'classes') << {
 		'pl.edu.agh.age.console.ConsoleBootstrapper',
 		'standalone'
 	]
+	if (project.hasProperty('appArgs') ) {
+		command.addAll(Eval.me(appArgs))
+	}
 	def proc = new ProcessBuilder(command)
 		.redirectOutput(ProcessBuilder.Redirect.INHERIT)
 		.redirectInput(ProcessBuilder.Redirect.INHERIT)

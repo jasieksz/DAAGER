@@ -32,6 +32,8 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.Arrays;
+
 /**
  * Bootstrapper for the console.
  *
@@ -54,9 +56,10 @@ public final class ConsoleBootstrapper {
 		System.out.println("Starting AgE console...");
 		try {
 			if ((args.length == 1) && args[0].equals("standalone")) {
-				standaloneMain();
+				final String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+				standaloneMain(newArgs);
 			} else {
-				consoleMain();
+				consoleMain(args);
 			}
 		} catch (final BeanCreationException e) {
 			handleException(e);
@@ -66,7 +69,7 @@ public final class ConsoleBootstrapper {
 		System.exit(0);
 	}
 
-	private static void standaloneMain() throws InterruptedException {
+	private static void standaloneMain(final String... args) throws InterruptedException {
 		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring-standalone.xml")) {
 			context.registerShutdownHook();
 
@@ -76,7 +79,7 @@ public final class ConsoleBootstrapper {
 				return;
 			}
 
-			consoleLoop(context);
+			consoleLoop(context, args);
 
 			logger.info("Destroying cluster");
 			context.getBean(LifecycleServiceClient.class).destroyCluster();
@@ -85,10 +88,10 @@ public final class ConsoleBootstrapper {
 		}
 	}
 
-	private static void consoleMain() {
+	private static void consoleMain(final String... args) {
 		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring-console.xml")) {
 			context.registerShutdownHook();
-			consoleLoop(context);
+			consoleLoop(context, args);
 		}
 	}
 
@@ -100,7 +103,7 @@ public final class ConsoleBootstrapper {
 		System.out.println("Have you configured and started the computational cluster?");
 	}
 
-	private static void consoleLoop(final ConfigurableApplicationContext context) {
+	private static void consoleLoop(final ConfigurableApplicationContext context, final String[] args) {
 		logger.info("Starting console");
 		final Console console = context.getBean(Console.class);
 		if (isNull(console)) {
@@ -108,6 +111,6 @@ public final class ConsoleBootstrapper {
 			logger.error("No console is defined.");
 			return;
 		}
-		console.mainLoop();
+		console.mainLoop(args);
 	}
 }

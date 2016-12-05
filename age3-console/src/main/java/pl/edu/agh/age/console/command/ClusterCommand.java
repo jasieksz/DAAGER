@@ -70,7 +70,7 @@ public final class ClusterCommand implements Command {
 		this.discoveryService = requireNonNull(discoveryService);
 		this.lifecycleServiceClient = requireNonNull(lifecycleServiceClient);
 		this.statusServiceClient = requireNonNull(statusServiceClient);
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true);
 	}
 
 

@@ -70,7 +70,7 @@ public final class HelpCommand implements Command {
 
 	@Inject public HelpCommand(final Terminal terminal, final ApplicationContext applicationContext) {
 		this.terminal = terminal;
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true);
 		commands = applicationContext.getBeansOfType(Command.class)
 		                             .values()
 		                             .stream()

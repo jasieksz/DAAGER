@@ -70,7 +70,7 @@ public final class ComputationCommand implements Command {
 		this.workerServiceClient = requireNonNull(workerServiceClient);
 		this.discoveryService = requireNonNull(discoveryService);
 		this.resourceLoader = requireNonNull(resourceLoader);
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true);
 	}
 
 	@Override public String name() {

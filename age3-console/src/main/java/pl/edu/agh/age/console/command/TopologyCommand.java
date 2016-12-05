@@ -49,7 +49,7 @@ public final class TopologyCommand implements Command {
 
 	@Inject public TopologyCommand(final TopologyServiceClient topologyService, final Terminal terminal) {
 		this.topologyService = requireNonNull(topologyService);
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true);
 	}
 
 	@Override public String name() {

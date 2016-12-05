@@ -59,7 +59,7 @@ public final class LoggingCommand implements Command {
 
 	@Inject public LoggingCommand(final LoggingClient loggingClient, final Terminal terminal) {
 		this.loggingClient = loggingClient;
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true);
 	}
 
 	@Override public String name() {

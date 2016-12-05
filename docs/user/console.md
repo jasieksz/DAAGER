@@ -50,3 +50,16 @@ Some commands require parameters. You pass them as a JS dictionary:
 cluster.nodes({ id: 1, longOutput: true })
 ```
 Optional parameters may be omitted.
+
+## Batch mode
+
+Since version 0.4 console support a batch mode. Any path passed as an argument to the console will be read and executed as if it was typed in the interactive mode.
+
+As the files are interpreted as a whole JavaScript script you can use any syntax (e.g. conditional expressions, loops, etc) that you like.
+On the other hand, you need to remember that batch execution may trigger some order-related errors
+if handling of previous command has not yet finished before new command is executed.
+This may improve in the future, but currently you can use `java.lang.Thread#sleep` as a workaround for such problems.
+
+You can always use `load()` function provided by Nashorn to load additional scripts.
+
+The "standalone" mode also supports batch processing. Just pass paths to your scripts after "standalone" keyword.

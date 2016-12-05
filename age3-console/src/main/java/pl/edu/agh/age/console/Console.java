@@ -33,7 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -64,13 +69,13 @@ public final class Console {
 	@Inject public Console(final ApplicationContext applicationContext, final Terminal terminal) {
 		this.applicationContext = requireNonNull(applicationContext);
 		this.terminal = requireNonNull(terminal);
-		writer = terminal.writer();
+		writer = new PrintWriter(terminal.writer(), true); // Wrap to enable autoFlush
+		logger.debug("{}", terminal.getAttributes());
 
 		logger.debug("Using {}", this.terminal);
 	}
 
-	void mainLoop() {
-		final LineReader reader = LineReaderBuilder.builder().appName("AgE").terminal(terminal).build();
+	void mainLoop(final String... args) {
 		final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 		try {
 			engine.eval("load('" + BASE_SCRIPT + "');");
@@ -81,29 +86,76 @@ public final class Console {
 			return;
 		}
 
-		writer.println("Welcome to the AgE console. Type help() to see usage information.");
-		writer.flush();
-
 		final Collection<Command> commands = applicationContext.getBeansOfType(Command.class).values();
 		commands.forEach(command -> engine.put(command.name(), command));
 
+		try {
+			if (args.length > 0) {
+				batch(engine, args);
+			} else {
+				interactive(engine);
+			}
+		} finally {
+			closeTerminal();
+		}
+	}
+
+	private void batch(final ScriptEngine engine, final String... args) {
+		logger.info("Batch mode with args {}", Arrays.toString(args));
+		writer.println("AgE Batch mode");
+
+		for (final String arg : args) {
+			logger.info("Parsing {}", arg);
+			writer.printf("Parsing %s%n", arg);
+
+			try (BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(arg))) {
+				engine.eval(bufferedReader);
+			} catch (final UserInterruptException e) { // XXX: never seen that one?
+				logger.debug("UserInterruptException", e);
+			} catch (final ScriptException e) {
+				final Throwable rootCause = getRootCause(e);
+				writer.println("Parsing problem:");
+				writer.println(rootCause.getMessage());
+			} catch (final IOException e) {
+				final Throwable rootCause = getRootCause(e);
+				writer.println("IO problem:");
+				writer.println(rootCause.getMessage());
+			}
+		}
+	}
+
+	private void interactive(final ScriptEngine engine) {
+		final LineReader reader = LineReaderBuilder.builder().appName("AgE").terminal(terminal).build();
+
+		writer.println("Welcome to the AgE console. Type help() to see usage information.");
 		while (true) {
 			try {
 				final String line = reader.readLine(PROMPT);
 				if (line == null) {
 					continue;
 				}
-				logger.debug("Read command: {}.", line);
+				logger.debug("Read command: {}", line);
 				engine.eval(line);
-			} catch (final UserInterruptException e) { // XXX: never seen that one?
-				logger.debug("UserInterruptException", e);
 			} catch (final EndOfFileException ignored) {
 				return;
+
+			} catch (final UserInterruptException e) { // XXX: never seen that one?
+				logger.debug("UserInterruptException", e);
 			} catch (final ScriptException e) {
 				final Throwable rootCause = getRootCause(e);
 				writer.println("Parsing problem:");
 				writer.println(rootCause.getMessage());
 			}
+		}
+	}
+
+	private void closeTerminal() {
+		try {
+			terminal.close();
+		} catch (final IOException e) {
+			final Throwable rootCause = getRootCause(e);
+			writer.println("IO problem:");
+			writer.println(rootCause.getMessage());
 		}
 	}
 }
