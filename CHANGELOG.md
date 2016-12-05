@@ -2,6 +2,8 @@
 
 ## 0.4 -- TBA
 
+- Add the batch mode to the console (#25)
+
 ## 0.3 -- 28.11.2016
 
 Initial public version.
