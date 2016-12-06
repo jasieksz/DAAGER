@@ -101,7 +101,7 @@ public final class Pipeline extends pl.edu.agh.age.compute.stream.Pipeline<EmasA
 			remainingAgents = remainingAgents.remove(agent);
 
 			final Tuple2<EmasAgent, EmasAgent> selectedPair = selector.apply(agent, remainingAgents);
-			remainingAgents.remove(selectedPair._2);
+			remainingAgents = remainingAgents.remove(selectedPair._2);
 
 			pairs = pairs.append(selectedPair);
 		}

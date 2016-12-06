@@ -77,9 +77,11 @@ public final class PipelineTest {
 		// assert non-repetitions
 		final java.util.List<EmasAgent> alreadyUsed = new ArrayList<>();
 		final Tuple2<PairPipeline, Pipeline> tuple2 = Pipeline.on(agents).selectPairs((emasAgent, emasAgents) -> {
+			final EmasAgent nextAgent = emasAgents.get();
 			alreadyUsed.add(emasAgent);
 			softly.assertThat(emasAgents).doesNotContainAnyElementsOf(alreadyUsed);
-			return Tuple.of(emasAgent, emasAgents.get());
+			alreadyUsed.add(nextAgent);
+			return Tuple.of(emasAgent, nextAgent);
 		});
 		final PairPipeline pairPipeline = tuple2._1;
 		final Pipeline pipeline = tuple2._2;
