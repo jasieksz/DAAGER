@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.identity.internal;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
 
 import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.identity.NodeType;

@@ -21,9 +21,6 @@ package pl.edu.agh.age.runnables;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class SimpleTest implements Runnable {
 
 	@Override public void run() {}

@@ -20,31 +20,24 @@
 package pl.edu.agh.age.integration;
 
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.TaskStartedEvent;
 import pl.edu.agh.age.services.worker.WorkerServiceEvent;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfiguration;
-import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

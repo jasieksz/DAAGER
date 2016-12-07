@@ -23,8 +23,8 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Objects.requireNonNull;
 
-import pl.edu.agh.age.compute.api.BroadcastMessenger;
 import pl.edu.agh.age.compute.api.BroadcastMessageListener;
+import pl.edu.agh.age.compute.api.BroadcastMessenger;
 import pl.edu.agh.age.services.topology.TopologyService;
 import pl.edu.agh.age.services.worker.WorkerMessage;
 

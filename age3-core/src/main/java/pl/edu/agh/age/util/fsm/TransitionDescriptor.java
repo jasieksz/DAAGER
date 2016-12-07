@@ -20,7 +20,6 @@
 package pl.edu.agh.age.util.fsm;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;

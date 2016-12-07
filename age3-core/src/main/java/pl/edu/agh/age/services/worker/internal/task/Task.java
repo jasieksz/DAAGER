@@ -21,8 +21,6 @@ package pl.edu.agh.age.services.worker.internal.task;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 
-import org.springframework.context.support.AbstractApplicationContext;
-
 /**
  * Wrapper of a single compute task.
  *

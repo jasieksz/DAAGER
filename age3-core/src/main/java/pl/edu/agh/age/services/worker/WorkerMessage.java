@@ -22,14 +22,11 @@ package pl.edu.agh.age.services.worker;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import java.io.Serializable;
 import java.util.Optional;

@@ -25,7 +25,6 @@ import com.google.common.util.concurrent.ListenableScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.AbstractApplicationContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
