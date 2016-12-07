@@ -162,7 +162,7 @@ public final class DefaultLoggingService implements LoggingService {
 	}
 
 	private void logSummaryStatistics(final Long time) {
-		final String bestEvaluation = Double.toString(agentsRegistry.getBestAgentEvaluation().getAsDouble());
+		final String bestEvaluation = Double.toString(agentsRegistry.getBestAgentEvaluation().orElse(Double.NaN));
 		final String evaluationCount = Long.toString(evaluatorCounter.get());
 		final String[] values = {Tags.TICK_SUMMARY_TAG, time.toString(), bestEvaluation, evaluationCount};
 		stream_logger.info(String.join(DELIMITER, values));
