@@ -157,7 +157,7 @@ public final class DefaultLoggingService implements LoggingService {
 			i++;
 		}
 		stream_logger.info(String.join(DELIMITER, values));
-		logger.debug("Workplace {} processed step number {}", workplaceId,
+		logger.info("Workplace {} processed step number {}", workplaceId,
 		             workplaceStats.get(StatisticsKeys.STEP_NUMBER).getOrElse("<unknown>"));
 	}
 
