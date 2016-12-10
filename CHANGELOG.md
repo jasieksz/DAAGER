@@ -2,7 +2,9 @@
 
 ## 0.4 -- TBA
 
-- Add the batch mode to the console (#25)
+- Add the batch mode to the console (#25).
+- `pl.edu.agh.age.console.command.ComputationCommand.info` provides now real info about computation (#26).
+- Compute setup failures do not result in node failure anymore (#24).
 
 ## 0.3.1 -- TBA
 
