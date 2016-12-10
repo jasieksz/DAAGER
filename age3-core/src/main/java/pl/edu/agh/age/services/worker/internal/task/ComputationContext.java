@@ -22,6 +22,7 @@ package pl.edu.agh.age.services.worker.internal.task;
 import static com.google.common.base.Preconditions.checkState;
 
 import pl.edu.agh.age.compute.api.DistributionUtilities;
+import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.CommunicationFacility;
 import pl.edu.agh.age.services.worker.internal.DefaultThreadPool;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
@@ -78,18 +79,17 @@ public final class ComputationContext {
 		}
 	}
 
-	@EnsuresNonNull("currentTask") private void checkIfTaskIsActive() {
+	public boolean isTaskActive() {
 		lock.readLock().lock();
 		try {
-			checkState(currentTask != null, "Task was not started");
-			checkState(!cleaned, "Task was already cleaned");
+			return (currentTask != null) && !cleaned;
 		} finally {
 			lock.readLock().unlock();
 		}
 	}
 
 	public void startTask(final ListeningScheduledExecutorService executorService,
-	                      final FutureCallback<Object> callback) {
+	                      final FutureCallback<Object> callback) throws FailedComputationSetupException {
 		lock.writeLock().lock();
 		try {
 			checkState(currentTask == null, "Task already started");
@@ -159,7 +159,21 @@ public final class ComputationContext {
 		}
 	}
 
-	private TaskBuilder createTaskBuilder() {
+	@Override public String toString() {
+		return MoreObjects.toStringHelper(this).add("currentTask", currentTask).add("cleaned", cleaned).toString();
+	}
+
+	@EnsuresNonNull("currentTask") private void checkIfTaskIsActive() {
+		lock.readLock().lock();
+		try {
+			checkState(currentTask != null, "Task was not started");
+			checkState(!cleaned, "Task was already cleaned");
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	private TaskBuilder createTaskBuilder() throws FailedComputationSetupException {
 		final TaskBuilder taskBuilder = configuration.taskBuilder();
 		communicationFacilities.forEach(taskBuilder::registerSingleton);
 		taskBuilder.registerSingleton(computeThreadPool);
@@ -171,7 +185,4 @@ public final class ComputationContext {
 		return taskBuilder;
 	}
 
-	@Override public String toString() {
-		return MoreObjects.toStringHelper(this).add("currentTask", currentTask).add("cleaned", cleaned).toString();
-	}
 }

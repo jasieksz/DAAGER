@@ -22,6 +22,8 @@ package pl.edu.agh.age.client;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
+import java.util.Optional;
+
 public interface WorkerServiceClient {
 
 	void startComputation();
@@ -34,5 +36,11 @@ public interface WorkerServiceClient {
 
 	boolean isComputationRunning();
 
+	boolean isComputationFailed();
+
 	ComputationState computationState();
+
+	Optional<WorkerConfiguration> currentConfiguration();
+
+	Optional<Throwable> currentError();
 }

@@ -22,6 +22,7 @@ package pl.edu.agh.age.services.worker.internal.configuration;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
+import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
 public final class SingleClassConfiguration implements WorkerConfiguration {
@@ -34,7 +35,7 @@ public final class SingleClassConfiguration implements WorkerConfiguration {
 		this.className = requireNonNull(className);
 	}
 
-	@Override public TaskBuilder taskBuilder() {
+	@Override public TaskBuilder taskBuilder() throws FailedComputationSetupException {
 		return TaskBuilder.fromClass(className);
 	}
 

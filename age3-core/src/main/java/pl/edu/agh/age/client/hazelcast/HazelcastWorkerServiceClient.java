@@ -77,9 +77,21 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 		return computationState() == ComputationState.RUNNING;
 	}
 
+	@Override public boolean isComputationFailed() {
+		return computationState() == ComputationState.FAILED;
+	}
+
 	@Override public ComputationState computationState() {
 		return (ComputationState)configurationValue(DefaultWorkerService.ConfigurationKey.COMPUTATION_STATE).orElseGet(
 			() -> ComputationState.NONE);
+	}
+
+	@Override public Optional<WorkerConfiguration> currentConfiguration() {
+		return configurationValue(DefaultWorkerService.ConfigurationKey.CONFIGURATION);
+	}
+
+	@Override public Optional<Throwable> currentError() {
+		return configurationValue(DefaultWorkerService.ConfigurationKey.ERROR);
 	}
 
 	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key) {

@@ -30,6 +30,7 @@ import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.lifecycle.NodeDestroyedEvent;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 import pl.edu.agh.age.services.topology.TopologyService;
+import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.TaskFailedEvent;
 import pl.edu.agh.age.services.worker.TaskFinishedEvent;
 import pl.edu.agh.age.services.worker.TaskStartedEvent;
@@ -88,21 +89,24 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	public enum Event {
 		START,
+		ERROR,
+		TERMINATE,
+		// Requested by external command
 		CONFIGURE,
 		START_EXECUTION,
 		PAUSE_EXECUTION,
 		RESUME_EXECUTION,
 		CANCEL_EXECUTION,
+		CLEAN,
+		// Triggered by computation
 		COMPUTATION_FINISHED,
 		COMPUTATION_FAILED,
-		CLEAN,
-		ERROR,
-		TERMINATE
 	}
 
 	public enum ConfigurationKey {
 		CONFIGURATION,
-		COMPUTATION_STATE;
+		COMPUTATION_STATE,
+		ERROR,
 	}
 
 	public static final String CHANNEL_NAME = "worker/channel";
@@ -173,8 +177,13 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				.commit()
 
 			.in(State.CONFIGURED)
-				.on(Event.START_EXECUTION).execute(this::startTask).goTo(State.EXECUTING, State.CONFIGURED)
-				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED)
+				.on(Event.START_EXECUTION).execute(this::startTask).goTo(State.EXECUTING, State.CONFIGURED, State.COMPUTATION_FAILED)
+				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
+                // Ignore incorrect user events
+				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.CONFIGURED)
+				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
+                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
+				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
 				.commit()
 
 			.in(State.EXECUTING)
@@ -182,18 +191,55 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED)
 				.on(Event.COMPUTATION_FAILED).execute(this::taskFailed).goTo(State.COMPUTATION_FAILED)
 				.on(Event.COMPUTATION_FINISHED).execute(this::taskFinished).goTo(State.FINISHED)
-			.commit()
+                // Ignore incorrect user events
+				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.EXECUTING)
+                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.EXECUTING)
+                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.EXECUTING)
+                .on(Event.CLEAN).execute(this::logEventIgnored).goTo(State.EXECUTING)
+				.commit()
 
 			.in(State.PAUSED)
 				.on(Event.RESUME_EXECUTION).execute(this::resumeTask).goTo(State.EXECUTING)
 				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED)
 				.on(Event.COMPUTATION_FAILED).goTo(State.COMPUTATION_FAILED)
 				.on(Event.COMPUTATION_FINISHED).goTo(State.FINISHED)
-			.commit()
+				// Ignore incorrect user events
+				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.PAUSED)
+                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.PAUSED)
+                .on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.PAUSED)
+                .on(Event.CLEAN).execute(this::logEventIgnored).goTo(State.PAUSED)
+				.commit()
 
-			.in(State.FINISHED)
+			.in(State.FINISHED) // Terminal for compute
 				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-			.commit()
+                // Ignore everything else
+                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.FINISHED)
+                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
+				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
+                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
+				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
+				.commit()
+
+			.in(State.COMPUTATION_FAILED) // Terminal for compute
+				// Must be CLEAN-ed
+				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
+                // Ignore everything else
+                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
+                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
+				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
+                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
+				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
+                .commit()
+
+            .in(State.COMPUTATION_CANCELED) // Terminal for compute
+				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
+				// Ignore everything else
+                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
+                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
+				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
+                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
+				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
+                .commit()
 
 			.inAnyState()
 				.on(Event.TERMINATE).execute(this::terminate).goTo(State.TERMINATED)
@@ -322,11 +368,18 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		}
 
 		logger.debug("Starting computation {}", computationContext);
-		computationContext.startTask(executorService, new ExecutionListener());
-		eventBus.post(new TaskStartedEvent());
-		setNodeComputationState(ComputationState.RUNNING);
-		changeGlobalComputationStateIfMaster(ComputationState.RUNNING);
-		fsm.goTo(State.EXECUTING);
+		try {
+			computationContext.startTask(executorService, new ExecutionListener());
+			eventBus.post(new TaskStartedEvent());
+			setNodeComputationState(ComputationState.RUNNING);
+			changeGlobalComputationStateIfMaster(ComputationState.RUNNING);
+			fsm.goTo(State.EXECUTING);
+		} catch (final FailedComputationSetupException e) {
+			logger.error("Computation could not be started", e);
+			changeGlobalComputationStateIfMaster(ComputationState.FAILED);
+			changeErrorIfMaster(e);
+			fsm.goTo(State.COMPUTATION_FAILED);
+		}
 	}
 
 	private void pauseTask(final FSM<State, Event> fsm) {
@@ -362,11 +415,18 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	private void cleanUpAfterTask(final FSM<State, Event> fsm) {
 		assert computationContext != null;
 
-		computationContext.cleanUp();
+		if (computationContext.isTaskActive()) {
+			computationContext.cleanUp();
+		}
 		computationContext = null;
 		setNodeComputationState(ComputationState.NONE);
 		changeGlobalComputationStateIfMaster(ComputationState.NONE);
+		changeErrorIfMaster(null);
 		logger.debug("Clean up finished");
+	}
+
+	private void logEventIgnored(final FSM<State, Event> fsm) {
+		logger.debug("User event was ignored");
 	}
 
 	// Utilities
@@ -398,6 +458,16 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 		if (topologyService.isLocalNodeMaster()) {
 			configurationMap.put(ConfigurationKey.COMPUTATION_STATE, state);
+		}
+	}
+
+	private void changeErrorIfMaster(final @Nullable Throwable error) {
+		if (topologyService.isLocalNodeMaster()) {
+			if (error == null) {
+				configurationMap.remove(ConfigurationKey.ERROR);
+			} else {
+				configurationMap.put(ConfigurationKey.ERROR, error);
+			}
 		}
 	}
 
@@ -453,18 +523,18 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		@Override public void onFailure(final Throwable t) {
 			if (t instanceof CancellationException) {
 				logger.debug("Task {} was cancelled. Ignoring exception", computationContext.currentTaskDescription());
-				service.fire(Event.COMPUTATION_FAILED);
 			} else {
 				logger.error("Task {} failed with error", computationContext.currentTaskDescription(), t);
 				eventBus.post(new TaskFailedEvent(t));
-				service.fire(Event.COMPUTATION_FAILED);
 			}
+			changeErrorIfMaster(t);
+			service.fire(Event.COMPUTATION_FAILED);
 		}
 	}
 
 	private static final class ExceptionHandler implements Consumer<Throwable> {
 		@Override public void accept(final Throwable throwable) {
-			logger.error("Exception", throwable);
+			logger.error("Internal DefaultWorkerService error", throwable);
 		}
 	}
 }

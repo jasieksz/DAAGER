@@ -25,14 +25,15 @@ import static java.util.Objects.requireNonNull;
 import static pl.edu.agh.age.console.command.Command.getAndCastDefault;
 import static pl.edu.agh.age.console.command.Command.getAndCastNullable;
 
-import pl.edu.agh.age.client.DiscoveryServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
-import pl.edu.agh.age.services.identity.NodeDescriptor;
+import pl.edu.agh.age.services.worker.internal.ComputationState;
 import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfiguration;
 import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -42,7 +43,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,21 +55,20 @@ public final class ComputationCommand implements Command {
 
 	private static final Logger logger = LoggerFactory.getLogger(ComputationCommand.class);
 
-	private final DiscoveryServiceClient discoveryService;
-
 	private final WorkerServiceClient workerServiceClient;
 
 	private final PrintWriter writer;
 
 	private final ResourceLoader resourceLoader;
 
+	private final Terminal terminal;
+
 	@Inject
-	public ComputationCommand(final WorkerServiceClient workerServiceClient,
-	                          final DiscoveryServiceClient discoveryService, final Terminal terminal,
+	public ComputationCommand(final WorkerServiceClient workerServiceClient, final Terminal terminal,
 	                          final ResourceLoader resourceLoader) {
 		this.workerServiceClient = requireNonNull(workerServiceClient);
-		this.discoveryService = requireNonNull(discoveryService);
 		this.resourceLoader = requireNonNull(resourceLoader);
+		this.terminal = terminal;
 		writer = new PrintWriter(terminal.writer(), true);
 	}
 
@@ -120,8 +119,24 @@ public final class ComputationCommand implements Command {
 	}
 
 	@Operation(description = "Prints info about the computation") public void info() {
-		final Set<NodeDescriptor> neighbours = discoveryService.allMembers();
-		neighbours.forEach(writer::println);
+		final ComputationState computationState = workerServiceClient.computationState();
+		final AttributedString computationStateString = new AttributedString(computationState.toString(),
+		                                                                     AttributedStyle.BOLD);
+		writer.printf("Computation state: %s%n", computationStateString.toAnsi(terminal));
+
+		final Optional<WorkerConfiguration> workerConfiguration = workerServiceClient.currentConfiguration();
+		workerConfiguration.ifPresent(c -> {
+			final AttributedString configurationString = new AttributedString(c.toString(), AttributedStyle.BOLD);
+			writer.printf("Configuration: %s%n", configurationString.toAnsi(terminal));
+		});
+
+		final Optional<Throwable> error = workerServiceClient.currentError();
+		error.ifPresent(t -> {
+			final AttributedString errorString = new AttributedString(t.getMessage(), AttributedStyle.BOLD.foreground(
+				AttributedStyle.RED));
+			writer.printf("Error: %s%n", errorString.toAnsi(terminal));
+			t.printStackTrace(writer);
+		});
 	}
 
 	@Operation(description = "Starts the computation") public void start() {

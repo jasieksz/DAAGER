@@ -20,8 +20,9 @@
 package pl.edu.agh.age.services.worker.internal.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +33,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
 import org.junit.Before;
@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
@@ -49,59 +48,57 @@ public final class TaskBuilderTest {
 
 	@Mock private ListeningScheduledExecutorService executorService;
 
-	@Mock private ListenableScheduledFuture<Object> future;
-
 	@Mock private FutureCallback<Object> callback;
 
 	@Before public void setUp() {
 		MockitoAnnotations.initMocks(this);
 	}
 
-	@Test public void testFromClass() {
+	@Test public void testFromClass() throws FailedComputationSetupException {
 		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
 
 		assertThat(taskBuilder.springContext()).isNotNull();
 		assertThat(taskBuilder.isConfigured()).isFalse();
 	}
 
-	@Test(expected = FailedComputationSetupException.class) public void testFromClass_notExisting() {
+	@Test public void testFromClass_notExisting() throws FailedComputationSetupException {
 		final TaskBuilder taskBuilder = TaskBuilder.fromClass("org.class.NotExisting");
-
-		taskBuilder.finishConfiguration();
+		assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(FailedComputationSetupException.class);
 	}
 
-	@Test public void testBuildAndSchedule() {
+	@Test public void testBuildAndSchedule() throws FailedComputationSetupException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		taskBuilder.finishConfiguration();
+
+		assertThat(taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(StartedTask.class);
+	}
+
+	@Test public void testBuildAndSchedule_needsToBeConfigured() throws FailedComputationSetupException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+
+		assertThatThrownBy(() -> taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(
+			IllegalStateException.class);
+	}
+
+	@Test public void testCannotConfigureTwoTimes() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
 
 		taskBuilder.finishConfiguration();
-		taskBuilder.buildAndSchedule(executorService, callback);
+		assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(IllegalStateException.class);
 	}
 
-	@Test(expected = IllegalStateException.class) public void testBuildAndSchedule_needsToBeConfigured() {
+	@Test public void testCannotUpdateAfterFinishingConfiguration() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		taskBuilder.finishConfiguration();
 
-		taskBuilder.buildAndSchedule(executorService, callback);
+		assertThatThrownBy(() -> taskBuilder.registerSingleton(new Object())).isInstanceOf(IllegalStateException.class);
 	}
 
-	@Test(expected = IllegalStateException.class) public void testCannotConfigureTwoTimes() {
-		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
-
-		taskBuilder.finishConfiguration();
-		taskBuilder.finishConfiguration();
-	}
-
-	@Test(expected = IllegalStateException.class) public void testCannotUpdateAfterFinishingConfiguration() {
-		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
-
-		taskBuilder.finishConfiguration();
-		taskBuilder.registerSingleton(new Object());
-	}
-
-	@Test public void testCreateFromStringAndProperties() throws IOException {
+	@Test public void testCreateFromStringAndProperties() throws Exception {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 
 		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
@@ -116,14 +113,14 @@ public final class TaskBuilderTest {
 		}
 	}
 
-	@Test(expected = FailedComputationSetupException.class) public void testThrowExceptionWhenLackingProperties()
-		throws IOException {
+	@Test public void testThrowExceptionWhenLackingProperties() throws Exception {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 
 		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
 			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of());
-			taskBuilder.finishConfiguration();
+
+			assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(FailedComputationSetupException.class);
 		}
 	}
 }

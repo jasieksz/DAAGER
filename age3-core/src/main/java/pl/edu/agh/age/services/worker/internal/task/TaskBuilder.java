@@ -69,7 +69,7 @@ public final class TaskBuilder {
 		this.springContext = springContext;
 	}
 
-	public static TaskBuilder fromClass(final String className) {
+	public static TaskBuilder fromClass(final String className) throws FailedComputationSetupException {
 		requireNonNull(className);
 
 		try {
@@ -88,7 +88,8 @@ public final class TaskBuilder {
 		}
 	}
 
-	public static TaskBuilder fromString(final String configuration, final Map<String, Object> properties) {
+	public static TaskBuilder fromString(final String configuration, final Map<String, Object> properties)
+		throws FailedComputationSetupException {
 		requireNonNull(configuration);
 		requireNonNull(properties);
 
@@ -128,7 +129,7 @@ public final class TaskBuilder {
 		springContext.getBeanFactory().registerSingleton(bean.getClass().getSimpleName(), bean);
 	}
 
-	public void finishConfiguration() {
+	public void finishConfiguration() throws FailedComputationSetupException {
 		checkState(!configured, "Task is already configured.");
 
 		try {
@@ -141,7 +142,8 @@ public final class TaskBuilder {
 	}
 
 	public Task buildAndSchedule(final ListeningScheduledExecutorService executorService,
-	                             final FutureCallback<Object> executionListener) {
+	                             final FutureCallback<Object> executionListener)
+		throws FailedComputationSetupException {
 		requireNonNull(executorService);
 		requireNonNull(executionListener);
 		checkState(configured, "Task is not configured.");

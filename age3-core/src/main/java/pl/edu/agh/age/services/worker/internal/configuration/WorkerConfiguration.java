@@ -19,11 +19,12 @@
 
 package pl.edu.agh.age.services.worker.internal.configuration;
 
+import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
 import java.io.Serializable;
 
 public interface WorkerConfiguration extends Serializable {
 
-	TaskBuilder taskBuilder();
+	TaskBuilder taskBuilder() throws FailedComputationSetupException;
 }

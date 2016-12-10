@@ -19,7 +19,7 @@
 
 package pl.edu.agh.age.services.worker;
 
-public class FailedComputationSetupException extends RuntimeException {
+public class FailedComputationSetupException extends Exception {
 
 	/**
 	 * Constructs a new runtime exception with the specified detail message and
