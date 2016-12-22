@@ -56,8 +56,7 @@ public final class NodeBootstrapper {
 	private NodeBootstrapper() {}
 
 	public static void main(final String... args) throws InterruptedException, IOException {
-		final @Nullable String property = System.getProperty("age.node.config");
-		final String configName = (property != null) ? property : "spring-node.xml";
+		final String configName = System.getProperty("age.node.config", "spring-node.xml");
 		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(configName)) {
 			context.registerShutdownHook();
 			final NodeLifecycleService lifecycleService = context.getBean(NodeLifecycleService.class);

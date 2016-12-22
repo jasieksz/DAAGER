@@ -22,6 +22,7 @@ package pl.edu.agh.age.node
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
+import ch.qos.logback.core.helpers.NOPAppender
 import ch.qos.logback.ext.spring.DelegatingLogbackAppender
 
 def bySecond = timestamp("yyyyMMdd'T'HHmmss")
@@ -43,7 +44,11 @@ appender("CONSOLE", ConsoleAppender) {
 	}
 }
 
-appender("hazelcastAppender", DelegatingLogbackAppender) {
+def ha_enabled = Boolean.valueOf(System.getProperty("age.node.hazelcastAppender", "false"))
+if (ha_enabled) {
+	appender("hazelcastAppender", DelegatingLogbackAppender) {}
+} else {
+	appender("hazelcastAppender", NOPAppender) {}
 }
 
 root(ALL, ["FILE", "hazelcastAppender"])

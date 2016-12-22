@@ -5,6 +5,7 @@
 - [Console](user/console.md)
 - [How to use AgE in your project?](user/how-to-use-age-in-your-project.md)
 - [How to write your own compute module?](user/how-to-write-your-own-compute-module.md)
+– [Configuration properties](user/properties.md)
 
 ## Contributor documentation
 
