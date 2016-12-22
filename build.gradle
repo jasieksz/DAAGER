@@ -100,6 +100,7 @@ subprojects {
 		compile 'io.javaslang:javaslang:2.+'
 		compile 'org.apache.commons:commons-lang3:+'
 		compile 'com.google.guava:guava:+'
+		compile 'one.util:streamex:+'
 
 		runtime 'org.codehaus.groovy:groovy:+'
 		compile 'ch.qos.logback:logback-classic:+'

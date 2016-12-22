@@ -25,6 +25,7 @@ package pl.edu.agh.age.compute.stream.configuration;
 
 import static java.util.stream.Collectors.toList;
 
+import pl.edu.agh.age.compute.api.topology.Topology;
 import pl.edu.agh.age.compute.stream.AfterStepAction;
 import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.Step;
@@ -76,6 +77,9 @@ public final class NashornLoader {
 			final LoggingService loggingService = (LoggingService)engine.get("loggingService");
 			logger.debug("Logging service: {}", loggingService);
 
+			final Topology<?> topology = (Topology<?>)engine.get("topology");
+			logger.debug("Topology: {}", topology);
+
 			final ScriptObjectMirror workplaces = (ScriptObjectMirror)engine.get("workplaces");
 			logger.debug("Workplaces array: {}", workplaces);
 
@@ -94,7 +98,7 @@ public final class NashornLoader {
 			}).collect(toList());
 
 			logger.info("Configuration has been read and built");
-			return new Configuration(configurations, stopCondition, loggingService);
+			return new Configuration(configurations, stopCondition, loggingService, topology);
 		} catch (final ScriptException e) {
 			throw new LoadingException("An error happened when parsing the script", e);
 		}

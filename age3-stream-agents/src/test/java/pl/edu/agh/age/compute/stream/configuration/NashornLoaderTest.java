@@ -21,6 +21,8 @@ package pl.edu.agh.age.compute.stream.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import pl.edu.agh.age.compute.api.topology.FullMeshTopology;
+import pl.edu.agh.age.compute.api.topology.Topology;
 import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.StopCondition;
 
@@ -41,9 +43,11 @@ public final class NashornLoaderTest {
 		assertThat(configuration).isNotNull();
 
 		final StopCondition stopCondition = configuration.stopCondition();
+		final Topology<?> topology = configuration.topology();
 		final List<WorkplaceConfiguration<Agent>> workplaces = configuration.workplaces();
 
 		softly.assertThat(stopCondition).isNotNull();
+		softly.assertThat(topology).isNotNull().isInstanceOf(FullMeshTopology.class);
 		softly.assertThat(workplaces).isNotNull().hasSize(2);
 
 		softly.assertThat(workplaces).extracting("agents").hasSize(5);

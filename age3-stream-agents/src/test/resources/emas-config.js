@@ -47,6 +47,7 @@ var afterStep = function (population) {
 
 var stopCondition = new TimedStopCondition(10);
 var loggingService = new NoOpLoggingService();
+var topology = Topology.fullMesh();
 
 var workplaces = [
 	{agents: Generators.randomAgents(5), step: step, after: afterStep},

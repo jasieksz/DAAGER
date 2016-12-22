@@ -67,6 +67,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.NoOpLoggingService"/>
 
+	<bean id="topology" class="pl.edu.agh.age.compute.api.topology.FullMeshTopology" />
+
 	<!-- Initialize configuration -->
 	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
 

@@ -17,12 +17,4 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Base imports and definitions for JS DSL
- **/
-
-var List = Java.type('javaslang.collection.List');
-var HashMap = Java.type('javaslang.collection.HashMap');
-var TimedStopCondition = Java.type('pl.edu.agh.age.compute.stream.TimedStopCondition');
-var NoOpLoggingService = Java.type('pl.edu.agh.age.compute.stream.logging.NoOpLoggingService');
-var Topology = Java.type('pl.edu.agh.age.compute.api.topology.Topology');
+package pl.edu.agh.age.services.worker.internal.topology;

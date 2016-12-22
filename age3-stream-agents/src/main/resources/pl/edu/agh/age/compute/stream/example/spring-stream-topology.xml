@@ -28,39 +28,16 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<!-- Required to process annotations -->
 	<context:annotation-config/>
 
-	<!-- Define a timed stop condition that fires after 10 s -->
+	<!-- Define a timed stop condition that fires after 2 s -->
 	<bean id="stop-condition" class="pl.edu.agh.age.compute.stream.TimedStopCondition">
-		<constructor-arg value="10" type="long"/>
+		<constructor-arg value="2" type="long"/>
 	</bean>
 
 	<!-- Define a step function for workplaces -->
-	<bean id="step" class="pl.edu.agh.age.compute.stream.example.SampleStep"/>
-
-	<!-- Define problem definition -->
-	<bean id="problemDefinition" class="pl.edu.agh.age.compute.stream.example.SampleProblem"/>
-	<bean id="loggingInterval" class="java.time.Duration" factory-method="ofMillis">
-		<constructor-arg value="500"/>
-	</bean>
-
-	<!-- Define logging parameters -->
-	<bean id="loggingParameters" class="pl.edu.agh.age.compute.stream.logging.LoggingParameters">
-		<constructor-arg name="problemDefinition" ref="problemDefinition"/>
-		<constructor-arg name="loggingInterval" ref="loggingInterval"/>
-	</bean>
-
-	<!-- Logging service -->
-	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.DefaultLoggingService"/>
-
-	<bean id="evaluatorCounter" class="pl.edu.agh.age.compute.stream.problem.EvaluatorCounter" factory-method="empty"/>
-	<bean id="agentsComparator"
-	      class="pl.edu.agh.age.compute.stream.emas.EmasAgentComparators"
-	      factory-method="higherFitness"/>
-	<bean id="agentsRegistry" class="pl.edu.agh.age.compute.stream.emas.EmasBestAgentsRegistry">
-		<constructor-arg name="agentsComparator" ref="agentsComparator"/>
-	</bean>
+	<bean id="step" class="pl.edu.agh.age.compute.stream.example.SampleTopologyStep"/>
 
 	<!-- Define an after-step analyzer -->
-	<bean id="population-analyzer" class="pl.edu.agh.age.compute.stream.example.SampleAfterStepActionWithLogging"/>
+	<bean id="population-analyzer" class="pl.edu.agh.age.compute.stream.example.SampleAfterStepAction"/>
 
 	<!-- Define a list of agents for workplaces -->
 	<util:list id="agents-jul" value-type="pl.edu.agh.age.compute.stream.emas.EmasAgent">
@@ -82,11 +59,18 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		<constructor-arg ref="agents-jul"/>
 		<constructor-arg ref="population-analyzer"/>
 	</bean>
+	<bean id="workplace-3" class="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
+		<constructor-arg ref="step"/>
+		<constructor-arg ref="agents-jul"/>
+		<constructor-arg ref="population-analyzer"/>
+	</bean>
 	<util:list id="workplace-configurations"
 	           value-type="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
 		<ref bean="workplace-1"/>
 		<ref bean="workplace-2"/>
 	</util:list>
+
+	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.NoOpLoggingService"/>
 
 	<bean id="topology" class="pl.edu.agh.age.compute.api.topology.FullMeshTopology" />
 

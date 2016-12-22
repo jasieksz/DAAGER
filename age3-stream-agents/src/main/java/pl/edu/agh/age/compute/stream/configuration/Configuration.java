@@ -19,10 +19,12 @@
 
 package pl.edu.agh.age.compute.stream.configuration;
 
+import pl.edu.agh.age.compute.api.topology.Topology;
 import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.StopCondition;
 import pl.edu.agh.age.compute.stream.logging.LoggingService;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,12 +41,16 @@ public final class Configuration {
 
 	private final LoggingService loggingService;
 
+	private final Topology<? extends Serializable> topology;
+
 	@Inject
 	public Configuration(final List<WorkplaceConfiguration<Agent>> workplaceConfigurations,
-	                     final StopCondition stopCondition, final LoggingService loggingService) {
+	                     final StopCondition stopCondition, final LoggingService loggingService,
+	                     final Topology<? extends Serializable> topology) {
 		this.workplaceConfigurations = new ArrayList<>(workplaceConfigurations);
 		this.stopCondition = stopCondition;
 		this.loggingService = loggingService;
+		this.topology = topology;
 	}
 
 	public List<WorkplaceConfiguration<Agent>> workplaces() {
@@ -57,5 +63,9 @@ public final class Configuration {
 
 	public LoggingService loggingService() {
 		return loggingService;
+	}
+
+	public <T extends Serializable> Topology<T> topology() {
+		return (Topology<T>)topology;
 	}
 }

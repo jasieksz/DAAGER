@@ -26,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 
 import pl.edu.agh.age.compute.api.DistributionUtilities;
 import pl.edu.agh.age.compute.api.ThreadPool;
+import pl.edu.agh.age.compute.api.TopologyProvider;
 import pl.edu.agh.age.compute.api.UnicastMessenger;
 import pl.edu.agh.age.compute.api.WorkerAddress;
 import pl.edu.agh.age.compute.stream.configuration.Configuration;
@@ -36,6 +37,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IdGenerator;
 
+import one.util.streamex.EntryStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +46,14 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import javaslang.collection.HashMap;
+import javaslang.collection.HashSet;
 import javaslang.collection.Map;
+import javaslang.collection.Set;
 
 /**
  * Main runtime for stream-like agents processing.
@@ -74,14 +80,17 @@ public final class StreamAgents implements Runnable, Manager {
 
 	private final LoggingService loggingService;
 
+	private final TopologyProvider<Long> topologyProvider;
+
 	@Inject
 	public StreamAgents(final Configuration configuration, final ThreadPool threadPool,
-	                    final DistributionUtilities distributionUtilities, final UnicastMessenger messenger) {
+	                    final DistributionUtilities distributionUtilities, final UnicastMessenger messenger,
+	                    final TopologyProvider<?> topologyProvider) {
 		requireNonNull(configuration);
 		this.threadPool = requireNonNull(threadPool);
 		this.distributionUtilities = requireNonNull(distributionUtilities);
 		this.messenger = requireNonNull(messenger);
-
+		this.topologyProvider = (TopologyProvider<Long>)requireNonNull(topologyProvider);
 
 		workplaceIdGenerator = this.distributionUtilities.getIdGenerator("workplace");
 		statistics = this.distributionUtilities.getMap("statistics");
@@ -90,13 +99,18 @@ public final class StreamAgents implements Runnable, Manager {
 		// Process configuration
 		stopCondition = configuration.stopCondition();
 		loggingService = configuration.loggingService();
+		this.topologyProvider.setTopology(configuration.topology());
 		final List<WorkplaceConfiguration<Agent>> workplaceConfigurations = configuration.workplaces();
 		localWorkplaces = workplaceConfigurations.stream()
 		                                         .map(c -> c.toWorkplace(workplaceIdGenerator.newId(), this))
 		                                         .collect(toList());
 
 		// Update location information
-		localWorkplaces.stream().map(Workplace::id).forEach(id -> workplacesLocations.put(id, messenger.address()));
+		final java.util.Set<Long> localWorkplacesIds = localWorkplaces.stream()
+		                                                              .map(Workplace::id)
+		                                                              .collect(Collectors.toSet());
+		localWorkplacesIds.forEach(id -> workplacesLocations.put(id, messenger.address()));
+		this.topologyProvider.addNodes(localWorkplacesIds);
 
 		this.messenger.<MigrationMessage>registerListener((message, sender) -> {
 			assert message instanceof MigrationMessage;
@@ -160,18 +174,50 @@ public final class StreamAgents implements Runnable, Manager {
 		return HashMap.ofAll(statistics);
 	}
 
-	@Override public void migrate(final Agent agent, final long targetWorkplace) {
+	@Override public Map<Long, Map<Object, Object>> getNeighboursStatistics(final long workplaceId) {
+		final Map<Long, Set<String>> neighbours = getNeighboursOf(workplaceId);
+		return HashMap.ofAll(statistics).filterKeys(neighbours::containsKey);
+	}
+
+	@Override public Map<Long, Set<String>> getNeighboursOf(final long workplaceId) {
+		return HashMap.ofAll(
+			EntryStream.of(topologyProvider.neighboursOf(workplaceId)).mapValues(HashSet::ofAll).toMap());
+	}
+
+	@Override public void migrate(final Agent agent, final long sourceWorkplace, final long targetWorkplace) {
 		requireNonNull(agent);
+		checkArgument(sourceWorkplace >= 0);
 		checkArgument(targetWorkplace >= 0);
 
-		final WorkerAddress targetAddress = workplacesLocations.get(targetWorkplace);
-		logger.debug("Address for Workplace {} is {}", targetWorkplace, targetAddress);
-		if (targetAddress == null) {
-			throw new IllegalArgumentException("Unknown workplace"); // XXX: Better exception
+		if (!topologyProvider.areNeighbours(sourceWorkplace, targetWorkplace)) {
+			throw new IllegalArgumentException("This workplace is not in neighbourhood"); // XXX: Better exception
 		}
 
-		logger.debug("Sending {} to {}", agent, targetAddress);
-		messenger.send(targetAddress, new MigrationMessage(targetWorkplace, agent));
+		performMigration(agent, targetWorkplace);
+	}
+
+	@Override public void migrate(final Agent agent, final long sourceWorkplace, final String neighbourAnnotation) {
+		requireNonNull(agent);
+		checkArgument(sourceWorkplace >= 0);
+		requireNonNull(neighbourAnnotation);
+
+		final Long targetWorkplace = topologyProvider.neighboursOfByAnnotation(sourceWorkplace)
+		                                             .get(neighbourAnnotation);
+
+		if (targetWorkplace == null) {
+			throw new IllegalArgumentException("Annotation does not point to any workplace"); // XXX: Better exception
+		}
+
+		performMigration(agent, targetWorkplace);
+	}
+
+	@Override
+	public void migrateUnconditionally(final Agent agent, final long sourceWorkplace, final long targetWorkplace) {
+		requireNonNull(agent);
+		checkArgument(sourceWorkplace >= 0);
+		checkArgument(targetWorkplace >= 0);
+
+		performMigration(agent, targetWorkplace);
 	}
 
 	@Override public boolean isStopConditionReached() {
@@ -180,5 +226,19 @@ public final class StreamAgents implements Runnable, Manager {
 
 	@Override public String toString() {
 		return toStringHelper(this).toString();
+	}
+
+	/**
+	 * Performs actual migration without any verification of arguments
+	 */
+	private void performMigration(final Agent agent, final long targetWorkplace) {
+		final WorkerAddress targetAddress = workplacesLocations.get(targetWorkplace);
+		logger.debug("Address for Workplace {} is {}", targetWorkplace, targetAddress);
+		if (targetAddress == null) {
+			throw new IllegalArgumentException("Unknown workplace"); // XXX: Better exception
+		}
+
+		logger.debug("Sending {} to {}", agent, targetAddress);
+		messenger.send(targetAddress, new MigrationMessage(targetWorkplace, agent));
 	}
 }

@@ -20,6 +20,7 @@
 package pl.edu.agh.age.compute.stream;
 
 import javaslang.collection.Map;
+import javaslang.collection.Set;
 
 /**
  * Interface for workplaces to interact with the global state of computation.
@@ -28,7 +29,7 @@ import javaslang.collection.Map;
  */
 public interface Manager {
 	/**
-	 * Posts provided statistics globally, mapping them to the workplace id.
+	 * Posts provided statistics globally, mapping them to the workplace ID.
 	 *
 	 * @param id
 	 * 		workplace id
@@ -38,11 +39,40 @@ public interface Manager {
 	void postStatistics(long id, Map<Object, Object> statistics);
 
 	/**
-	 * Returns a read-only view of global statistics map
+	 * Returns a read-only view of global statistics map.
 	 */
 	Map<Long, Map<Object, Object>> getStatistics();
 
-	void migrate(Agent agent, long targetWorkplace);
+	/**
+	 * Returns a read-only view of global statistics map filtered only for neighbours of the given workplace.
+	 */
+	Map<Long, Map<Object, Object>> getNeighboursStatistics(long workplaceId);
+
+	/**
+	 * Returns a read-only view of global statistics map filtered only for neighbours of the given workplace.
+	 */
+	Map<Long, Set<String>> getNeighboursOf(long workplaceId);
+
+	/**
+	 * Migrates an agent to a workplace with the given ID in neighbourhood.
+	 *
+	 * This method always use the current topology.
+	 */
+	void migrate(Agent agent, long sourceWorkplace, long targetWorkplace);
+
+	/**
+	 * Migrates an agent to a workplace with the given annotation in neighbourhood.
+	 *
+	 * This method always use the current topology.
+	 */
+	void migrate(Agent agent, long sourceWorkplace, String neighbourAnnotation);
+
+	/**
+	 * Migrates an agent to a workplace with the given ID.
+	 *
+	 * This method makes it possible to bypass a current topology.
+	 */
+	void migrateUnconditionally(Agent agent, long sourceWorkplace, long targetWorkplace);
 
 	boolean isStopConditionReached();
 }

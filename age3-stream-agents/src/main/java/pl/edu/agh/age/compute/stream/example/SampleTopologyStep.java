@@ -17,14 +17,26 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Imports and definitions for EMAS
- */
+package pl.edu.agh.age.compute.stream.example;
 
-var Pipeline = Java.type('pl.edu.agh.age.compute.stream.emas.Pipeline');
-var EmasAgent = Java.type('pl.edu.agh.age.compute.stream.emas.EmasAgent');
-var Solutions = Java.type('pl.edu.agh.age.compute.stream.emas.solution.Solutions');
-var Selectors = Java.type('pl.edu.agh.age.compute.stream.emas.Selectors');
-var Predicates = Java.type('pl.edu.agh.age.compute.stream.emas.Predicates');
-var Generators = Java.type('pl.edu.agh.age.compute.stream.emas.Generators');
-var StatisticsKeys = Java.type('pl.edu.agh.age.compute.stream.emas.StatisticsKeys');
+import pl.edu.agh.age.compute.stream.Environment;
+import pl.edu.agh.age.compute.stream.Step;
+import pl.edu.agh.age.compute.stream.emas.EmasAgent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javaslang.collection.List;
+
+/**
+ * Sample step to test that topology of workplaces works.
+ */
+public final class SampleTopologyStep implements Step<EmasAgent> {
+
+	private static final Logger logger = LoggerFactory.getLogger(SampleTopologyStep.class);
+
+	@Override public List<EmasAgent> stepOn(final List<EmasAgent> population, final Environment environment) {
+		logger.info("Neighbours of {} are {}", environment.workplaceId(), environment.neighbours());
+		return population;
+	}
+}

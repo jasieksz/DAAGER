@@ -68,3 +68,34 @@ they are automatically injected when the compute configuration is loaded.
 
 Note: Of course you can use any other method if injection supported by Spring (e.g. field injection). 
 
+### Compute-level topology
+
+In some computations it may be beneficial to introduce additional network topology between computational units.
+It is especially useful in cases when there are multiple computation units on single node.
+
+To aid this scenario AgE provides a topology service accessible with **TopologyProvider** API.
+
+A quick example of it:
+```java
+Set<String> nodes = ImmutableSet.of("first", "second", "third"); 
+topologyProvider.setTopology(Topology.unidirectionalRing());
+topologyProvider.addNodes(nodes);
+Map<String, Set<String>> neighbours = topologyProvider.neighboursOf("second");
+```
+
+This API requires two things:
+- topology function – passed using `setTopology`,
+- identifiers (any serializable type) of your computational units – passed using `addNodes`.  
+
+In most cases functions located in `pl.edu.agh.age.compute.api.topology`
+and `pl.edu.agh.age.compute.api.topology.Topology` can be used.
+However you are free to provide your own implementation of the topology generator (implementing `Topology` interface).
+If you need to change the topology after initialization, just use the `setTopology` method again.
+
+
+Topology offered to compute levels use two concepts to locate nodes:
+- identifiers defined by user,
+- `String`-based annotations defined by the topology function.
+Annotations make it possible to define more complicated relations beside simple "neighbourhood". 
+For example, for bi-directional ring, two annotations are used: *left* and *right*,
+so you can easily differentiate the direction of your messages.

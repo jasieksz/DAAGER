@@ -52,6 +52,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
 	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.NoOpLoggingService"/>
 
+	<bean id="topology" class="pl.edu.agh.age.compute.api.topology.FullMeshTopology" />
+
 	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
 
 	<!-- Commented out, because it would require too many dependencies -->
