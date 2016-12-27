@@ -96,10 +96,11 @@ public final class SexualReproductionBuilder<S extends Solution<?>> {
 			if (mutation != null) {
 				pipeline = pipeline.mutate(mutation);
 			}
+			pipeline = pipeline.evaluate(evaluator);
 			if (improvement != null) {
 				pipeline = pipeline.improve(improvement);
 			}
-			pipeline = pipeline.transferEnergy(energyTransfer).evaluate(evaluator);
+			pipeline = pipeline.transferEnergy(energyTransfer);
 			return pipeline.extract();
 		};
 	}

@@ -29,5 +29,16 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
  */
 @FunctionalInterface
 public interface Improvement<S extends Solution<?>> {
+	/**
+	 * Improvement method.
+	 *
+	 * **IMPORTANT:** The input solution must be already evaluated at this point and the returned one **MUST** also be
+	 * properly evaluated inside this method!
+	 *
+	 * @param solution
+	 * 		the solution to improve (must be evaluated)
+	 *
+	 * @return the improved and properly evaluated solution
+	 */
 	S improve(S solution);
 }

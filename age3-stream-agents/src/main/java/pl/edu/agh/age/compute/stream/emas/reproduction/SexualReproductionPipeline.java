@@ -125,12 +125,11 @@ public final class SexualReproductionPipeline<S extends Solution<?>> {
 		                                        secondParent.withEnergy(energyValue[1]), newChild);
 	}
 
-	/* terminal */
-	public SexualReproductionPipeline<S> evaluate(final Evaluator<S> evaluator) {
-		checkState(childSolution != null, "Evaluation requires child soultion");
+	@SuppressWarnings("unchecked") public SexualReproductionPipeline<S> evaluate(final Evaluator<S> evaluator) {
+		checkState(childSolution != null, "Evaluation requires child solution");
 
-		final EmasAgent newChild = child.withSolution(childSolution.updateFitness(evaluator.evaluate(childSolution)));
-		return new SexualReproductionPipeline<>(firstParent, secondParent, newChild, childSolution);
+		final S evaluatedChild = (S)childSolution.updateFitness(evaluator.evaluate(childSolution));
+		return new SexualReproductionPipeline<>(firstParent, secondParent, evaluatedChild);
 	}
 
 	/**
@@ -142,7 +141,11 @@ public final class SexualReproductionPipeline<S extends Solution<?>> {
 	 * 		if the child was not generated (usually `transferEnergy` was not called).
 	 */
 	public Seq<EmasAgent> extract() {
-		checkState(child != null, "The child was not created");
+		checkState(child != null, "The child was not created. You must call transferEnergy before extraction.");
+
+		// Sanity check. Although evaluation is not required by API it is usually expected
+		// Not a checkState() because of possible performance issues
+		assert !Double.isNaN(child.solution.fitnessValue());
 
 		return List.of(firstParent, secondParent, child);
 	}
