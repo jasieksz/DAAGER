@@ -25,8 +25,6 @@ plugins {
 mainClassName = 'pl.edu.agh.age.console.ConsoleBootstrapper'
 applicationDefaultJvmArgs = [
 	'-enableassertions',
-	'-Dhazelcast.logging.type=slf4j',
-	'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy'
 ]
 
 dependencies {
@@ -51,11 +49,9 @@ task(shell, dependsOn: 'classes') << {
 	def command = [
 		'java',
 		'-cp', classpath.collect().join(java.io.File.pathSeparator),
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper'
 	]
-	if (project.hasProperty('appArgs') ) {
+	if (project.hasProperty('appArgs')) {
 		command.addAll(Eval.me(appArgs))
 	}
 	def proc = new ProcessBuilder(command)
@@ -71,12 +67,10 @@ task(standalone, dependsOn: 'classes') << {
 	def command = [
 		'java',
 		'-cp', classpath.collect().join(java.io.File.pathSeparator),
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper',
 		'standalone'
 	]
-	if (project.hasProperty('appArgs') ) {
+	if (project.hasProperty('appArgs')) {
 		command.addAll(Eval.me(appArgs))
 	}
 	def proc = new ProcessBuilder(command)

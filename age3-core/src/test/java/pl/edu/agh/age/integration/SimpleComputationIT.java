@@ -75,7 +75,7 @@ public final class SimpleComputationIT {
 	}
 
 	@Test public void test_2_ifLoadsConfig() throws InterruptedException, IOException {
-		final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:spring-simple-test.xml"), emptyMap());
+		final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), emptyMap());
 		workerServiceClient.prepareConfiguration(configuration);
 		TimeUnit.SECONDS.sleep(3L);
 		assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);

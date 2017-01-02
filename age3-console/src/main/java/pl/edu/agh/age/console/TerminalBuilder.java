@@ -23,19 +23,23 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
+
+import javax.inject.Named;
 
 /**
  * Terminal wrapper for easier Spring configuration.
  */
+@Named
 public final class TerminalBuilder {
 
 	private static final Logger logger = LoggerFactory.getLogger(TerminalBuilder.class);
 
 	private TerminalBuilder() {}
 
-	public static Terminal build() throws IOException {
+	@Bean public static Terminal build() throws IOException {
 		logger.debug("Executing our terminal builder");
 		if (SystemUtils.IS_OS_WINDOWS) {
 			// Seems that JNA does not work?

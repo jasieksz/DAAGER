@@ -66,7 +66,7 @@ public final class MultipleComputationsIT {
 	@Test public void testMultipleComputations() throws IOException, InterruptedException {
 		for (int i = 0; i < 2; i++) {
 			// Configure
-			final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:spring-simple-test.xml"), emptyMap());
+			final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), emptyMap());
 			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(3L);
 			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);

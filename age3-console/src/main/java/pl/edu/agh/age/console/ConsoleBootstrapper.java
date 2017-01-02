@@ -47,6 +47,9 @@ import java.util.Arrays;
  */
 @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CallToSystemExit", "ThrowableResultOfMethodCallIgnored"})
 public final class ConsoleBootstrapper {
+	static {
+		System.setProperty("logback.statusListenerClass", "ch.qos.logback.core.status.NopStatusListener");
+	}
 
 	private static final Logger logger = LoggerFactory.getLogger(ConsoleBootstrapper.class);
 

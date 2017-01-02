@@ -21,6 +21,5 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="runnable" class="pl.edu.agh.age.examples.Simple"/>
-
+	<bean id="runnable" class="pl.edu.agh.age.runnables.SimpleTest"/>
 </beans>

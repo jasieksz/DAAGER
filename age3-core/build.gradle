@@ -24,9 +24,7 @@ plugins {
 
 mainClassName = 'pl.edu.agh.age.node.NodeBootstrapper'
 applicationDefaultJvmArgs = [
-		'-enableassertions',
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy'
+	'-enableassertions',
 ]
 
 shadowJar {
@@ -43,7 +41,6 @@ dependencies {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
-	compile 'com.hazelcast:hazelcast-spring:3.7+'
 	compile 'org.jgrapht:jgrapht-core:+'
 
 	runtime 'javax.cache:cache-api:+'
@@ -57,7 +54,6 @@ task node(type: JavaExec) {
 	standardOutput = System.out
 	standardInput = System.in
 	jvmArgs '-enableassertions'
-	systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
 	if (project.hasProperty('appArgs')) {
 		args Eval.me(appArgs)
 	}

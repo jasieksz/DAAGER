@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -49,9 +50,10 @@ import javax.script.ScriptException;
 /**
  * Console is the shell-like interface for managing the cluster and AgE nodes.
  *
- * A command is a class that implements the {@link Command} interface and is annotated using the {@link
- * javax.inject.Named} annotations. Such commands are automatically recognized and made available for the user.
+ * A command is a class that implements the {@link Command} interface and is annotated using the {@link Named}
+ * annotations. Such commands are automatically recognized and made available for the user.
  */
+@Named
 public final class Console {
 
 	private static final Logger logger = LoggerFactory.getLogger(Console.class);

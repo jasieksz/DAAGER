@@ -24,8 +24,8 @@ import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
+import pl.edu.agh.age.util.NodeSystemProperties;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -51,12 +51,16 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("CallToSystemExit")
 public final class NodeBootstrapper {
 
+	static {
+		System.setProperty("logback.statusListenerClass", "ch.qos.logback.core.status.NopStatusListener");
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(NodeBootstrapper.class);
 
 	private NodeBootstrapper() {}
 
 	public static void main(final String... args) throws InterruptedException, IOException {
-		final String configName = System.getProperty("age.node.config", "spring-node.xml");
+		final String configName = NodeSystemProperties.CONFIG.get();
 		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(configName)) {
 			context.registerShutdownHook();
 			final NodeLifecycleService lifecycleService = context.getBean(NodeLifecycleService.class);

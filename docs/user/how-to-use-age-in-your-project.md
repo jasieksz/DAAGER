@@ -13,7 +13,7 @@ In the former case, usage is dependent on the module. This page describes the la
 
 ## In short – using sample project
 
-Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it as a base for your project.
+Clone <https://gitlab.com/age-agh/age3-sample-project.git> repository and use it as a base for your project.
 
 ## Creating project from scratch
 
@@ -69,14 +69,14 @@ Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it a
 7. Run your computation in AgE:
 
     ```bash
-    java -cp YOUR_CLASSPATH -enableassertions -Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy pl.edu.agh.age.node.NodeBootstrapper file:src/main/resources/spring-sample.xml
+    java -cp YOUR_CLASSPATH -enableassertions pl.edu.agh.age.node.NodeBootstrapper file:src/main/resources/spring-sample.xml
     ```
     
     Two things are important in this command:   
     * **YOUR_CLASSPATH** should be replaces by collected list of jars and your classes,
     * The only argument for **NodeBootstrapper** is a path to your Spring configuration. If it is not provided, the node will wait for configuration from the network (for example, passed from a console node).
     
-    Using `-enableassertions` is encouraged. `logback.configurationFile` that is defined in this command configures a log file and reduces amount of messages displayed on screen.
+    Using `-enableassertions` is encouraged.
     
     Of course, constructing the classpath is rather boring task. It's easier to use a Gradle task similar to this one:
     
@@ -87,7 +87,6 @@ Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it a
 	    standardOutput = System.out
 	    standardInput = System.in
 	    jvmArgs '-enableassertions'
-	    systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
 	    args 'file:src/main/resources/spring-sample.xml'
     }
     ```
@@ -95,3 +94,19 @@ Clone https://gitlab.com/age-agh/age3-sample-project.git repository and use it a
 ## Advanced API
 
 If you want to use more advanced computational API, check the **pl.edu.agh.age.compute.api** package.
+
+## Advanced configuration
+
+### Network configuration for Hazelcast
+
+By default, AgE uses a default Hazelcast configuration – nodes are discovered using multicast
+and all discovered nodes join a single cluster. It is appropriate for local networks but does not work in more complicated scenarios.
+If you want to change this configuration, you need to provide your own `<network>` section for the Hazelcast XML config.
+AgE loads the network configuration from the file specified by the `age.node.hazelcast.config.user` property.
+The first file found is then imported into the main configuration.
+ 
+You can either:
+- provide a file with the same name somewhere in your classpath,
+- change the property to your preferred value (`classpath:` prefix is supported).
+
+**Note:** if you use the console, you should change its settings accordingly. 

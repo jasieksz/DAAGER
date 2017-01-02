@@ -1,6 +1,7 @@
 # Console
 
-AgE provides a simple console that is intended to make cluster and computation management easier. It is located in the [**age3-console** module](https://gitlab.com/age-agh/age3/tree/develop/age3-console).
+AgE provides a simple console that is intended to make cluster and computation management easier.
+It is located in the [**age3-console** module](https://gitlab.com/age-agh/age3/tree/develop/age3-console).
 
 The current version of the console is backed by Nashorn JavaScript engine. It make the full integration with Java code possible right from the console.
 
@@ -63,3 +64,8 @@ This may improve in the future, but currently you can use `java.lang.Thread#slee
 You can always use `load()` function provided by Nashorn to load additional scripts.
 
 The "standalone" mode also supports batch processing. Just pass paths to your scripts after "standalone" keyword.
+
+## Connecting to nodes
+
+By default, the console connects to the local AgE node (using IP address **127.0.0.1**).
+If you want to connect to remote nodes, you need to define them using `age.console.nodes` property.

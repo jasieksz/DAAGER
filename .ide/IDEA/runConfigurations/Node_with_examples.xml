@@ -2,7 +2,7 @@
   <configuration default="false" name="Node with examples" type="Application" factoryName="Application">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="pl.edu.agh.age.node.NodeBootstrapper" />
-    <option name="VM_PARAMETERS" value="-ea -Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy -Dage.node.config=spring-examples-node.xml" />
+    <option name="VM_PARAMETERS" value="-ea -Dage.node.config=spring-examples-node.xml" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />

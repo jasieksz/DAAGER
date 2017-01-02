@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright (C) 2016 Intelligent Information Systems Group.
   ~
   ~ This file is part of AgE.
@@ -18,11 +17,11 @@
   ~ along with AgE.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-	<bean id="runnable"
-	      class="pl.edu.agh.age.runnables.SimpleTest"/>
-
-</beans>
+<hazelcast-client xsi:schemaLocation="http://www.hazelcast.com/schema/client-config http://www.hazelcast.com/schema/spring/hazelcast-client-config-3.7.xsd"
+                  xmlns="http://www.hazelcast.com/schema/client-config"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<properties>
+		<property name="hazelcast.logging.type">slf4j</property>
+		<property name="hazelcast.shutdownhook.enabled">false</property>
+	</properties>
+</hazelcast-client>

@@ -17,8 +17,6 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.compute.stream
-
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender

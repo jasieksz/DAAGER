@@ -17,41 +17,22 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.node
-
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
-import ch.qos.logback.core.helpers.NOPAppender
-import ch.qos.logback.ext.spring.DelegatingLogbackAppender
 
 def bySecond = timestamp("yyyyMMdd'T'HHmmss")
 
 appender("FILE", FileAppender) {
-	file = "node-${bySecond}.log"
+	file = "console-${bySecond}.log"
 	append = false
+
 	encoder(PatternLayoutEncoder) {
 		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
 	}
 }
 
-appender("CONSOLE", ConsoleAppender) {
-	filter(ch.qos.logback.classic.filter.ThresholdFilter) {
-		level = INFO
-	}
-	encoder(PatternLayoutEncoder) {
-		pattern = "%highlight(%.-1level) %green(%-40logger{39}) : %msg%n"
-	}
-}
-
-def ha_enabled = Boolean.valueOf(System.getProperty("age.node.hazelcastAppender", "false"))
-if (ha_enabled) {
-	appender("hazelcastAppender", DelegatingLogbackAppender) {}
-} else {
-	appender("hazelcastAppender", NOPAppender) {}
-}
-
-root(ALL, ["FILE", "hazelcastAppender"])
-logger("pl.edu.agh.age", DEBUG, ["CONSOLE"])
+root(DEBUG, ["FILE"])
+logger("pl.edu.agh.age", DEBUG)
 logger("com.hazelcast", INFO)
+logger("com.hazelcast.client", INFO)
 logger("org.springframework", INFO)

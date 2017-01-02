@@ -70,8 +70,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @SuppressWarnings("FeatureEnvy")
+@Named
 public final class DefaultWorkerService implements SmartLifecycle, WorkerCommunication, WorkerService {
 
 	public enum State {

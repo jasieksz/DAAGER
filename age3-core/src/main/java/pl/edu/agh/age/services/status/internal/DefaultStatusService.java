@@ -49,7 +49,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
+@Named
 public final class DefaultStatusService implements SmartLifecycle {
 
 	public static final String CHANNEL_NAME = "status/channel";

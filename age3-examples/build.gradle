@@ -25,15 +25,11 @@ plugins {
 mainClassName = 'pl.edu.agh.age.console.ConsoleBootstrapper'
 applicationDefaultJvmArgs = [
 	'-enableassertions',
-	'-Dhazelcast.logging.type=slf4j',
-	'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy'
 ]
 
 dependencies {
 	compile project(':age3-core')
 	compile project(':age3-console')
-
-	testCompile 'org.springframework:spring-test:+'
 }
 
 shadowJar {
@@ -47,8 +43,6 @@ task(shell, dependsOn: 'classes') << {
 	def command = [
 		'java',
 		'-cp', classpath.collect().join(java.io.File.pathSeparator),
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper'
 	]
 	if (project.hasProperty('appArgs') ) {
@@ -67,8 +61,6 @@ task(standalone, dependsOn: 'classes') << {
 	def command = [
 		'java',
 		'-cp', classpath.collect().join(java.io.File.pathSeparator),
-		'-Dhazelcast.logging.type=slf4j',
-		'-Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy',
 		'pl.edu.agh.age.console.ConsoleBootstrapper',
 		'standalone'
 	]
@@ -90,7 +82,6 @@ task node(type: JavaExec) {
 	standardInput = System.in
 	jvmArgs '-enableassertions'
 	systemProperty 'age.node.config', 'spring-examples-node.xml'
-	systemProperty 'logback.configurationFile', 'pl/edu/agh/age/node/logback.groovy'
 	if (project.hasProperty('appArgs') ) {
 		args Eval.me(appArgs)
 	}

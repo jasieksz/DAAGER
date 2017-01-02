@@ -17,10 +17,26 @@
   ~ along with AgE.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config http://www.hazelcast.com/schema/spring/hazelcast-config-3.7.xsd"
+           xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-	<bean id="runnable" class="pl.edu.agh.age.examples.Simple"/>
+	<properties>
+		<property name="hazelcast.logging.type">slf4j</property>
+		<property name="hazelcast.shutdownhook.enabled">true</property>
+	</properties>
+	<map name="discovery/members">
+		<max-idle-seconds>20</max-idle-seconds>
+	</map>
 
-</beans>
+	<network>
+		<port auto-increment="true" port-count="100">5701</port>
+		<outbound-ports>
+			<ports>0</ports>
+		</outbound-ports>
+		<join>
+			<multicast enabled="false"/>
+			<tcp-ip enabled="false"/>
+		</join>
+	</network>
+</hazelcast>

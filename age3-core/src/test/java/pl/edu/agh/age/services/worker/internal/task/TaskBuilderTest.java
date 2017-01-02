@@ -101,7 +101,7 @@ public final class TaskBuilderTest {
 	@Test public void testCreateFromStringAndProperties() throws Exception {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 
-		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
+		try (InputStream resourceAsStream = getClass().getResourceAsStream("/compute/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
 			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of("age.property", "Test property"));
 			taskBuilder.finishConfiguration();
@@ -116,7 +116,7 @@ public final class TaskBuilderTest {
 	@Test public void testThrowExceptionWhenLackingProperties() throws Exception {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
 
-		try (InputStream resourceAsStream = getClass().getResourceAsStream("/spring-test-with-property.xml")) {
+		try (InputStream resourceAsStream = getClass().getResourceAsStream("/compute/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
 			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of());
 

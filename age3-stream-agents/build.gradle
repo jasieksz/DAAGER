@@ -26,8 +26,6 @@ plugins {
 mainClassName = 'pl.edu.agh.age.node.NodeBootstrapper'
 applicationDefaultJvmArgs = [
 	'-enableassertions',
-	'-Dhazelcast.logging.type=slf4j',
-	'-Dlogback.configurationFile=pl/edu/agh/age/node/logback.groovy'
 ]
 
 shadowJar {
@@ -45,7 +43,7 @@ dependencies {
 	compile 'org.openjdk.jmh:jmh-core:+'
 	compile 'org.openjdk.jmh:jmh-generator-annprocess:+'
 	testCompile 'org.springframework:spring-test:+'
-	testCompile "org.mockito:mockito-core:1.+"
+	testCompile 'org.mockito:mockito-core:+'
 }
 
 jmh {
@@ -55,7 +53,6 @@ jmh {
 
 jmhJar {
 	mergeServiceFiles('META-INF/spring.*')
-	exclude 'LICENSE'
 }
 
 task node(type: JavaExec) {
@@ -64,7 +61,6 @@ task node(type: JavaExec) {
 	standardOutput = System.out
 	standardInput = System.in
 	jvmArgs '-enableassertions'
-	systemProperty 'logback.configurationFile', 'pl/edu/agh/age/compute/stream/logback.groovy'
 	if (project.hasProperty('appArgs')) {
 		args Eval.me(appArgs)
 	}
