@@ -18,6 +18,7 @@
  */
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
 import ch.qos.logback.core.helpers.NOPAppender
@@ -35,7 +36,7 @@ appender("FILE", FileAppender) {
 }
 
 appender("CONSOLE", ConsoleAppender) {
-	filter(ch.qos.logback.classic.filter.ThresholdFilter) {
+	filter(ThresholdFilter) {
 		level = INFO
 	}
 	encoder(PatternLayoutEncoder) {

@@ -18,9 +18,12 @@
  */
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
+import ch.qos.logback.core.helpers.NOPAppender
 import ch.qos.logback.ext.spring.DelegatingLogbackAppender
+import pl.edu.agh.age.util.NodeSystemProperties
 
 import static ch.qos.logback.classic.Level.DEBUG
 import static ch.qos.logback.classic.Level.INFO
@@ -44,7 +47,7 @@ appender("FILE", FileAppender) {
 }
 
 appender("CONSOLE", ConsoleAppender) {
-	filter(ch.qos.logback.classic.filter.ThresholdFilter) {
+	filter(ThresholdFilter) {
 		level = INFO
 	}
 	encoder(PatternLayoutEncoder) {
@@ -52,7 +55,11 @@ appender("CONSOLE", ConsoleAppender) {
 	}
 }
 
-appender("hazelcastAppender", DelegatingLogbackAppender) {
+def ha_enabled = Boolean.valueOf(NodeSystemProperties.HAZELCAST_APPENDER.get())
+if (ha_enabled) {
+	appender("hazelcastAppender", DelegatingLogbackAppender) {}
+} else {
+	appender("hazelcastAppender", NOPAppender) {}
 }
 
 logger("stream", DEBUG, ["STREAM-FILE"], additivity = false)
