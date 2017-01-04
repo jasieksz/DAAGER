@@ -63,9 +63,19 @@ public final class DefaultBroadcastMessenger implements BroadcastMessenger, Comm
 		log.debug("Sending message {}.", message);
 		final Set<String> neighbours = topologyService.neighbours();
 		final WorkerMessage<Serializable> workerMessage = WorkerMessage.createWithPayload(
-				WorkerMessage.Type.BROADCAST_MESSAGE, neighbours, message);
+			WorkerMessage.Type.BROADCAST_MESSAGE, neighbours, message);
 		log.debug("Prepared message to send: {}.", workerMessage);
 		workerCommunication.sendMessage(workerMessage);
+	}
+
+	@Override public <T extends Serializable> void registerListener(final BroadcastMessageListener<T> listener) {
+		log.debug("Adding listener {}.", listener);
+		listeners.add((BroadcastMessageListener<Serializable>)listener);
+	}
+
+	@Override public <T extends Serializable> void removeListener(final BroadcastMessageListener<T> listener) {
+		log.debug("Removing listener {}.", listener);
+		listeners.remove(listener);
 	}
 
 	@Override public <T extends Serializable> boolean onMessage(final WorkerMessage<T> workerMessage) {
@@ -90,14 +100,9 @@ public final class DefaultBroadcastMessenger implements BroadcastMessenger, Comm
 		log.debug("Starting local broadcast messenger.");
 	}
 
-	@Override public <T extends Serializable> void registerListener(final BroadcastMessageListener<T> listener) {
-		log.debug("Adding listener {}.", listener);
-		listeners.add((BroadcastMessageListener<Serializable>)listener);
-	}
-
-	@Override public <T extends Serializable> void removeListener(final BroadcastMessageListener<T> listener) {
-		log.debug("Removing listener {}.", listener);
-		listeners.remove(listener);
+	@Override public void reset() {
+		log.debug("Broadcast messenger reset");
+		listeners.clear();
 	}
 
 	@Override public String toString() {

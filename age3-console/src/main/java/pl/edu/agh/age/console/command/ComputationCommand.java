@@ -143,6 +143,18 @@ public final class ComputationCommand implements Command {
 		workerServiceClient.startComputation();
 	}
 
+	@Operation(description = "Waits for the computation to finish (or fail)") public void waitUntilFinished() {
+		try {
+			workerServiceClient.waitForComputationEnd();
+		} catch (final InterruptedException e) {
+			logger.debug("Interrupted", e);
+			writer.println("Waiting was interrupted");
+		}
+		final AttributedString finished = new AttributedString("Computation finished",
+		                                                       AttributedStyle.BOLD.foreground(AttributedStyle.BLUE));
+		writer.printf("%s%n", finished.toAnsi(terminal));
+	}
+
 	@Operation(description = "Stops the computation") public void stop() {
 		workerServiceClient.stopComputation();
 	}

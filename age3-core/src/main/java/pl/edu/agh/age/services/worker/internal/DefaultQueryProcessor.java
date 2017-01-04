@@ -77,7 +77,7 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 			try {
 				final T call = callable.call();
 				replicatedMap.put(identityService.nodeId(), call, 10L, TimeUnit.SECONDS);
-			} catch (final RuntimeException|Error e) {
+			} catch (final RuntimeException | Error e) {
 				throw e;
 			} catch (final Exception e) {
 				throw new RuntimeException(e);
@@ -96,6 +96,11 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 
 	@Override public void start() {
 		log.debug("Starting Query Processor");
+	}
+
+	@Override public void reset() {
+		log.debug("Query processor reset");
+		replicatedMap.clear();
 	}
 
 	@Override public String toString() {

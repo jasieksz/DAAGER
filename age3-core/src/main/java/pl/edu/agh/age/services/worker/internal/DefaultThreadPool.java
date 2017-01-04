@@ -20,6 +20,7 @@
 package pl.edu.agh.age.services.worker.internal;
 
 import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
+import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
 import static java.util.stream.Collectors.toList;
 import static pl.edu.agh.age.util.Runnables.swallowingRunnable;
 
@@ -30,11 +31,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public final class DefaultThreadPool implements ThreadPool {
+
+	private static final Logger logger = LoggerFactory.getLogger(DefaultThreadPool.class);
 
 	private final ListeningScheduledExecutorService service = listeningDecorator(Executors.newScheduledThreadPool(10));
 
@@ -48,7 +54,8 @@ public final class DefaultThreadPool implements ThreadPool {
 		return service.scheduleAtFixedRate(swallowingRunnable(command), initialDelay, period, unit);
 	}
 
-	void shutdownAll() {
-		service.shutdownNow();
+	public void shutdownAll() {
+		logger.debug("Thread pool shutdown");
+		shutdownAndAwaitTermination(service, 5, TimeUnit.SECONDS);
 	}
 }

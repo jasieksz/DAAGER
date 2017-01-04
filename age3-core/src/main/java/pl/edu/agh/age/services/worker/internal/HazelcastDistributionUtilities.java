@@ -21,23 +21,44 @@ package pl.edu.agh.age.services.worker.internal;
 
 import pl.edu.agh.age.compute.api.DistributionUtilities;
 
+import com.hazelcast.core.DistributedObject;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IdGenerator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
+
 final class HazelcastDistributionUtilities implements DistributionUtilities {
 
+	private static final Logger logger = LoggerFactory.getLogger(HazelcastDistributionUtilities.class);
+
 	private final HazelcastInstance hazelcastInstance;
+
+	private final Set<DistributedObject> distributedObjects = new HashSet<>(10);
 
 	public HazelcastDistributionUtilities(final HazelcastInstance hazelcastInstance) {
 		this.hazelcastInstance = hazelcastInstance;
 	}
 
 	public <K, V> IMap<K, V> getMap(final String name) {
-		return hazelcastInstance.getMap("compute/" + name);
+		final IMap<K, V> map = hazelcastInstance.getMap("compute/" + name);
+		distributedObjects.add(map);
+		return map;
 	}
 
 	@Override public IdGenerator getIdGenerator(final String name) {
-		return hazelcastInstance.getIdGenerator("compute/" + name);
+		final IdGenerator idGenerator = hazelcastInstance.getIdGenerator("compute/" + name);
+		distributedObjects.add(idGenerator);
+		return idGenerator;
+	}
+
+	@Override public void reset() {
+		logger.debug("Distributed utilities destroy");
+		distributedObjects.forEach(DistributedObject::destroy);
+		distributedObjects.clear();
 	}
 }

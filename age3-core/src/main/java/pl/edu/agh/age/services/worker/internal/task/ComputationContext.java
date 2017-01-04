@@ -138,11 +138,15 @@ public final class ComputationContext {
 		lock.writeLock().lock();
 		try {
 			checkIfTaskIsActive();
-			logger.debug("Cleaning up after task {}", currentTask);
+			logger.info("Cleaning up after task {}", currentTask);
 			currentTask.cleanUp();
 			cleaned = true;
-			logger.debug("Cleaning up after task");
+			logger.debug("Destroying Spring context");
 			springContext.destroy();
+			logger.debug("Cleaning up utilities");
+			computeThreadPool.shutdownAll();
+			computeDistributionUtilities.reset();
+			communicationFacilities.forEach(CommunicationFacility::reset);
 		} finally {
 			lock.writeLock().unlock();
 		}

@@ -27,4 +27,6 @@ public interface DistributionUtilities {
 	<K, V> IMap<K, V> getMap(String name);
 
 	IdGenerator getIdGenerator(String name);
+
+	void reset();
 }

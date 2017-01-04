@@ -20,11 +20,13 @@
 package pl.edu.agh.age.compute.stream;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import pl.edu.agh.age.compute.stream.configuration.Configuration;
 import pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration;
 
 import org.assertj.core.api.JUnitSoftAssertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
@@ -35,7 +37,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import javaslang.collection.HashMap;
+import javaslang.collection.HashSet;
 import javaslang.collection.Map;
+import javaslang.collection.Set;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:spring-stream-static.xml")
@@ -44,7 +49,14 @@ public final class SpringConfigurationIT {
 
 	@Inject private Configuration configuration;
 
-	private final Environment environment = new Environment(0, mock(Manager.class));
+	private final Manager manager = mock(Manager.class);
+
+	private final Environment environment = new Environment(0, manager);
+
+	@Before public void setUp() {
+		final Map<Long, Set<String>> returnValue = HashMap.of(1L, HashSet.empty());
+		when(manager.getNeighboursOf(0)).thenReturn(returnValue);
+	}
 
 	@Test public void configurationLoadsAndWorks() {
 		final JUnitSoftAssertions softly = new JUnitSoftAssertions();

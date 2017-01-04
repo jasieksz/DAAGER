@@ -79,10 +79,8 @@ public final class NodeBootstrapper {
 					workerServiceClient.prepareConfiguration(new SpringConfiguration(resource, Collections.emptyMap()));
 					TimeUnit.SECONDS.sleep(1);
 					workerServiceClient.startComputation();
-					TimeUnit.SECONDS.sleep(1);
-					while (workerServiceClient.isComputationRunning()) {
-						TimeUnit.SECONDS.sleep(1);
-					}
+
+					workerServiceClient.waitForComputationEnd();
 					workerServiceClient.cleanConfiguration();
 				}
 

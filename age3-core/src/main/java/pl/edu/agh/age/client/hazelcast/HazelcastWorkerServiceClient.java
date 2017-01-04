@@ -25,12 +25,14 @@ import pl.edu.agh.age.services.worker.internal.ComputationState;
 import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
+import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +43,9 @@ import javax.inject.Named;
 @Named
 public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 	private static final Logger logger = LoggerFactory.getLogger(HazelcastWorkerServiceClient.class);
+
+	private static final ImmutableSet<ComputationState> NOT_FINISHED_STATES = ImmutableSet.copyOf(
+		EnumSet.of(ComputationState.RUNNING, ComputationState.CONFIGURED));
 
 	private final ITopic<WorkerMessage<?>> workerTopic;
 
@@ -77,6 +82,10 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 		return computationState() == ComputationState.RUNNING;
 	}
 
+	@Override public boolean isComputationFinished() {
+		return !NOT_FINISHED_STATES.contains(computationState());
+	}
+
 	@Override public boolean isComputationFailed() {
 		return computationState() == ComputationState.FAILED;
 	}
@@ -92,6 +101,14 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 
 	@Override public Optional<Throwable> currentError() {
 		return configurationValue(DefaultWorkerService.ConfigurationKey.ERROR);
+	}
+
+	@Override public void waitForComputationEnd() throws InterruptedException {
+		logger.debug("Waiting for computation to end or fail");
+		while (!isComputationFinished()) {
+			TimeUnit.MILLISECONDS.sleep(100);
+		}
+		logger.debug("Computation finished");
 	}
 
 	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key) {

@@ -53,7 +53,7 @@ public final class SampleStep implements Step<EmasAgent> {
 		final Tuple2<Pipeline, Pipeline> afterMigration = pipeline.migrateWhen(Predicates.random(0.2));
 		final List<EmasAgent> migrated = afterMigration._1.extract();
 
-		migrated.forEach(emasAgent -> environment.migrate(emasAgent, 1));
+		migrated.forEach(emasAgent -> environment.migrate(emasAgent, environment.neighbours().get()._1));
 
 		final Tuple2<Pipeline, Pipeline> afterDeath = afterMigration._2().dieWhen(agent -> agent.energy < 0.1);
 

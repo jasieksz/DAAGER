@@ -88,7 +88,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 		log.debug("Sending message {}.", unicastMessage);
 		final Set<String> neighbours = topologyService.neighbours();
 		final WorkerMessage<Serializable> workerMessage = WorkerMessage.createWithPayload(
-				WorkerMessage.Type.UNICAST_MESSAGE, neighbours, unicastMessage);
+			WorkerMessage.Type.UNICAST_MESSAGE, neighbours, unicastMessage);
 		log.debug("Prepared message to send: {}.", workerMessage);
 		workerCommunication.sendMessage(workerMessage);
 	}
@@ -113,7 +113,8 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 			if (unicastMessage.isRecipient(localWorkerAddress)) {
 				log.debug("Delivering the message {}.", unicastMessage);
 				listeners.parallelStream()
-				         .forEach(listener -> listener.onUnicastMessage(unicastMessage.payload(), unicastMessage.sender()));
+				         .forEach(
+					         listener -> listener.onUnicastMessage(unicastMessage.payload(), unicastMessage.sender()));
 			}
 
 			return true;
@@ -136,6 +137,11 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 		workerCommunication.scheduleAtFixedRate(this::broadcastMyAddress, 1L, 5L, TimeUnit.SECONDS);
 	}
 
+	@Override public void reset() {
+		log.debug("Unicast messenger reset");
+		listeners.clear();
+	}
+
 	private void broadcastMyAddress() {
 		log.debug("Broadcasting my unicast address: {}.", localWorkerAddress);
 		try {
@@ -145,7 +151,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 				return;
 			}
 			final WorkerMessage<Serializable> workerMessage = WorkerMessage.createWithPayload(
-					WorkerMessage.Type.UNICAST_CONTROL, neighbours, localWorkerAddress);
+				WorkerMessage.Type.UNICAST_CONTROL, neighbours, localWorkerAddress);
 			workerCommunication.sendMessage(workerMessage);
 		} catch (final IllegalStateException e) {
 			log.debug("Topology is not available yet.");

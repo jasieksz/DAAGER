@@ -48,4 +48,6 @@ public interface CommunicationFacility {
 	Set<WorkerMessage.Type> subscribedTypes();
 
 	void start();
+
+	void reset();
 }

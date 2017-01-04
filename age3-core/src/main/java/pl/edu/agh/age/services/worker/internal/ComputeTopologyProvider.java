@@ -100,6 +100,19 @@ public final class ComputeTopologyProvider implements TopologyProvider<Serializa
 	// TODO
 	@Override public void start() {}
 
+	@Override public void reset() {
+		logger.debug("Compute topology reset");
+		idsSet.clear();
+		topology = new FullMeshTopology<>();
+		lock.writeLock().lock();
+		try {
+			needUpgrade = true;
+			cachedTopology = null;
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
 	@Override public void setTopology(final Topology<Serializable> topology) {
 		this.topology = requireNonNull(topology);
 		markForUpgrade();

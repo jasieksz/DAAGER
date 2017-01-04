@@ -417,6 +417,8 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	private void cleanUpAfterTask(final FSM<State, Event> fsm) {
 		assert computationContext != null;
 
+		logger.debug("Cleaning up");
+
 		if (computationContext.isTaskActive()) {
 			computationContext.cleanUp();
 		}

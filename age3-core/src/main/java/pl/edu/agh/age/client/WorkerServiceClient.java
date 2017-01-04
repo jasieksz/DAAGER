@@ -36,6 +36,8 @@ public interface WorkerServiceClient {
 
 	boolean isComputationRunning();
 
+	boolean isComputationFinished();
+
 	boolean isComputationFailed();
 
 	ComputationState computationState();
@@ -43,4 +45,6 @@ public interface WorkerServiceClient {
 	Optional<WorkerConfiguration> currentConfiguration();
 
 	Optional<Throwable> currentError();
+
+	void waitForComputationEnd() throws InterruptedException;
 }

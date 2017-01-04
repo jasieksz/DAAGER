@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -135,23 +136,39 @@ public final class StreamAgents implements Runnable, Manager {
 			Thread.currentThread().interrupt();
 		}
 
-		// Cancel all workplaces and wait for them. They do not return any
-		// values so we just want to be sure that they are finished.
-		workplaceFutures.forEach(f -> f.cancel(true));
-		workplaceFutures.forEach(f -> {
-			try {
-				f.get();
-			} catch (final CancellationException ignored) {
-				logger.debug("Task cancelled (probably by us)");
-			} catch (final InterruptedException ignored) {
-				logger.debug("Waiting for the workplace was interrupted");
-			} catch (final ExecutionException e) {
-				logger.error("Computation threw an exception that was not caught. Possible bug in core?", e);
-			}
-		});
+		workplaceFutures.forEach(StreamAgents::cancelWorkplaceFuture);
 		loggingService.stop();
 
 		logger.info("Stream agents finished");
+	}
+
+	private static void cancelWorkplaceFuture(final ListenableFuture<?> f) {
+		// Cancel all workplaces and wait for them. They do not return any
+		// values so we just want to be sure that they are finished.
+		try {
+			logger.debug("Waiting for workplace to finish");
+			boolean finished = false;
+			// Wait for 10 seconds (counting)
+			for (int i = 1; !finished || (i <= 10); i++) {
+				try {
+					final Object o = f.get(1, TimeUnit.SECONDS);
+					logger.debug("OUT {}", o);
+					finished = true;
+				} catch (final TimeoutException ignored) {
+					logger.debug("Still waiting ({} from 10)", i);
+				}
+			}
+			if (!finished) {
+				logger.debug("Cancel forced");
+				f.cancel(true);
+			}
+		} catch (final CancellationException ignored) {
+			logger.debug("Task cancelled (probably by us)");
+		} catch (final InterruptedException ignored) {
+			logger.debug("Waiting for the workplace was interrupted");
+		} catch (final ExecutionException e) {
+			logger.error("Computation threw an exception that was not caught. Possible bug in core?", e);
+		}
 	}
 
 	private static void waitFor(final StopCondition stopCondition) throws InterruptedException {
