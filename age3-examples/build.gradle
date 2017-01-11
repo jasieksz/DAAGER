@@ -81,7 +81,6 @@ task node(type: JavaExec) {
 	standardOutput = System.out
 	standardInput = System.in
 	jvmArgs '-enableassertions'
-	systemProperty 'age.node.config', 'spring-examples-node.xml'
 	if (project.hasProperty('appArgs') ) {
 		args Eval.me(appArgs)
 	}

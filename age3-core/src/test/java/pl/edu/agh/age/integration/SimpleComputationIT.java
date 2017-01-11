@@ -45,6 +45,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -75,7 +76,7 @@ public final class SimpleComputationIT {
 	}
 
 	@Test public void test_2_ifLoadsConfig() throws InterruptedException, IOException {
-		final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), emptyMap());
+		final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), new Properties());
 		workerServiceClient.prepareConfiguration(configuration);
 		TimeUnit.SECONDS.sleep(3L);
 		assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);

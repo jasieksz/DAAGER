@@ -26,6 +26,11 @@ import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 import pl.edu.agh.age.util.NodeSystemProperties;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+
+import one.util.streamex.StreamEx;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,7 +38,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -75,8 +83,16 @@ public final class NodeBootstrapper {
 
 				for (final String arg : args) {
 					logger.info("Loading: {}", arg);
-					final Resource resource = context.getResource(arg);
-					workerServiceClient.prepareConfiguration(new SpringConfiguration(resource, Collections.emptyMap()));
+					final List<String> files = Splitter.on(',').omitEmptyStrings().splitToList(arg);
+					final List<Resource> propertiesFiles = StreamEx.of(files).map(context::getResource).toList();
+					final Resource configuration = propertiesFiles.remove(0);
+					final Properties properties = new Properties();
+					for (final Resource propertiesFile : propertiesFiles) {
+						logger.debug("Loading passedProperties from {}", propertiesFile);
+						properties.load(new InputStreamReader(propertiesFile.getInputStream(), Charsets.UTF_8));
+					}
+
+					workerServiceClient.prepareConfiguration(new SpringConfiguration(configuration, properties));
 					TimeUnit.SECONDS.sleep(1);
 					workerServiceClient.startComputation();
 

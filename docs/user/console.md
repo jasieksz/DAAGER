@@ -10,7 +10,7 @@ The current version of the console is backed by Nashorn JavaScript engine. It ma
 ### From the build JAR
 To start the console, you need to have `age3-console` jar and all its dependencies. Then execute:
 ```bash
-java -cp YOUR_JARS -Dhazelcast.logging.type=slf4j -Dlogback.configurationFile=pl/edu/agh/age/console/logback.groovy pl.edu.agh.age.console.ConsoleBootstrapper
+java -cp YOUR_JARS pl.edu.agh.age.console.ConsoleBootstrapper
 ```
 Replacing YOUR_JARS with the proper classpath.
 

@@ -26,6 +26,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
+import jdk.nashorn.api.scripting.ScriptUtils;
+
 /**
  * Interface for commands used by the pl.edu.agh.age.console.
  */
@@ -56,10 +58,11 @@ public interface Command {
 	 * 		when `obj` is not instance of `klass`. `msg` is used as a message string
 	 */
 	static <T> T checkAndCast(final Object obj, final Class<T> klass, final String msg) {
-		if (klass.isInstance(obj)) {
-			return klass.cast(obj);
+		try {
+			return klass.cast(ScriptUtils.convert(obj, klass));
+		} catch (final Throwable t) {
+			throw new IllegalArgumentException(msg, t);
 		}
-		throw new IllegalArgumentException(msg);
 	}
 
 	/**
@@ -111,10 +114,11 @@ public interface Command {
 		if (obj == null) {
 			return Optional.empty();
 		}
-		if (klass.isInstance(obj)) {
-			return Optional.of(klass.cast(obj));
+		try {
+			return Optional.of(klass.cast(ScriptUtils.convert(obj, klass)));
+		} catch (final Throwable t) {
+			throw new IllegalArgumentException(msg, t);
 		}
-		throw new IllegalArgumentException(msg);
 	}
 
 	/**
@@ -170,10 +174,11 @@ public interface Command {
 		if (obj == null) {
 			return def;
 		}
-		if (klass.isInstance(obj)) {
-			return klass.cast(obj);
+		try {
+			return klass.cast(ScriptUtils.convert(obj, klass));
+		} catch (final Throwable t) {
+			throw new IllegalArgumentException(msg, t);
 		}
-		throw new IllegalArgumentException(msg);
 	}
 
 	/**

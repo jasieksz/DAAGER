@@ -32,7 +32,9 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public final class SpringConfiguration implements WorkerConfiguration {
 
@@ -42,11 +44,12 @@ public final class SpringConfiguration implements WorkerConfiguration {
 
 	private final String configuration;
 
-	private final Map<String, Object> properties = newHashMap();
+	private final Properties properties = new Properties();
 
-	public SpringConfiguration(final Resource resource, final Map<String, Object> properties) throws IOException {
+	public SpringConfiguration(final Resource resource, final Properties properties) throws IOException {
 		resourceInfo = String.format("%s, length=%d", resource.getURL(), resource.contentLength());
 		configuration = CharStreams.toString(new InputStreamReader(resource.getInputStream(), Charsets.UTF_8));
+		//noinspection UseOfPropertiesAsHashtable
 		this.properties.putAll(properties);
 	}
 

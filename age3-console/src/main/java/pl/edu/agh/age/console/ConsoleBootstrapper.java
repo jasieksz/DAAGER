@@ -58,7 +58,7 @@ public final class ConsoleBootstrapper {
 	public static void main(final String... args) throws InterruptedException {
 		System.out.println("Starting AgE console...");
 		try {
-			if ((args.length == 1) && args[0].equals("standalone")) {
+			if ((args.length > 0) && args[0].equals("standalone")) {
 				final String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
 				standaloneMain(newArgs);
 			} else {

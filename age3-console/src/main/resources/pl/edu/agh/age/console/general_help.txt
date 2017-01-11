@@ -14,6 +14,8 @@ a name of command group to see help only for this group.
 	displays help
 [1mcls()[0m
 	clears screen
+[1msleep(n)[0m
+	sleeps n number of seconds
 [1mquit()[0m/[1mCtrl-D[0m
 	quit
 

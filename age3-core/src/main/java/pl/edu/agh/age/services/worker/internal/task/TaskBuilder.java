@@ -43,9 +43,11 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ByteArrayResource;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -88,7 +90,7 @@ public final class TaskBuilder {
 		}
 	}
 
-	public static TaskBuilder fromString(final String configuration, final Map<String, Object> properties)
+	public static TaskBuilder fromString(final String configuration, final Properties properties)
 		throws FailedComputationSetupException {
 		requireNonNull(configuration);
 		requireNonNull(properties);
@@ -99,7 +101,7 @@ public final class TaskBuilder {
 			final GenericXmlApplicationContext taskContext = new GenericXmlApplicationContext();
 
 			final MutablePropertySources propertySources = new MutablePropertySources();
-			propertySources.addFirst(new MapPropertySource("local", properties));
+			propertySources.addFirst(new PropertiesPropertySource("local", properties));
 			final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 			configurer.setPropertySources(propertySources);
 			taskContext.addBeanFactoryPostProcessor(configurer);

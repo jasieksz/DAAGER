@@ -20,6 +20,7 @@
 package pl.edu.agh.age.console.command;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static pl.edu.agh.age.console.command.Command.getAndCastDefault;
@@ -31,6 +32,8 @@ import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfigur
 import pl.edu.agh.age.services.worker.internal.configuration.SpringConfiguration;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
+import com.google.common.base.Charsets;
+
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
@@ -40,9 +43,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -82,11 +88,16 @@ public final class ComputationCommand implements Command {
 	@Parameter(name = "properties",
 	           type = Map.class,
 	           optional = true,
-	           description = "Java properties to use with the provided configuration file as a Map<String, Object>")
+	           description = "Java properties to use with the provided configuration file as a Map<String, String>")
+	@Parameter(name = "propertiesFiles",
+	           type = List.class,
+	           optional = true,
+	           description = "Files with properties to use")
 	public void load(final Map<String, Object> parameters) {
 		final Optional<String> classToLoad = getAndCastNullable(parameters, "class", String.class);
 		final Optional<String> configToLoad = getAndCastNullable(parameters, "config", String.class);
-		final Map<String, Object> properties = getAndCastDefault(parameters, "properties", Map.class, emptyMap());
+		final Map<String, String> passedProperties = getAndCastDefault(parameters, "properties", Map.class, emptyMap());
+		final List<String> propertiesFiles = getAndCastDefault(parameters, "propertiesFiles", List.class, emptyList());
 
 		final WorkerConfiguration configuration;
 		if (classToLoad.isPresent()) {
@@ -95,6 +106,19 @@ public final class ComputationCommand implements Command {
 		} else if (configToLoad.isPresent()) {
 			logger.debug("Loading config from {}", configToLoad);
 			final Resource resource = resourceLoader.getResource(configToLoad.get());
+			final Properties properties = new Properties();
+			for (final String propertiesFile : propertiesFiles) {
+				final Resource resource1 = resourceLoader.getResource(propertiesFile);
+				logger.debug("Loading passedProperties from {}", resource1);
+				try {
+					properties.load(new InputStreamReader(resource1.getInputStream(), Charsets.UTF_8));
+				} catch (final IOException e) {
+					writer.printf("File %s cannot be loaded due to an exception: %s.%n", resource1, e.getMessage());
+					return;
+				}
+			}
+			passedProperties.forEach(properties::setProperty);
+
 			if (resource.exists() && resource.isReadable()) {
 				try {
 					configuration = new SpringConfiguration(resource, properties);

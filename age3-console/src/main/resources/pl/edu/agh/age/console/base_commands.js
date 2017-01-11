@@ -24,3 +24,7 @@ function cls() {
 function help(obj) {
 	_help.execute(obj);
 }
+
+function sleep(seconds) {
+	java.lang.Thread.sleep(seconds);
+}

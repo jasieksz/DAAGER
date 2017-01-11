@@ -42,6 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -66,14 +67,14 @@ public final class MultipleComputationsIT {
 	@Test public void testMultipleComputations() throws IOException, InterruptedException {
 		for (int i = 0; i < 2; i++) {
 			// Configure
-			final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), emptyMap());
+			final SpringConfiguration configuration = new SpringConfiguration(resourceLoader.getResource("classpath:compute/spring-simple-test.xml"), new Properties());
 			workerServiceClient.prepareConfiguration(configuration);
 			TimeUnit.SECONDS.sleep(3L);
 			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.CONFIGURED);
 
 			// Start
 			workerServiceClient.startComputation();
-			TimeUnit.SECONDS.sleep(3L);
+			workerServiceClient.waitForComputationEnd();
 			assertThat(workerServiceClient.computationState()).isEqualTo(ComputationState.FINISHED);
 			assertThat(events).hasAtLeastOneElementOfType(TaskStartedEvent.class);
 

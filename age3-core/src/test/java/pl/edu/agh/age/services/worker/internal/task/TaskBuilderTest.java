@@ -42,6 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public final class TaskBuilderTest {
@@ -103,7 +104,9 @@ public final class TaskBuilderTest {
 
 		try (InputStream resourceAsStream = getClass().getResourceAsStream("/compute/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
-			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of("age.property", "Test property"));
+			final Properties properties = new Properties();
+			properties.setProperty("age.property", "Test property");
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, properties);
 			taskBuilder.finishConfiguration();
 			final Task task = taskBuilder.buildAndSchedule(executorService, callback);
 			final SimpleTestWithProperty runnable = (SimpleTestWithProperty)task.runnable();
@@ -118,7 +121,7 @@ public final class TaskBuilderTest {
 
 		try (InputStream resourceAsStream = getClass().getResourceAsStream("/compute/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
-			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, ImmutableMap.of());
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, new Properties());
 
 			assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(FailedComputationSetupException.class);
 		}
