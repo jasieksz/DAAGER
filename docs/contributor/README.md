@@ -1,3 +1,7 @@
+---
+title: Contributing to AgE
+---
+
 # Contributing to AgE
 
 Thank you for your interest in improving AgE3.

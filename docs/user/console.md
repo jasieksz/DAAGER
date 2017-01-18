@@ -1,3 +1,7 @@
+---
+title: Console
+---
+
 # Console
 
 AgE provides a simple console that is intended to make cluster and computation management easier.
@@ -8,6 +12,7 @@ The current version of the console is backed by Nashorn JavaScript engine. It ma
 ## Running console
 
 ### From the build JAR
+
 To start the console, you need to have `age3-console` jar and all its dependencies. Then execute:
 ```bash
 java -cp YOUR_JARS pl.edu.agh.age.console.ConsoleBootstrapper

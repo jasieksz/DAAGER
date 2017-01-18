@@ -1,12 +1,18 @@
+---
+title: Architecture
+---
+
 # Architecture
 
 ## Core module
 
 The core module (located in **age3-core** Gradle module) should contain all of the services needed to deploy a distributed cluster of nodes, general compute API and general utilities.
 It **should not** contain:
+
 - compute-dependent classes,
 - console-related classes,
 - examples.
+
 Generally — the less, the better.
 
 Note: It is worth considering to extract compute API and utilities to separate module,
@@ -16,6 +22,7 @@ However, our codebase is small as for now, so we still keep everything in the co
 ## Core services
 
 There are several core services, that are required for AgE 3 to work:
+
 * discovery — performs (compute) node discovery,
 * identity — provides info about compute nodes,
 * lifecycle — manages the lifecycle of a compute node,

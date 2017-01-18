@@ -1,3 +1,7 @@
+---
+title: System properties in AgE
+---
+
 # System properties in AgE
 
 This page presents all configuration properties accepted by AgE.

@@ -1,3 +1,7 @@
+---
+title: Coding Guidelines for AgE3
+---
+
 # Coding Guidelines for AgE3
 
 We base our guidelines loosely on [Google Java Guidelines](https://google.github.io/styleguide/javaguide.html).

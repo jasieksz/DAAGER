@@ -1,3 +1,7 @@
+---
+title: How to write your own compute module?
+---
+
 # How to write your own compute module?
 
 The design of the platform eases the iterative development of compute modules.
@@ -84,6 +88,7 @@ Map<String, Set<String>> neighbours = topologyProvider.neighboursOf("second");
 ```
 
 This API requires two things:
+
 - topology function – passed using `setTopology`,
 - identifiers (any serializable type) of your computational units – passed using `addNodes`.  
 
@@ -94,8 +99,10 @@ If you need to change the topology after initialization, just use the `setTopolo
 
 
 Topology offered to compute levels use two concepts to locate nodes:
+
 - identifiers defined by user,
 - `String`-based annotations defined by the topology function.
+
 Annotations make it possible to define more complicated relations beside simple "neighbourhood". 
 For example, for bi-directional ring, two annotations are used: *left* and *right*,
 so you can easily differentiate the direction of your messages.

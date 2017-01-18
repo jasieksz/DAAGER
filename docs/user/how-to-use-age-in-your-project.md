@@ -1,3 +1,7 @@
+---
+title: How to use AgE in your project?
+---
+
 # How to use AgE in your project?
 
 AgE is intended to be used in two ways:
@@ -72,9 +76,11 @@ Clone <https://gitlab.com/age-agh/age3-sample-project.git> repository and use it
     java -cp YOUR_CLASSPATH -enableassertions pl.edu.agh.age.node.NodeBootstrapper file:src/main/resources/spring-sample.xml
     ```
     
-    Two things are important in this command:   
-    * **YOUR_CLASSPATH** should be replaces by collected list of jars and your classes,
-    * The only argument for **NodeBootstrapper** is a path to your Spring configuration. If it is not provided, the node will wait for configuration from the network (for example, passed from a console node).
+    Two things are important in this command:
+
+    *   **YOUR_CLASSPATH** should be replaces by collected list of jars and your classes,
+    *   The only argument for **NodeBootstrapper** is a path to your Spring configuration.
+        If it is not provided, the node will wait for configuration from the network (for example, passed from a console node).
     
     Using `-enableassertions` is encouraged.
     
@@ -106,6 +112,7 @@ AgE loads the network configuration from the file specified by the `age.node.haz
 The first file found is then imported into the main configuration.
  
 You can either:
+
 - provide a file with the same name somewhere in your classpath,
 - change the property to your preferred value (`classpath:` prefix is supported).
 

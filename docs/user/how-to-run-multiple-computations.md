@@ -1,3 +1,7 @@
+---
+title: How to run multiple computations?
+---
+
 # How to run multiple computations?
 
 A common scenario is to run repeated experiments with the same or similar configuration in each execution.
