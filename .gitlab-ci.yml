@@ -49,9 +49,14 @@ deploy_age_javadocs:
     - develop
   script:
     - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD alljavadoc
-    - scp -r build/docs/javadoc/ $DOCS_URL:dev/
+    - scp -r build/docs/javadoc/ $DOCS_URL:javadocs/age3/develop
   tags:
     - java
+
+trigger_build:
+    stage: deploy
+    script:
+      - "curl -X POST -F token=${DOCS_TRIGGER_TOKEN} -F ref=master https://gitlab.com/api/v3/projects/2333621/trigger/builds"
 
 build_core_jar:
   stage: build
