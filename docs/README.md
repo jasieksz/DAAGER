@@ -6,16 +6,21 @@ title: AgE 3 Documentation
 
 ## User documentation
 
-- [Console]({filename}user/console.md)
-- [How to use AgE in your project?]({filename}user/how-to-use-age-in-your-project.md)
-- [How to write your own compute module?]({filename}user/how-to-write-your-own-compute-module.md)
-- [How to run multiple computations?]({filename}user/how-to-run-multiple-computations.md)
-- [Configuration properties]({filename}user/properties.md)
+- [Overview](user/overview.md)
+- [Console](user/console.md)
+- [Configuration properties](user/properties.md)
+- [Stream Agents](user/stream-agents/README.md)
+
+## How-tos
+
+- [How to use AgE in your project?](howto/how-to-use-age-in-your-project.md)
+- [How to write your own compute module?](howto/how-to-write-your-own-compute-module.md)
+- [How to run multiple computations?](howto/how-to-run-multiple-computations.md)
 
 ## Contributor documentation
 
 Please, read the following pages if you are extending AgE core or developing a new module to include in
 the AgE codebase.
 
-- [How to contribute]({filename}contributor/README.md)
-- [Architecture]({filename}contributor/architecture.md)
+- [How to contribute](contributor/README.md)
+- [Architecture](contributor/architecture.md)

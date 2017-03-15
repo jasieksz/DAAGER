@@ -19,7 +19,7 @@
 
 plugins {
 	id 'application'
-	id 'com.github.johnrengelman.shadow' version '1.2.3'
+	id 'com.github.johnrengelman.shadow' version '1.2.4'
 }
 
 mainClassName = 'pl.edu.agh.age.node.NodeBootstrapper'
@@ -32,6 +32,14 @@ shadowJar {
 	mergeServiceFiles('META-INF/spring.*')
 	baseName = 'age3-core'
 	classifier = null
+	version = null
+}
+
+distShadowTar {
+	version = null
+}
+
+distShadowZip {
 	version = null
 }
 

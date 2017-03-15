@@ -35,6 +35,17 @@ dependencies {
 shadowJar {
 	// Required for merging spring handler definitions (e.g. from Hazelcast)
 	mergeServiceFiles('META-INF/spring.*')
+	baseName = 'age3-examples'
+	classifier = null
+	version = null
+}
+
+distShadowTar {
+	version = null
+}
+
+distShadowZip {
+	version = null
 }
 
 // Use ProcessBuilder to have a correct tty on Linux
