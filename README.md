@@ -84,7 +84,8 @@ To run the standalone node with the console:
 
 To pass arguments to these Gradle tasks, you can use the `appArgs` property, for example:
 ```bash
-./gradlew age3-core:node -PappArgs="['classpath:pl/edu/agh/age/compute/stream/example/spring-stream-example.xml']"
+cd age3-stream-agents
+../gradlew age3-core:node -PappArgs="['classpath:pl/edu/agh/age/compute/stream/example/spring-stream-example.xml']"
 ```
 
 ### Using distribution jar
