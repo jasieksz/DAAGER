@@ -55,13 +55,13 @@ allprojects {
 		repositories {
 			maven {
 				if (project.version.endsWith('-SNAPSHOT')) {
-					url "${nexusUrl}/repository/maven-snapshots"
+					url "${project.properties.nexusUrl}/repository/maven-snapshots"
 				} else {
-					url "${nexusUrl}/repository/maven-releases"
+					url "${project.properties.nexusUrl}/repository/maven-releases"
 				}
 				credentials {
-					username = nexusUsername
-					password = nexusPassword
+					username = project.properties.nexusUsername
+					password = project.properties.nexusPassword
 				}
 			}
 		}
