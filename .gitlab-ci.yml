@@ -70,6 +70,7 @@ build_core_jar:
   artifacts:
     paths:
       - age3-core/build/libs/age3-core.jar
+    expire_in: 1 week
 
 build_docker:
   stage: deploy
