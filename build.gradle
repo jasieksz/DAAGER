@@ -31,6 +31,8 @@ plugins {
 	id 'net.researchgate.release' version '2.5.0'
 }
 
+project.ext.hazelcastVersion = '3.8'
+
 allprojects {
 	group 'pl.edu.agh.age'
 	version '0.4-SNAPSHOT'
@@ -59,6 +61,15 @@ allprojects {
 					username = project.properties.nexusUsername
 					password = project.properties.nexusPassword
 				}
+			}
+		}
+	}
+
+	configurations.all {
+		// As in: https://docs.gradle.org/current/userguide/dependency_management.html#sec:custom_versioning_scheme
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.group == 'com.hazelcast' && details.requested.version == 'default') {
+				details.useVersion "${hazelcastVersion}+"
 			}
 		}
 	}
@@ -142,7 +153,7 @@ task alljavadoc(type: Javadoc, group: "Documentation") {
 	options.links 'http://docs.oracle.com/javase/8/docs/api/'
 	options.links 'http://docs.spring.io/spring/docs/current/javadoc-api/'
 	options.links 'https://google.github.io/guava/releases/snapshot/api/docs/'
-	options.links 'http://docs.hazelcast.org/docs/3.7/javadoc/'
+	options.links "http://docs.hazelcast.org/docs/${hazelcastVersion}/javadoc/"
 	options.tags = ['apiNote:a:API Note:', 'implSpec:a:Implementation Requirements:', 'implNote:a:Implementation Note:']
 	destinationDir = file("${buildDir}/docs/javadoc")
 }

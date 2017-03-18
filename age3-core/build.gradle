@@ -45,7 +45,7 @@ distShadowZip {
 
 dependencies {
 	compile 'org.springframework:spring-context:+'
-	compile('com.hazelcast:hazelcast:3.7+') {
+	compile('com.hazelcast:hazelcast:default') {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
