@@ -33,7 +33,7 @@ import javaslang.collection.Seq;
  * It should include modified parents in the results.
  */
 @FunctionalInterface
-public interface SexualReproduction extends Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> {
+public interface SexualReproduction extends Function<Tuple2<EmasAgent, EmasAgent>, Tuple2<Seq<EmasAgent>, EmasAgent>> {
 
 	/**
 	 * Creates a new builder for sexual reproduction.

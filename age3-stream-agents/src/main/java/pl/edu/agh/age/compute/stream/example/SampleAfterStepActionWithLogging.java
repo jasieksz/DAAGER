@@ -33,6 +33,8 @@ import javaslang.collection.Seq;
 
 public final class SampleAfterStepActionWithLogging implements AfterStepAction<EmasAgent, StatisticsKeys> {
 
+	private static final long serialVersionUID = 999377795385214162L;
+	
 	private final AgentsRegistry<EmasAgent> registry;
 
 	@Inject public SampleAfterStepActionWithLogging(final AgentsRegistry<EmasAgent> registry) {
@@ -43,7 +45,8 @@ public final class SampleAfterStepActionWithLogging implements AfterStepAction<E
 	public Map<StatisticsKeys, Object> apply(final Long workplaceId, final Long step,
 	                                         final List<EmasAgent> population) {
 		registry.register(workplaceId, step, population);
-		return HashMap.of(StatisticsKeys.STEP_NUMBER, step, StatisticsKeys.ENERGY_SUM, sumEnergy(population),
+		return HashMap.of(StatisticsKeys.STEP_NUMBER, step,
+		                  StatisticsKeys.ENERGY_SUM, sumEnergy(population),
 		                  StatisticsKeys.AVERAGE_FITNESS, computeAverageFitness(population),
 		                  StatisticsKeys.POPULATION_SIZE, population.size());
 	}

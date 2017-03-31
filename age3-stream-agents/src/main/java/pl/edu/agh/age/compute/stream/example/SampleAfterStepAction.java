@@ -29,10 +29,14 @@ import javaslang.collection.Map;
 import javaslang.collection.Seq;
 
 public final class SampleAfterStepAction implements AfterStepAction<EmasAgent, StatisticsKeys> {
+
+	private static final long serialVersionUID = -5852903273256254808L;
+
 	@Override
 	public Map<StatisticsKeys, Object> apply(final Long workplaceId, final Long step,
 	                                         final List<EmasAgent> population) {
-		return HashMap.of(StatisticsKeys.STEP_NUMBER, step, StatisticsKeys.ENERGY_SUM, sumEnergy(population),
+		return HashMap.of(StatisticsKeys.STEP_NUMBER, step,
+			              StatisticsKeys.ENERGY_SUM, sumEnergy(population),
 		                  StatisticsKeys.AVERAGE_FITNESS, computeAverageFitness(population),
 		                  StatisticsKeys.POPULATION_SIZE, population.size());
 	}

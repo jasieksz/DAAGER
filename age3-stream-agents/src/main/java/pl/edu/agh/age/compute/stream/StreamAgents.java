@@ -83,6 +83,7 @@ public final class StreamAgents implements Runnable, Manager {
 
 	private final TopologyProvider<Long> topologyProvider;
 
+	@SuppressWarnings("unchecked")
 	@Inject
 	public StreamAgents(final Configuration configuration, final ThreadPool threadPool,
 	                    final DistributionUtilities distributionUtilities, final UnicastMessenger messenger,
@@ -136,9 +137,9 @@ public final class StreamAgents implements Runnable, Manager {
 			Thread.currentThread().interrupt();
 		}
 
-		workplaceFutures.forEach(StreamAgents::cancelWorkplaceFuture);
 		loggingService.stop();
-
+		
+		workplaceFutures.forEach(StreamAgents::cancelWorkplaceFuture);
 		logger.info("Stream agents finished");
 	}
 

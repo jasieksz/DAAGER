@@ -56,7 +56,7 @@ import javaslang.collection.Map;
  * - `[PD]` - log entry with a one-line problem definition string
  * - `[WH]` - log entry with a one-line definition of properties used in the workplace entries
  * - `[SH]` - log entry with a one-line definition of properties used in the tick summary entries
- * - `[BH]` - log entry with a one-line definition of properties used in best solution entries<
+ * - `[BH]` - log entry with a one-line definition of properties used in best solution entries
  * - `[W]` - log entry for a particular workplace in a tick (each tick consist of *n* such entries, if *n* is the
  * number of all workplaces)
  * - `[S]` - log entry with a tick summary (each tick consists of exactly one entry of this type)

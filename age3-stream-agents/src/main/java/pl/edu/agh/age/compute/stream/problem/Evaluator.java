@@ -25,7 +25,7 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
  * Evaluator is a function that computes fitness of the solution.
  *
  * @param <S>
- * 		type of the solution.
+ * 		the type of the solution
  */
 @FunctionalInterface
 public interface Evaluator<S extends Solution<?>> {

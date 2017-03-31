@@ -88,24 +88,25 @@ public class Workplace<T extends Agent> implements Runnable {
 		incomingAgents.getAndUpdate(ts -> ts.append(agent));
 	}
 
-	@Override public void run() {
+	@SuppressWarnings("unchecked") @Override public void run() {
 		logger.info("[W{}] Workplace {} is starting", id, this);
 		logger.debug("[W{}] Initial population: {}", id, initialPopulation);
 
 		List<T> population = initialPopulation;
 		while (!Thread.currentThread().isInterrupted() && !manager.isStopConditionReached()) {
+			step.incrementAndGet();
+			
 			// Before step
 			population = beforeStepAction.apply(step.get(), population, incomingAgents.getAndSet(List.empty()));
 
 			// Step
-			population = stepOperations.stepOn(population, environment);
+			population = stepOperations.stepOn(step.get(), population, environment);
 			logger.debug("[W{}] Current population: {}", id, population.length()); // FIXME
 
 			// After step
 			final Map<Object, Object> localStats = (Map<Object, Object>)afterStepAction.apply(id, step.get(), population);
 			manager.postStatistics(id, localStats);
 			logger.debug("[W{}] Local stats: {}", id, localStats);
-			step.incrementAndGet();
 		}
 
 		logger.info("[W{}] Workplace {} finished work in {} steps", id, this, step.get());

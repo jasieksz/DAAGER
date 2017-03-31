@@ -23,6 +23,7 @@ package pl.edu.agh.age.compute.stream.logging;
  * Columns used by the {@link DefaultLoggingService}
  */
 public final class Columns {
+
 	public static final String TIME = "TIME";
 
 	public static final String WORKPLACE_ID = "WORKPLACE_ID";
@@ -39,11 +40,16 @@ public final class Columns {
 
 	public static final String SOLUTION_OCURRANCE_COUNT = "SOLUTION_OCURRANCE_COUNT";
 
-	static final String[] BEST_SOLUTION_HEADER = {Tags.BEST_SOLUTION_HEADER_TAG, SOLUTION_STRING, SOLUTION_WORKPLACE_ID,
-		SOLUTION_WORKPLACE_STEP_NUMBER, SOLUTION_OCURRANCE_COUNT};
+	static final String[] BEST_SOLUTION_HEADER = {Tags.BEST_SOLUTION_HEADER_TAG, //
+	                                              SOLUTION_STRING, //
+	                                              SOLUTION_WORKPLACE_ID, //
+	                                              SOLUTION_WORKPLACE_STEP_NUMBER, //
+	                                              SOLUTION_OCURRANCE_COUNT};
 
-	static final String[] SUMMARY_HEADER = {Tags.TICK_SUMMARY_HEADER_TAG, TIME, BEST_SOLUTION_SO_FAR,
-		FITNESS_EVALUATIONS};
+	static final String[] SUMMARY_HEADER = {Tags.TICK_SUMMARY_HEADER_TAG, //
+	                                        TIME, //
+	                                        BEST_SOLUTION_SO_FAR, //
+	                                        FITNESS_EVALUATIONS};
 
 	private Columns() {}
 }

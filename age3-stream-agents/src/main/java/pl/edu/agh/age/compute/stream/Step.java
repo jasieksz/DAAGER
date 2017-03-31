@@ -23,5 +23,18 @@ import javaslang.collection.List;
 
 @FunctionalInterface
 public interface Step<T extends Agent> {
-	List<T> stepOn(List<T> population, Environment environment);
+
+	/**
+	 * Method invoked during each iteration. Make sure that a minimum number of operations is executed here.
+	 *
+	 * @param stepNumber
+	 * 		the current step number
+	 * @param population
+	 * 		the current population
+	 * @param environment
+	 * 		the environment
+	 * @return the new population - a result of step iteration calculations
+	 */
+	List<T> stepOn(long stepNumber, List<T> population, Environment environment);
+
 }

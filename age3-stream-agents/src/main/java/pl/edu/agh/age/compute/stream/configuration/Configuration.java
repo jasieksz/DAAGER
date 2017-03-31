@@ -43,7 +43,15 @@ public final class Configuration {
 
 	private final Topology<? extends Serializable> topology;
 
-	@Inject
+	public Configuration(final WorkplaceConfigurationGenerator<Agent> workplaceConfigurationGenerator,
+	                     final StopCondition stopCondition, final LoggingService loggingService,
+	                     final Topology<? extends Serializable> topology) {
+		this.workplaceConfigurations = workplaceConfigurationGenerator.generateConfigurations();
+		this.stopCondition = stopCondition;
+		this.loggingService = loggingService;
+		this.topology = topology;
+	}
+
 	public Configuration(final List<WorkplaceConfiguration<Agent>> workplaceConfigurations,
 	                     final StopCondition stopCondition, final LoggingService loggingService,
 	                     final Topology<? extends Serializable> topology) {
@@ -65,7 +73,7 @@ public final class Configuration {
 		return loggingService;
 	}
 
-	public <T extends Serializable> Topology<T> topology() {
+	@SuppressWarnings("unchecked") public <T extends Serializable> Topology<T> topology() {
 		return (Topology<T>)topology;
 	}
 }

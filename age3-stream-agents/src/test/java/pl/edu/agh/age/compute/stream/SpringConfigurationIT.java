@@ -78,7 +78,7 @@ public final class SpringConfigurationIT {
 		final javaslang.collection.List<Agent> agents = javaslang.collection.List.ofAll(
 			workplaceConfiguration.agents());
 
-		final javaslang.collection.List<Agent> agentsAfterStep = step.stepOn(agents, environment);
+		final javaslang.collection.List<Agent> agentsAfterStep = step.stepOn(1L, agents, environment);
 
 		softly.assertThat(agentsAfterStep).isNotEmpty();
 

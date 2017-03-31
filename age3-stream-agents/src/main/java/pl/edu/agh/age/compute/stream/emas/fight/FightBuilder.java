@@ -42,13 +42,13 @@ public final class FightBuilder<S extends Solution<?>> {
 	FightBuilder() {}
 
 	/**
-	 * Custom agent comparator should return a non-negative integer if a first agent should win the transferEnergy
+	 * Agent comparator should return a non-negative integer if a first agent should win the fight
 	 * or a negative integer if the second one should be the winner.
 	 *
 	 * @param agentComparator
 	 * 		the agent comparator
 	 *
-	 * @return the transferEnergy builder
+	 * @return the fight builder
 	 */
 	public FightBuilder<S> withComparator(final Comparator<EmasAgent> agentComparator) {
 		this.agentComparator = requireNonNull(agentComparator);
@@ -65,8 +65,8 @@ public final class FightBuilder<S extends Solution<?>> {
 		checkState(energyTransfer != null);
 
 		return agents -> (agentComparator.compare(agents._1, agents._2) >= 0)
-		                 ? transferEnergy(agents._2, agents._1)
-		                 : transferEnergy(agents._1, agents._2);
+		                 ? transferEnergy(agents._2, agents._1) // first agent wins the fight
+		                 : transferEnergy(agents._1, agents._2); // second agent wins the fight
 	}
 
 	private Seq<EmasAgent> transferEnergy(final EmasAgent loser, final EmasAgent winner) {

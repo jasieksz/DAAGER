@@ -44,7 +44,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	<bean id="workplace-1" class="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
 		<constructor-arg ref="step"/>
 		<constructor-arg ref="agents-jul"/>
+		<constructor-arg ref="population-analyzer"/>
 	</bean>
+
 	<util:list id="workplace-configurations"
 	           value-type="pl.edu.agh.age.compute.stream.configuration.WorkplaceConfiguration">
 		<ref bean="workplace-1"/>
@@ -54,7 +56,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
 	<bean id="topology" class="pl.edu.agh.age.compute.api.topology.FullMeshTopology" />
 
-	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration"/>
+	<bean id="configuration" class="pl.edu.agh.age.compute.stream.configuration.Configuration">
+		<constructor-arg name="workplaceConfigurations" ref="workplace-configurations" />
+		<constructor-arg name="stopCondition" ref="stop-condition" />
+		<constructor-arg name="loggingService" ref="loggingService" />
+		<constructor-arg name="topology" ref="topology" />
+	</bean>
 
 	<!-- Commented out, because it would require too many dependencies -->
 	<!--<bean id="runnable" class="pl.edu.agh.age.compute.stream.StreamAgents"/>-->

@@ -1,5 +1,18 @@
 # AgE 3 Changelog
 
+## 0.5 -- TBD
+
+Stream Agents:
+- Broad changes to Stream Agents (#38):
+  - Probabilistic comparators for EMAS Agents with probability proportional to the agent's quality
+  - Proportional energy transfer modified to match old version (only parent's loss is defined)
+  - Constant energy transfer was introduced
+  - AsexualReproduction was added
+  - Evaluation and improvement are separated from reproduction
+  - Workplace generator added to configuration
+  - Step has been extended with the step number parameter
+  - Logger improvements
+
 ## 0.4 -- 04.04.2017
 
 Console:

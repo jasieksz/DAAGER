@@ -62,7 +62,7 @@ public final class NashornLoader {
 		return load(new FileInputStream(configuration));
 	}
 
-	public static Configuration load(final InputStream configuration) {
+	@SuppressWarnings("unchecked") public static Configuration load(final InputStream configuration) {
 		final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 		try {
 			logger.debug("Evaluating base script");
@@ -105,6 +105,8 @@ public final class NashornLoader {
 	}
 
 	public static class LoadingException extends RuntimeException {
+
+		private static final long serialVersionUID = 6488985976724910073L;
 
 		public LoadingException(final String message) {
 			super(message);

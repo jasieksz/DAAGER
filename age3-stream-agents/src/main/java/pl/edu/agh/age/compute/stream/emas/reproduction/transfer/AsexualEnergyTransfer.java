@@ -17,44 +17,55 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.compute.stream.emas.fight.transfer;
+package pl.edu.agh.age.compute.stream.emas.reproduction.transfer;
+
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
 
+/**
+ * Energy transfer operator for asexual reproduction. Operates on doubles.
+ */
 @FunctionalInterface
-public interface FightEnergyTransfer {
+public interface AsexualEnergyTransfer {
 
 	/**
-	 * Transfers the energy between fighting agents
+	 * @param parent
+	 * 		parent agent
 	 *
-	 * @param loser
-	 * 		losing agent
-	 * @param winner
-	 * 		winning agent
-	 *
-	 * @return array with energy values for losing agent and winning agent
+	 * @return array with energy values for the parent and a child
 	 */
-	double[] transfer(EmasAgent loser, EmasAgent winner);
+	double[] transfer(EmasAgent parent);
+
+	/**
+	 * Returns an energy transfer operator that distributes energy equally between all two agents.
+	 */
+	static AsexualEnergyTransfer equal() {
+		return (parent) -> {
+			final double v = parent.energy / 2.0;
+			return new double[] {v, v};
+		};
+	}
 
 	/**
 	 * Returns an energy transfer operator that distributes energy in proportional energy portions.
 	 *
 	 * @param proportion
-	 * 		proportion of energy that winning agent should receive
+	 * 		proportion of parent's energy that will be transfered to the child
 	 * @param minimumAgentEnergy
 	 * 		minimum agent energy that agent can have
 	 */
-	static FightEnergyTransfer proportional(final double proportion, final double minimumAgentEnergy) {
+	static AsexualEnergyTransfer proportional(final double proportion, final double minimumAgentEnergy) {
 		// FIXME: minimumAgentEnergy does not fit here - it's not the responsibility of transfer to kill parents
 		checkArgument(proportion >= 0 && proportion <= 1, "Proportion value is out of allowed range");
-		return (loser, winner) -> {
-			// If agent dies after the fight -> transfer all his energy to the winner
-			final double delta = (loser.energy * (1 - proportion) <= minimumAgentEnergy)
-			                     ? loser.energy
-			                     : (loser.energy * proportion);
-			return new double[] {loser.energy - delta, winner.energy + delta};
+		return (parent) -> {
+			final double childEnergy = parent.energy * proportion;
+			final double parentEnergy = parent.energy * (1 - proportion);
+			if (parentEnergy <= minimumAgentEnergy) {
+				return new double[] {0.0, parent.energy};
+			}
+			return new double[] {parentEnergy, childEnergy};
 		};
 	}
 
@@ -62,19 +73,19 @@ public interface FightEnergyTransfer {
 	 * Returns an energy transfer operator that distributes energy in fixed portions.
 	 *
 	 * @param transferredEnergy
-	 *        the transferred energy portion
+	 * 		the transferred energy portion
 	 * @param minimumAgentEnergy
-	 *        the minimum agent energy that agent can have
+	 * 		the minimum agent energy that agent can have
 	 */
-	static FightEnergyTransfer constant(final double transferredEnergy, final double minimumAgentEnergy) {
+	static AsexualEnergyTransfer constant(final double transferredEnergy, final double minimumAgentEnergy) {
 		// FIXME: minimumAgentEnergy does not fit here - it's not the responsibility of transfer to kill parents
 		checkArgument(transferredEnergy >= 0);
-		return (loser, winner) -> {
-			// if agent dies after the fight -> transfer all his energy to the winner
-			final double delta = ((loser.energy - transferredEnergy) <= minimumAgentEnergy)
-				                 ? loser.energy : transferredEnergy;
-			return new double[] {loser.energy - delta, winner.energy + delta};
+		return (parent) -> {
+			final double parentEnergy = parent.energy - transferredEnergy;
+			if (parentEnergy <= minimumAgentEnergy) {
+				return new double[] {0.0, parent.energy};
+			}
+			return new double[] {parentEnergy, transferredEnergy};
 		};
 	}
-
 }

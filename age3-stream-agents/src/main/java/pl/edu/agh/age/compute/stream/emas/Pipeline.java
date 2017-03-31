@@ -20,11 +20,13 @@
 package pl.edu.agh.age.compute.stream.emas;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
+import javaslang.collection.Seq;
 
 /**
  * EMAS agent processing definition.
@@ -106,6 +108,62 @@ public final class Pipeline extends pl.edu.agh.age.compute.stream.Pipeline<EmasA
 			pairs = pairs.append(selectedPair);
 		}
 		return Tuple.of(new PairPipeline(pairs), new Pipeline(remainingAgents));
+	}
+
+	/**
+	 * Self reproduce all agents from this pipeline, using a provided strategy.
+	 *
+	 * @param selfReproductionStrategy
+	 * 		the self reproduction strategy
+	 * @return the tuple containing parent and child agents pipelines
+	 */
+	public final Tuple2<Pipeline, Pipeline> selfReproduce(final Function<EmasAgent, Tuple2<EmasAgent, EmasAgent>> selfReproductionStrategy) {
+		final List<Tuple2<EmasAgent, EmasAgent>> ts = population.map(agent -> selfReproductionStrategy.apply(agent));
+		return PipelineUtils.extractPipelineTuple(ts);
+	}
+
+	/**
+	 * Self reproduce agents from this pipeline that meet a given reproduction predicate.
+	 *
+	 * @param selfReproductionPredicate
+	 * 		the self reproduction predicate
+	 * @param selfReproductionStrategy
+	 * 		the self reproduction strategy
+	 * @return the tuple containing parent and child agents pipelines
+	 */
+	public final Tuple2<Pipeline, Pipeline> selfReproduce(final Predicate<EmasAgent> selfReproductionPredicate,
+	                                                      final Function<EmasAgent, Tuple2<EmasAgent, EmasAgent>> selfReproductionStrategy) {
+		final List<Tuple2<EmasAgent, EmasAgent>> ts = population.map(agent -> selfReproduce(agent,
+		    selfReproductionPredicate, selfReproductionStrategy));
+		return PipelineUtils.extractPipelineTuple(ts);
+	}
+
+	private static Tuple2<EmasAgent, EmasAgent> selfReproduce(final EmasAgent agent,
+	                                                          final Predicate<EmasAgent> selfReproductionPredicate,
+	                                                          final Function<EmasAgent, Tuple2<EmasAgent, EmasAgent>> selfReproductionStrategy) {
+		return selfReproductionPredicate.test(agent) ? selfReproductionStrategy.apply(agent) : Tuple.of(agent, null);
+	}
+
+	/**
+	 * Evaluates agents in the population.
+	 *
+	 * @param populationEvaluator
+	 * 		the population evaluator
+	 * @return the pipeline
+	 */
+	public final Pipeline evaluate(final PopulationEvaluator<EmasAgent> populationEvaluator) {
+		return pipelineFactory.apply(populationEvaluator.evaluate(population).toList());
+	}
+
+	/**
+	 * Processes the whole population, applying a custom function to it.
+	 *
+	 * @param populationProcessor
+	 * 		the function to process the population
+	 * @return the pipeline
+	 */
+	public final Pipeline process(final Function<Seq<EmasAgent>, Seq<EmasAgent>> populationProcessor) {
+		return pipelineFactory.apply(populationProcessor.apply(population).toList());
 	}
 
 	/**

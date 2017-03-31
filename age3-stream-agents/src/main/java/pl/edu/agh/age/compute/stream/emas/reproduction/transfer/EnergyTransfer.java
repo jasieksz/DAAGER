@@ -25,10 +25,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
 
 /**
- * Energy transfer operator. Operates on doubles.
+ * Energy transfer operator for sexual reproduction. Operates on doubles.
  */
 @FunctionalInterface
 public interface EnergyTransfer {
+
 	/**
 	 * @param first
 	 * 		parent agent
@@ -50,32 +51,47 @@ public interface EnergyTransfer {
 	}
 
 	/**
-	 * Returns an energy transfer operator that distributes energy proportionally with given proportions between all
-	 * three agents.
+	 * Returns an energy transfer operator that distributes energy in proportional energy portions.
 	 *
-	 * @param parentsProportion
-	 * 		proportion of energy that parents should receive
-	 * @param childProportion
-	 * 		proportion of energy that child should receive
+	 * @param proportion
+	 * 		proportion of each parent's energy that will be transfered to the child
 	 * @param minimumAgentEnergy
 	 * 		minimum agent energy that agent can have
 	 */
-	static EnergyTransfer proportional(final double parentsProportion, final double childProportion,
-	                                   final double minimumAgentEnergy) {
+	static EnergyTransfer proportional(final double proportion, final double minimumAgentEnergy) {
 		// FIXME: minimumAgentEnergy does not fit here - it's not the responsibility of transfer to kill parents
-		checkArgument((parentsProportion >= 0) && (parentsProportion <= 1));
-		checkArgument((childProportion >= 0) && (childProportion <= 1));
-		checkArgument(Math.abs(parentsProportion + childProportion - 1) <= 0.0001,
-		              "Proportion sum is not equal to 1.0");
+		checkArgument(proportion >= 0 && proportion <= 1, "Proportion value is out of allowed range");
 		return (first, second) -> {
-			final double energySum = first.energy + second.energy;
-			final double parentEnergy = (energySum * parentsProportion) / 2.0;
-			final double childEnergy = energySum * childProportion;
-			// XXX: really for childEnergy <= minimum?
-			if ((parentEnergy <= minimumAgentEnergy) || (childEnergy <= minimumAgentEnergy)) {
-				return new double[] {0.0, 0.0, energySum};
+			final double firstParentGift = first.energy * proportion;
+			final double firstParentEnergy = first.energy * (1 - proportion);
+			final double secondParentGift = second.energy * proportion;
+			final double secondParentEnergy = second.energy * (1 - proportion);
+			if (firstParentEnergy <= minimumAgentEnergy || secondParentEnergy <= minimumAgentEnergy) {
+				return new double[] {0.0, 0.0, first.energy + second.energy};
 			}
-			return new double[] {parentEnergy, parentEnergy, childEnergy};
+			return new double[] {firstParentEnergy, secondParentEnergy, firstParentGift + secondParentGift};
+		};
+	}
+
+	/**
+	 * Returns an energy transfer operator that distributes energy in fixed portions.
+	 *
+	 * @param transferredEnergy
+	 *        the transferred energy portion (each parent will lose energy portion of this value and a child will gain
+	 *        twice as much energy)
+	 * @param minimumAgentEnergy
+	 *        the minimum agent energy that agent can have
+	 */
+	static EnergyTransfer constant(final double transferredEnergy, final double minimumAgentEnergy) {
+		// FIXME: minimumAgentEnergy does not fit here - it's not the responsibility of transfer to kill parents
+		checkArgument(transferredEnergy >= 0);
+		return (first, second) -> {
+			final double firstParentEnergy = first.energy - transferredEnergy;
+			final double secondParentEnergy = second.energy - transferredEnergy;
+			if (firstParentEnergy <= minimumAgentEnergy || secondParentEnergy <= minimumAgentEnergy) {
+				return new double[] {0.0, 0.0, first.energy + second.energy};
+			}
+			return new double[] {firstParentEnergy, secondParentEnergy, 2 * transferredEnergy};
 		};
 	}
 }

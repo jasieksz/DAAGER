@@ -27,6 +27,7 @@ import javaslang.collection.Map;
  * Interface for functions executed after the step execution in a workplace.
  *
  * The parameters of the function are:
+ * - id of the workplace (as Long),
  * - step number (as Long),
  * - current population (as {@link List}).
  *

@@ -23,15 +23,15 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
-import pl.edu.agh.age.compute.stream.emas.reproduction.improvement.Improvement;
 import pl.edu.agh.age.compute.stream.emas.reproduction.mutation.Mutation;
 import pl.edu.agh.age.compute.stream.emas.reproduction.recombination.Recombination;
 import pl.edu.agh.age.compute.stream.emas.reproduction.transfer.EnergyTransfer;
 import pl.edu.agh.age.compute.stream.emas.solution.Solution;
-import pl.edu.agh.age.compute.stream.problem.Evaluator;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javaslang.Tuple;
+import javaslang.Tuple2;
 import javaslang.collection.List;
 import javaslang.collection.Seq;
 
@@ -42,7 +42,8 @@ import javaslang.collection.Seq;
  * * recombination,
  * * mutation,
  * * improvement,
- * * energy transfer.
+ * * energy transfer,
+ * * evaluation.
  *
  * Pipeline is immutable, new instance is created with each call.
  *
@@ -50,6 +51,7 @@ import javaslang.collection.Seq;
  * 		type of the solution.
  */
 public final class SexualReproductionPipeline<S extends Solution<?>> {
+
 	private final EmasAgent firstParent;
 
 	private final EmasAgent secondParent;
@@ -110,10 +112,6 @@ public final class SexualReproductionPipeline<S extends Solution<?>> {
 		return new SexualReproductionPipeline<>(firstParent, secondParent, mutation.mutate(childSolution));
 	}
 
-	public SexualReproductionPipeline<S> improve(final Improvement<S> improvement) {
-		return new SexualReproductionPipeline<>(firstParent, secondParent, improvement.improve(childSolution));
-	}
-
 	public SexualReproductionPipeline<S> transferEnergy(final EnergyTransfer energyTransfer) {
 		final double[] energyValue = energyTransfer.transfer(firstParent, secondParent);
 
@@ -125,29 +123,18 @@ public final class SexualReproductionPipeline<S extends Solution<?>> {
 		                                        secondParent.withEnergy(energyValue[1]), newChild);
 	}
 
-	@SuppressWarnings("unchecked") public SexualReproductionPipeline<S> evaluate(final Evaluator<S> evaluator) {
-		checkState(childSolution != null, "Evaluation requires child solution");
-
-		final S evaluatedChild = (S)childSolution.updateFitness(evaluator.evaluate(childSolution));
-		return new SexualReproductionPipeline<>(firstParent, secondParent, evaluatedChild);
-	}
-
 	/**
 	 * Extracts agents from this pipeline.
 	 *
-	 * @return a sequence of agents: two new parents and a child.
+	 * @return a tuple of agents: two new parents and a child.
 	 *
 	 * @throws IllegalStateException
 	 * 		if the child was not generated (usually `transferEnergy` was not called).
 	 */
-	public Seq<EmasAgent> extract() {
+	public Tuple2<Seq<EmasAgent>, EmasAgent> extract() {
 		checkState(child != null, "The child was not created. You must call transferEnergy before extraction.");
 
-		// Sanity check. Although evaluation is not required by API it is usually expected
-		// Not a checkState() because of possible performance issues
-		assert !Double.isNaN(child.solution.fitnessValue());
-
-		return List.of(firstParent, secondParent, child);
+		return Tuple.of(List.of(firstParent, secondParent), child);
 	}
 
 }

@@ -35,7 +35,8 @@ public final class SampleTopologyStep implements Step<EmasAgent> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SampleTopologyStep.class);
 
-	@Override public List<EmasAgent> stepOn(final List<EmasAgent> population, final Environment environment) {
+	@Override public List<EmasAgent> stepOn(final long stepNumber, final List<EmasAgent> population,
+	                                        final Environment environment) {
 		logger.info("Neighbours of {} are {}", environment.workplaceId(), environment.neighbours());
 		return population;
 	}

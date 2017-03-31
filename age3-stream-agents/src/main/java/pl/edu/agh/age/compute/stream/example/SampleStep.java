@@ -38,24 +38,34 @@ import javaslang.collection.List;
  */
 public final class SampleStep implements Step<EmasAgent> {
 
-	@Override public List<EmasAgent> stepOn(final List<EmasAgent> population, final Environment environment) {
-		final Recombination<DoubleSolution> recombination
-			= (firstSolution, secondSolution) -> new DoubleSolution((firstSolution.value() * 0.1)
-			                                                        + (secondSolution.value() * 0.9));
-		final SexualReproduction reproduction = SexualReproduction.<DoubleSolution>builder().withRecombination(
-			recombination).withEnergyTransfer(EnergyTransfer.equal()).withEvaluator(DoubleSolution::value).build();
+	private final Recombination<DoubleSolution> recombination;
 
-		final Pipeline pipeline = Pipeline.on(population)
-		                                  .selectPairsWithRepetitions(Selectors.random())
-		                                  .reproduce(reproduction)
-		                                  .selectPairsWithRepetitions(Selectors.random())
-		                                  .fight(pair -> List.of(pair._1, pair._2));
+	private final SexualReproduction reproduction;
+
+	public SampleStep() {
+		recombination = (firstSolution, secondSolution) -> new DoubleSolution(firstSolution.value() * 0.1
+		                                                                      + secondSolution.value() * 0.9);
+		reproduction = SexualReproduction.<DoubleSolution>builder()
+		                                 .withRecombination(recombination)
+		                                 .withEnergyTransfer(EnergyTransfer.equal())
+		                                 .build();
+	}
+
+	@Override public List<EmasAgent> stepOn(final long stepNumber, final List<EmasAgent> population,
+	                                        final Environment environment) {
+		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
+			                                                  .selectPairsWithRepetitions(Selectors.random())
+			                                                  .reproduce(reproduction);		
+		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2) //
+			                                   .selectPairsWithRepetitions(Selectors.random())
+			                                   .fight(pair -> List.of(pair._1, pair._2));
+
 		final Tuple2<Pipeline, Pipeline> afterMigration = pipeline.migrateWhen(Predicates.random(0.2));
 		final List<EmasAgent> migrated = afterMigration._1.extract();
 
 		migrated.forEach(emasAgent -> environment.migrate(emasAgent, environment.neighbours().get()._1));
 
-		final Tuple2<Pipeline, Pipeline> afterDeath = afterMigration._2().dieWhen(agent -> agent.energy < 0.1);
+		final Tuple2<Pipeline, Pipeline> afterDeath = afterMigration._2().dieWhen(agent -> agent.energy == 0);
 
 		final List<EmasAgent> dead = afterDeath._1.extract();
 		environment.logPopulation("dead", dead);

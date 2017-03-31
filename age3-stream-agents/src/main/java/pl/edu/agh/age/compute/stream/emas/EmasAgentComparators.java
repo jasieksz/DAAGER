@@ -20,6 +20,8 @@
 package pl.edu.agh.age.compute.stream.emas;
 
 import java.util.Comparator;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Comparators for EMAS agents.
@@ -40,6 +42,36 @@ public final class EmasAgentComparators {
 	 */
 	public static Comparator<EmasAgent> lowerFitness() {
 		return (first, second) -> Double.compare(second.solution.fitnessValue(), first.solution.fitnessValue());
+	}
+
+	/**
+	 * Higher fitness probabilistic comparator, where agents have winning probability proportional to their fitness.
+	 */
+	public static Comparator<EmasAgent> higherFitnessProbabilistic() {
+		return (first, second) -> {
+			final Random rand = ThreadLocalRandom.current();
+			final double threshold = getFitnessProportion(first, second);
+			return rand.nextDouble() <= threshold ? 1 : -1;
+
+		};
+	}
+
+	/**
+	 * Lower fitness probabilistic comparator, where agents have winning probability inversely proportional to their
+	 * fitness.
+	 */
+	public static Comparator<EmasAgent> lowerFitnessProbabilistic() {
+		return (first, second) -> {
+			final Random rand = ThreadLocalRandom.current();
+			final double threshold = 1 - getFitnessProportion(first, second);
+			return rand.nextDouble() <= threshold ? 1 : -1;
+		};
+	}
+
+	private static double getFitnessProportion(final EmasAgent first, final EmasAgent second) {
+		final double firstValue = first.solution.fitnessValue();
+		final double secondValue = second.solution.fitnessValue();
+		return firstValue / (firstValue + secondValue);
 	}
 
 }

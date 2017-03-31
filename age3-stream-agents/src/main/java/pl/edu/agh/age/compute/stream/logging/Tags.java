@@ -38,5 +38,9 @@ public final class Tags {
 
 	public static final String BEST_SOLUTION_TAG = "[B]";
 
+	public static final String PROPERTIES_OPENING_TAG = "<properties>";
+
+	public static final String PROPERTIES_CLOSING_TAG = "</properties>";
+
 	private Tags() {}
 }

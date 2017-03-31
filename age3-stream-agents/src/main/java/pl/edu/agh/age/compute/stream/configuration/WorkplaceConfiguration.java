@@ -27,6 +27,7 @@ import pl.edu.agh.age.compute.stream.BeforeStepAction;
 import pl.edu.agh.age.compute.stream.Manager;
 import pl.edu.agh.age.compute.stream.Step;
 import pl.edu.agh.age.compute.stream.Workplace;
+import pl.edu.agh.age.compute.stream.emas.PopulationGenerator;
 
 import com.google.common.base.MoreObjects;
 
@@ -49,22 +50,32 @@ public final class WorkplaceConfiguration<T extends Agent> {
 
 	private final AfterStepAction<T, ?> afterStep;
 
-	private final BeforeStepAction<T> beforeStepAction;
+	private final BeforeStepAction<T> beforeStep;
 
-	@Inject
+	public WorkplaceConfiguration(final PopulationGenerator<T> generator, final Step<T> step,
+	                              final AfterStepAction<T, ?> afterStep) {
+		this(generator.createPopulation(), step, afterStep, BeforeStepAction.simpleMerge());
+	}
+	
+	public WorkplaceConfiguration(final PopulationGenerator<T> generator, final Step<T> step,
+	                              final AfterStepAction<T, ?> afterStep, final BeforeStepAction<T> beforeStep) {
+		this(generator.createPopulation(), step, afterStep, beforeStep);
+	}
+
+
 	public WorkplaceConfiguration(final List<T> agents, final Step<T> step, final AfterStepAction<T, ?> afterStep) {
 		this(agents, step, afterStep, BeforeStepAction.simpleMerge());
 	}
 
 	public WorkplaceConfiguration(final List<T> agents, final Step<T> step, final AfterStepAction<T, ?> afterStep,
-	                              final BeforeStepAction<T> beforeStepAction) {
+	                              final BeforeStepAction<T> beforeStep) {
 		this.step = requireNonNull(step);
 		this.agents = requireNonNull(agents);
 		this.afterStep = requireNonNull(afterStep);
-		this.beforeStepAction = requireNonNull(beforeStepAction);
+		this.beforeStep = requireNonNull(beforeStep);
 	}
 
-	public Step<Agent> step() {
+	@SuppressWarnings("unchecked") public Step<Agent> step() {
 		return (Step<Agent>)step;
 	}
 
@@ -77,15 +88,15 @@ public final class WorkplaceConfiguration<T extends Agent> {
 	}
 
 	public Workplace<T> toWorkplace(final long id, final Manager manager) {
-		return new Workplace<>(id, agents, beforeStepAction, step, afterStep, manager);
+		return new Workplace<>(id, agents, beforeStep, step, afterStep, manager);
 	}
 
 	@Override public String toString() {
-		return MoreObjects.toStringHelper(this)
-		                  .add("step", step)
-		                  .add("agents", agents)
-		                  .add("afterStep", afterStep)
-		                  .add("beforeStepAction", beforeStepAction)
+		return MoreObjects.toStringHelper(this) //
+		                  .add("step", step) //
+		                  .add("agents", agents) //
+		                  .add("afterStep", afterStep) //
+		                  .add("beforeStep", beforeStep) //
 		                  .toString();
 	}
 }

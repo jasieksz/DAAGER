@@ -32,9 +32,11 @@ import java.util.ArrayList;
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
+import javaslang.collection.Seq;
 import javaslang.collection.Stream;
 
 public final class PipelineTest {
+
 	private static final Logger logger = LoggerFactory.getLogger(PipelineTest.class);
 
 	@Rule public final JUnitSoftAssertions softly = new JUnitSoftAssertions();
@@ -43,12 +45,12 @@ public final class PipelineTest {
 		final List<EmasAgent> population = Generators.randomAgents(10);
 
 		logger.info("Population before processing [{}]: {}", population.size(), population);
-		final Pipeline pipeline = Pipeline.on(population)
-		                                  .selectPairsWithRepetitions(Selectors.random())
-		                                  .reproduce(pair -> List.of(pair._1, pair._2,
-		                                                             EmasAgent.create(1.0, Solutions.simple(2))))
-		                                  .selectPairs(Selectors.random())._1.fight(pair -> List.of(pair._1, pair._2));
-
+		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
+		                                                      .selectPairsWithRepetitions(Selectors.random()) //
+		                                                      .reproduce(pair -> reproduce(pair));
+		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2) //
+		                                       .selectPairs(Selectors.random())._1 //
+		                                       .fight(pair -> List.of(pair._1, pair._2));
 		logger.info("Population after reproduction and fights [{}]: {}", pipeline.extract().size(), pipeline.extract());
 
 		final Tuple2<Pipeline, Pipeline> split = pipeline.migrateWhen(Predicates.random(0.5));
@@ -66,8 +68,12 @@ public final class PipelineTest {
 		logger.info("Population dead [{}]: {}", dead.extract().size(), dead.extract());
 		logger.info("Population alive (new population) [{}]: {}", alive.extract().size(), alive.extract());
 	}
+	
+	private Tuple2<Seq<EmasAgent>, EmasAgent> reproduce(final Tuple2<EmasAgent, EmasAgent> parents) {
+		return Tuple.of(List.of(parents._1, parents._2), EmasAgent.create(1.0, Solutions.simple(2)));
+	}
 
-
+	@SuppressWarnings("unused")
 	@Test public void testSelectPairs() {
 		final List<EmasAgent> agents = Stream.range(0, 5)
 		                                     .map(i -> EmasAgent.create(10, Solutions.simple(0)))
@@ -89,6 +95,7 @@ public final class PipelineTest {
 		softly.assertThat(pipeline.extract()).hasSize(1);
 	}
 
+	@SuppressWarnings("unused")
 	@Test public void testSelectPairsWithRepetitions() {
 		final List<EmasAgent> agents = Stream.range(0, 5).map(i -> EmasAgent.create(10, Solutions.simple(0))).toList();
 
@@ -106,12 +113,12 @@ public final class PipelineTest {
 		final List<EmasAgent> population = List.empty();
 
 		logger.info("Population before processing [{}]: {}", population.size(), population);
-		final Pipeline pipeline = Pipeline.on(population)
-		                                  .selectPairsWithRepetitions(Selectors.random())
-		                                  .reproduce(pair -> List.of(pair._1, pair._2,
-		                                                             EmasAgent.create(1.0, Solutions.simple(2))))
-		                                  .selectPairs(Selectors.random())._1.fight(pair -> List.of(pair._1, pair._2));
-
+		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
+                                                              .selectPairsWithRepetitions(Selectors.random()) //
+                                                              .reproduce(pair -> reproduce(pair));
+		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2)
+			                                   .selectPairs(Selectors.random())._1 //
+			                                   .fight(pair -> List.of(pair._1, pair._2));
 		logger.info("Population after reproduction and fights [{}]: {}", pipeline.extract().size(), pipeline.extract());
 
 		final Tuple2<Pipeline, Pipeline> split = pipeline.migrateWhen(Predicates.random(0.5));
