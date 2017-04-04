@@ -32,6 +32,8 @@ plugins {
 }
 
 project.ext.hazelcastVersion = '3.8'
+project.ext.springVersion = '4.3'
+project.ext.jmhVersion = '1.18'
 
 allprojects {
 	group 'pl.edu.agh.age'
@@ -70,6 +72,13 @@ allprojects {
 		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
 			if (details.requested.group == 'com.hazelcast' && details.requested.version == 'default') {
 				details.useVersion "${hazelcastVersion}+"
+			}
+			if (details.requested.group == 'org.springframework' && details.requested.version == 'default') {
+				details.useVersion "${springVersion}+"
+			}
+			// Enforce JMH version (overrides plugin defaults)
+			if (details.requested.group == 'org.openjdk.jmh') {
+				details.useVersion "${jmhVersion}"
 			}
 		}
 	}

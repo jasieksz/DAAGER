@@ -44,7 +44,7 @@ distShadowZip {
 }
 
 dependencies {
-	compile 'org.springframework:spring-context:+'
+	compile 'org.springframework:spring-context:default'
 	compile('com.hazelcast:hazelcast:default') {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
@@ -53,7 +53,7 @@ dependencies {
 
 	runtime 'javax.cache:cache-api:+'
 
-	testCompile 'org.springframework:spring-test:+'
+	testCompile 'org.springframework:spring-test:default'
 }
 
 task node(type: JavaExec) {

@@ -40,9 +40,9 @@ jmh {
 dependencies {
 	compile project(':age3-core')
 
-	compile 'org.openjdk.jmh:jmh-core:+'
-	compile 'org.openjdk.jmh:jmh-generator-annprocess:+'
-	testCompile 'org.springframework:spring-test:+'
+	compile 'org.openjdk.jmh:jmh-core:default'
+	compile 'org.openjdk.jmh:jmh-generator-annprocess:default'
+	testCompile 'org.springframework:spring-test:default'
 	testCompile 'org.mockito:mockito-core:+'
 }
 
