@@ -12,6 +12,7 @@ Stream Agents:
   - Workplace generator added to configuration
   - Step has been extended with the step number parameter
   - Logger improvements
+  - Introduce `pl.edu.agh.age.compute.stream.emas.EmasStep`
 
 ## 0.4 -- 04.04.2017
 
