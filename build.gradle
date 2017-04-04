@@ -37,7 +37,7 @@ project.ext.jmhVersion = '1.18'
 
 allprojects {
 	group 'pl.edu.agh.age'
-	version '0.4-SNAPSHOT'
+	version '0.5-SNAPSHOT'
 	apply plugin: 'maven-publish'
 	apply plugin: 'ch.raffael.pegdown-doclet'
 
