@@ -1,6 +1,6 @@
 # AgE 3 Changelog
 
-## 0.3.1 -- TBA
+## 0.3.1 -- 04.04.2017
 
 - Fix broken `pl.edu.agh.age.compute.stream.emas.Pipeline.selectPairs` – now correctly prevents repetitions.
 - Remove assumption that `pl.edu.agh.age.compute.stream.AgentsRegistry.getBestAgentEvaluation` is always present
