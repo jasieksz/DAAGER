@@ -49,9 +49,9 @@ dependencies {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
-	compile 'org.jgrapht:jgrapht-core:+'
+	compile 'org.jgrapht:jgrapht-core:1.0.1'
 
-	runtime 'javax.cache:cache-api:+'
+	runtime 'javax.cache:cache-api:1.0.0'
 
 	testCompile 'org.springframework:spring-test:default'
 }

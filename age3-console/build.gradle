@@ -31,11 +31,11 @@ dependencies {
 	compile project(':age3-core')
 
 	compile 'com.hazelcast:hazelcast-client:default'
-	compile 'org.jline:jline:+'
+	compile 'org.jline:jline:3.2.0'
 
 	// JNA is needed for jline
-	runtime 'net.java.dev.jna:jna:+'
-	runtime 'org.fusesource.jansi:jansi:+'
+	runtime 'net.java.dev.jna:jna:4.4.0'
+	runtime 'org.fusesource.jansi:jansi:1.11'
 }
 
 shadowJar {
