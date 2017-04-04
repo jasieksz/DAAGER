@@ -37,12 +37,17 @@ Moreover, each workplace has an id nad an initial population of agents.
 - current population,
 - incoming population (coming from migrations).
 
-And returns a population for the current step (usually just merge between current and incoming agents).
+And returns a population for the current step (usually just a merge between current and incoming agents).
 
 **Step** is a main computation operation that should contain code that changes population.
-It receives a current population (returned from the **before step action**) and the reference to the environment.
+It receives:
 
-**After step action** is usually used to collect statistics. It receives the following arguments:
+- current step number,
+- current population (returned from the **before step action**)
+- reference to the environment.
+
+**After step action** is usually used to collect statistics.
+It receives the following arguments:
 
 - id of the workplace,
 - step number,
@@ -50,9 +55,9 @@ It receives a current population (returned from the **before step action**) and 
 
 And it returns the map of statistics.
 
-#### Environment
+### Environment
 
-**Environment** is the only view of the global computation accessible to agents and operators.
+Environment is the only view of the global computation accessible to agents and operators.
 It is a way for them to gain the limited knowledge of the world and perform interactions with other populations.
 
 Environment makes it possible to:
@@ -70,21 +75,35 @@ Basically, the concept behind pipeline is to provide a functional and easy way t
 For example:
 
 ```java
-Pipeline.on(population)
-        .selectPairs(selector)
-        .reproduce(reproduction)
-        .selectPairs(selector)
-        .fight(fight);
+final Tuple2<PairPipeline, Pipeline> pipelines = Pipeline.on(population).selectPairs(selector);
+
+// reproduction
+Tuple2<Pipeline, Pipeline> reproduced = pipelines._1.reproduce(reproduction);
+Tuple2<Pipeline, Pipeline> selfReproduced = pipelines._2.selfReproduce(selfReproduction);
+
+Pipeline parentAgents = reproduced._1.mergeWith(selfReproduced._1);
+Pipeline childAgents = reproduced._2.mergeWith(selfReproduced._2);
+
+// fight
+parentAgents = parentAgents.fight(fight);
+
+// evaluate
+childAgents = childAgents.evaluate(evaluator);
+
+// merge and extract
+List<EmasAgent> population = parentAgents.mergeWith(childAgents).extract(); 
 ```
 
-Pipelines are eagerly evaluated. It is currently required in order to support splitting populations.
+Pipelines are eagerly evaluated.
+It is currently required in order to support splitting populations.
 
 ### Stop condition
 
-**Stop condition** (`StopCondition` interface) defines conditions under which the computation is gracefully stopped.
+Stop condition (`StopCondition` interface) defines conditions under which the computation is gracefully stopped.
 Currently, only time-based stop condition implementation is provided.
  
-Stop condition is global for the whole computation. If it is fulfilled, all of the workplaces initiate shutdown.
+Stop condition is global for the whole computation.
+If it is fulfilled, all of the workplaces initiate shutdown.
 
 ## Evolutionary Multi-Agent Systems
 
@@ -95,7 +114,8 @@ EMAS API and implementation is located in the `pl.edu.agh.age.compute.stream.ema
 
 ### Agent and solutions
 
-The agent class is `EmasAgent`. Each agent has the following properties:
+The agent class is `EmasAgent`.
+Each agent has the following properties:
 
 - **id**,
 - **energy**,
@@ -121,10 +141,27 @@ The pipeline for the EMAS provides some dedicated operations:
 
 - `Tuple2<PairPipeline, Pipeline> selectPairs(BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector)`
   Selects pairs of agents using the given selector.
+  Returns a `PairPipeline` for the paired agents and a `Pipeline` for non-paired ones.
+  The latter `Pipeline` can be either empty (in case of even agents count) or contain a single agent (for odd agents count).
   
-- `PairPipeline selectPairsWithRepetitions(final BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector)`
-  Selects pairs of agents using the given selector but allow repetitions.
-   
+- `PairPipeline selectPairsWithRepetitions(BiFunction<EmasAgent, List<EmasAgent>, Tuple2<EmasAgent, EmasAgent>> selector)`
+  Selects pairs of agents using the given selector but allows a single agent to be used in more than one pair.
+  This method ensures that every agent is paired, even if the agents count is odd.
+
+- `Tuple2<Pipeline, Pipeline> selfReproduce(Function<EmasAgent, Tuple2<EmasAgent, EmasAgent>> selfReproductionStrategy)`
+  Self reproduces agents from the pipeline applying a given strategy.
+  Self reproduction is applied to every agent in the pipeline and produces one child for each agent.
+
+- `Tuple2<Pipeline, Pipeline> selfReproduce(Predicate<EmasAgent> selfReproductionPredicate, Function<EmasAgent, Tuple2<EmasAgent, EmasAgent>> selfReproductionStrategy)`
+  Performs self reproduction for agents that meet the given predicate.
+
+- `Pipeline evaluate(PopulationEvaluator<EmasAgent> populationEvaluator)`
+  Evaluates all agents from the pipeline at once.
+  Note that `PopulationEvaluator` can also perform additional operations on the population, such as local optimization (improvement).
+
+- `Pipeline process(Function<Seq<EmasAgent>, Seq<EmasAgent>> populationProcessor)`
+  A way to perform custom operations (e.g. operations that are not implemented in the Pipeline API) on the whole population at once.
+
 - `Tuple2<Pipeline, Pipeline> migrateWhen(Predicate<EmasAgent> migrationPredicate)`
   Chooses agents for migration using the given predicate.
   
@@ -134,34 +171,51 @@ The pipeline for the EMAS provides some dedicated operations:
 `migrateWhen` and `dieWhen` are identical in behavior but they are differentiated for better semantics.
 Both return two separate pipelines: one for selected and one for unselected agents.
 
-`selectPairs` and `selectPairsWithRepetitions` make it possible to pair agents. 
-The first version guarantees that the `selector` will not receive already selected agents.
-In that case it is possible that not all agents could be paired and they are returned in the second element of the tuple.
+### PairPipeline
 
-### Agents interaction
+The paired agents are represented by the `PairPipeline`, which allows performing operations that require two agents.
+Currently, these are supported:
 
-Agents can interact in two ways: by reproducing and by fighting.
+- `Tuple2<Pipeline, Pipeline> reproduce(Function<Tuple2<EmasAgent, EmasAgent>, Tuple2<Seq<EmasAgent>, EmasAgent>> reproductionStrategy)`
+  Reproduces a pair of agents using a given sexual reproduction strategy.
+  Returns the tuple of parent and child agents.
+  See [Reproduction section](#reproduction) for details about the reproduction.
 
-**Reproduction** is provided by the `pl.edu.agh.age.compute.stream.emas.reproduction` package. Currently only sexual reproduction is implemented.
-It is also based on a *pipeline* concept but it is usually better to prepare the pipeline beforehand using provided builder: `SexualReproductionBuilder`
-The sexual reproduction always work on pairs ofa agents and is built using the following operations:
+- `Pipeline fight(Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> fightingStrategy)`
+  Performs a fight between agents using a given strategy.
+  See [Fighting section](#fighting) for details about the fight.
 
-- recombination,
-- mutation,
-- evaluation,
-- improvement,
-- energy transfer.
+- `Tuple2<Pipeline, Pipeline> encounter(Predicate<EmasAgent> reproductionPredicate, Function<Tuple2<EmasAgent, EmasAgent>, Tuple2<Seq<EmasAgent>, EmasAgent>> reproductionStrategy, Function<Tuple2<EmasAgent, EmasAgent>, Seq<EmasAgent>> fightingStrategy)`
+  Performs an agents encounter action, which combines sexual reproduction and fighting in one method.
+  When a given reproduction predicate is met for a pair of agents – they reproduce themselves (using a given reproduction strategy).
+  Otherwise, they fight which each other (using a given fight strategy).
 
-When using the builder, the recombination, evaluation and energy transfer operators are required to be provided
-and all operations are executed in the order specified in the list (that is, in the most common order).
- 
-The meaning of these operations is equivalent to genetic algorithms.
-All of them, beside *energy transfer*, operate on solutions.
+### Reproduction
 
-The sexual reproduction always generates a sequence of agents: two parents and one child.
-Please, note, that the parents returned from the pipeline usually have energy levels changed by the *energy transfer* operator.
-   
-**Fighting** is located in the `pl.edu.agh.age.compute.stream.emas.fight` package.
+Reproduction is provided by the `pl.edu.agh.age.compute.stream.emas.reproduction` package.
+Currently, **sexual reproduction** and **asexual reproduction** are implemented.
+
+Both reproduction types are also based on a *pipeline* concept but it is usually better to prepare the pipeline beforehand using provided builders:
+`SexualReproductionBuilder` or `AsexualReproductionBuilder`.
+
+The reproduction is built using the following operations:
+
+- recombination (required),
+- mutation (optional),
+- energy transfer (required).
+
+Operations are executed in the same order as specified in the list above.
+*Recombination* and *mutation* operate on solutions while *energy transfer* modifies agents' energy.
+
+The sexual reproduction operates on a pair of agents whereas the asexual reproduction - on a single agent.
+Asexual reproduction has already built-in recombination operator which duplicates the parent agent as its child,
+leaving only an optional *mutation* and a compulsory *energy transfer* to be defined manually.
+
+Both reproduction types always generate one or two parent agents and a single child.
+Please note that the parents returned from the pipeline usually have energy levels changed by the *energy transfer* operator.
+
+### Fighting
+Fighting is located in the `pl.edu.agh.age.compute.stream.emas.fight` package.
 It is much simpler than reproduction, as it only performs two operations:
 
 - comparison of two agents (using **Comparator**),
@@ -169,5 +223,5 @@ It is much simpler than reproduction, as it only performs two operations:
 
 The fight generates a sequence of agents – the same agents that were passed to it, but with changed energy levels.
 
-[bib]: https://www.age.agh.edu.pl/bibliography/emas/
+[bib]: https://www.age.agh.edu.pl/bibliography/
 [javaslang]: http://www.javaslang.io/
