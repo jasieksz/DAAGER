@@ -22,7 +22,7 @@ cache:
 test_age:
   stage: test
   script:
-    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD test
+    - ./gradlew test
   tags:
     - java
 
@@ -48,8 +48,8 @@ deploy_age_javadocs:
   only:
     - develop
   script:
-    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD alljavadoc
-    - scp -r build/docs/javadoc/ $DOCS_URL:javadocs/age3/develop
+    - ./gradlew alljavadoc
+    - scp -r build/docs/javadoc/* $DOCS_URL:javadocs/age3/develop/
   tags:
     - java
 
@@ -66,7 +66,7 @@ build_core_jar:
   tags:
     - java
   script:
-    - ./gradlew -PnexusUrl=$DEPLOY_URL -PnexusUsername=$DEPLOY_USERNAME -PnexusPassword=$DEPLOY_PASSWORD age3-core:shadowJar
+    - ./gradlew age3-core:shadowJar
   artifacts:
     paths:
       - age3-core/build/libs/age3-core.jar
