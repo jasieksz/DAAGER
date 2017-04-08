@@ -110,8 +110,8 @@ subprojects {
 
 	dependencies {
 		compile 'javax.inject:javax.inject:1'
-		compile 'org.slf4j:slf4j-api:+'
-		compile 'org.slf4j:jcl-over-slf4j:+'
+		compile 'org.slf4j:slf4j-api:1.7+'
+		compile 'org.slf4j:jcl-over-slf4j:1.7+'
 		compile 'com.google.code.findbugs:jsr305:+'
 		compile 'io.javaslang:javaslang:2.+'
 		compile 'org.apache.commons:commons-lang3:+'
