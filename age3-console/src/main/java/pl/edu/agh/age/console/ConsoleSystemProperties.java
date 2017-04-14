@@ -23,7 +23,8 @@ package pl.edu.agh.age.console;
  * System properties used by the console. See `docs/user/properties.md` for details.
  */
 public enum ConsoleSystemProperties {
-	NODES("age.console.nodes", "127.0.0.1");
+	NODES("age.console.nodes", "127.0.0.1"),
+	LOG_FILE_LEVEL("age.console.log.file.level", "ALL"),;
 
 	public final String propertyName;
 

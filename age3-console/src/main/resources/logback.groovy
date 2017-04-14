@@ -17,21 +17,25 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.FileAppender
+import ch.qos.logback.classic.filter.ThresholdFilter
+import pl.edu.agh.age.console.ConsoleSystemProperties
 
 def bySecond = timestamp("yyyyMMdd'T'HHmmss")
 
 appender("FILE", FileAppender) {
 	file = "console-${bySecond}.log"
 	append = false
-
+	filter(ThresholdFilter) {
+		level = ConsoleSystemProperties.LOG_FILE_LEVEL.get()
+	}
 	encoder(PatternLayoutEncoder) {
 		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
 	}
 }
 
-root(DEBUG, ["FILE"])
+root(ALL, ["FILE"])
 logger("pl.edu.agh.age", DEBUG)
 logger("com.hazelcast", INFO)
 logger("com.hazelcast.client", INFO)

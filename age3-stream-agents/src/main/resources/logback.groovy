@@ -19,8 +19,6 @@
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.filter.ThresholdFilter
-import ch.qos.logback.core.ConsoleAppender
-import ch.qos.logback.core.FileAppender
 import ch.qos.logback.core.helpers.NOPAppender
 import ch.qos.logback.ext.spring.DelegatingLogbackAppender
 import pl.edu.agh.age.util.NodeSystemProperties
@@ -41,6 +39,9 @@ appender("STREAM-FILE", FileAppender) {
 appender("FILE", FileAppender) {
 	file = "node-${bySecond}.log"
 	append = false
+	filter(ThresholdFilter) {
+		level = NodeSystemProperties.LOG_FILE_LEVEL.get()
+	}
 	encoder(PatternLayoutEncoder) {
 		pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"
 	}
@@ -48,7 +49,7 @@ appender("FILE", FileAppender) {
 
 appender("CONSOLE", ConsoleAppender) {
 	filter(ThresholdFilter) {
-		level = INFO
+		level = NodeSystemProperties.LOG_CONSOLE_LEVEL.get()
 	}
 	encoder(PatternLayoutEncoder) {
 		pattern = "%highlight(%.-1level) %green(%-40logger{39}) : %msg%n"

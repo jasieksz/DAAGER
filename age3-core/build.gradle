@@ -57,6 +57,7 @@ dependencies {
 }
 
 task node(type: JavaExec) {
+	systemProperties = System.properties
 	main = 'pl.edu.agh.age.node.NodeBootstrapper'
 	classpath = sourceSets.main.runtimeClasspath
 	standardOutput = System.out

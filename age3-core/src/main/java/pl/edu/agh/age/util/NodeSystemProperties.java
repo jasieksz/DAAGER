@@ -24,6 +24,8 @@ package pl.edu.agh.age.util;
  */
 public enum NodeSystemProperties {
 	CONFIG("age.node.config", "spring-node.xml"),
+	LOG_FILE_LEVEL("age.node.log.file.level", "ALL"),
+	LOG_CONSOLE_LEVEL("age.node.log.console.level", "INFO"),
 	HAZELCAST_CONFIG_MAIN("age.node.hazelcast.config.main", "classpath:hazelcast-node.xml"),
 	HAZELCAST_CONFIG_USER("age.node.hazelcast.config.user", "classpath:hazelcast-network.xml"),
 	HAZELCAST_APPENDER("age.node.hazelcast.appender", "false");

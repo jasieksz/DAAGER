@@ -47,9 +47,11 @@ shadowJar {
 task(shell, dependsOn: 'classes') {
 	doLast {
 		def classpath = sourceSets.main.runtimeClasspath
+		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
 		def command = [
 			'java',
 			'-cp', classpath.collect().join(java.io.File.pathSeparator),
+			systemProperties,
 			'pl.edu.agh.age.console.ConsoleBootstrapper'
 		]
 		if (project.hasProperty('appArgs')) {
@@ -67,10 +69,12 @@ task(shell, dependsOn: 'classes') {
 task(standalone, dependsOn: 'classes') {
 	doLast {
 		def classpath = sourceSets.main.runtimeClasspath
+		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
 		def command = [
 			'java',
 			'-cp', classpath.collect().join(java.io.File.pathSeparator),
 			'pl.edu.agh.age.console.ConsoleBootstrapper',
+			systemProperties,
 			'standalone'
 		]
 		if (project.hasProperty('appArgs')) {
