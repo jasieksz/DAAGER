@@ -1,6 +1,6 @@
 # AgE 3 Changelog
 
-## 0.5 -- TBD
+## 0.5 -- 03.06.2017
 
 Core:
 - Properties to change logging levels were added (#39).
