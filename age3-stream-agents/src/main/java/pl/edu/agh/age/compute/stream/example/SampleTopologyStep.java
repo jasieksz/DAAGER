@@ -26,7 +26,7 @@ import pl.edu.agh.age.compute.stream.emas.EmasAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javaslang.collection.List;
+import io.vavr.collection.List;
 
 /**
  * Sample step to test that topology of workplaces works.

@@ -19,7 +19,7 @@
 
 package pl.edu.agh.age.compute.stream;
 
-import javaslang.collection.List;
+import io.vavr.collection.List;
 
 @FunctionalInterface
 public interface Step<T extends Agent> {

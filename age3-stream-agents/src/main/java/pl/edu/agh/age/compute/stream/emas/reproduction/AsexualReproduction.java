@@ -24,7 +24,7 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
 
 import java.util.function.Function;
 
-import javaslang.Tuple2;
+import io.vavr.Tuple2;
 
 /**
  * Asexual reproduction is a function generating a new agent from a given one.

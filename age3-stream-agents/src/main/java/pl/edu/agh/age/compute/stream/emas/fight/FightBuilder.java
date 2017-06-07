@@ -29,8 +29,8 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
 
 import java.util.Comparator;
 
-import javaslang.collection.List;
-import javaslang.collection.Seq;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
 
 @SuppressWarnings({"ParameterHidesMemberVariable", "InstanceVariableMayNotBeInitialized"})
 public final class FightBuilder<S extends Solution<?>> {

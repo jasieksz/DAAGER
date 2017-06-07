@@ -37,10 +37,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import javaslang.collection.HashMap;
-import javaslang.collection.HashSet;
-import javaslang.collection.Map;
-import javaslang.collection.Set;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration("classpath:spring-stream-static.xml")
@@ -75,10 +75,10 @@ public final class SpringConfigurationIT {
 		final WorkplaceConfiguration<Agent> workplaceConfiguration = workplaces.get(0);
 		final Step<Agent> step = workplaceConfiguration.step();
 		final AfterStepAction<Agent, ?> afterStepAction = workplaceConfiguration.afterStep();
-		final javaslang.collection.List<Agent> agents = javaslang.collection.List.ofAll(
+		final io.vavr.collection.List<Agent> agents = io.vavr.collection.List.ofAll(
 			workplaceConfiguration.agents());
 
-		final javaslang.collection.List<Agent> agentsAfterStep = step.stepOn(1L, agents, environment);
+		final io.vavr.collection.List<Agent> agentsAfterStep = step.stepOn(1L, agents, environment);
 
 		softly.assertThat(agentsAfterStep).isNotEmpty();
 

@@ -90,7 +90,7 @@ public final class NashornLoader {
 
 			final List<WorkplaceConfiguration<Agent>> configurations = Arrays.stream(workplacesArray).map(obj -> {
 				final Step<Agent> step = ((ScriptObjectMirror)obj.get("step")).to(Step.class);
-				final List<Agent> agents = ((javaslang.collection.List<Agent>)obj.get("agents")).toJavaList();
+				final List<Agent> agents = ((io.vavr.collection.List<Agent>)obj.get("agents")).toJavaList();
 				final AfterStepAction<Agent, Object> after = ((ScriptObjectMirror)obj.get("after")).to(
 					AfterStepAction.class);
 				// FIXME: Before step?

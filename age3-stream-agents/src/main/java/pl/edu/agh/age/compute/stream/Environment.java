@@ -22,9 +22,9 @@ package pl.edu.agh.age.compute.stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javaslang.collection.List;
-import javaslang.collection.Map;
-import javaslang.collection.Set;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 /**
  * Environment passed to the step function.

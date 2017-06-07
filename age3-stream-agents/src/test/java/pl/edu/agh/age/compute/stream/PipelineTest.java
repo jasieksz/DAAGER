@@ -26,9 +26,9 @@ import org.junit.Test;
 
 import java.util.function.Predicate;
 
-import javaslang.Tuple2;
-import javaslang.collection.List;
-import javaslang.collection.Stream;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
+import io.vavr.collection.Stream;
 
 /*
  * Created: 2016-11-09.

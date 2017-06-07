@@ -30,10 +30,10 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.List;
-import javaslang.collection.Seq;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
 
 /**
  * Pipeline for processing parent agents in standard way.

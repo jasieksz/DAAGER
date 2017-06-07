@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.List;
-import javaslang.collection.Seq;
-import javaslang.collection.Stream;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Stream;
 
 public final class PipelineTest {
 
@@ -68,7 +68,7 @@ public final class PipelineTest {
 		logger.info("Population dead [{}]: {}", dead.extract().size(), dead.extract());
 		logger.info("Population alive (new population) [{}]: {}", alive.extract().size(), alive.extract());
 	}
-	
+
 	private Tuple2<Seq<EmasAgent>, EmasAgent> reproduce(final Tuple2<EmasAgent, EmasAgent> parents) {
 		return Tuple.of(List.of(parents._1, parents._2), EmasAgent.create(1.0, Solutions.simple(2)));
 	}

@@ -25,7 +25,7 @@ import com.google.common.base.MoreObjects;
 
 import java.util.Arrays;
 
-import javaslang.collection.Array;
+import io.vavr.collection.Array;
 
 /**
  * Solution optimized for a vector of doubles.

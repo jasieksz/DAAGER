@@ -23,10 +23,10 @@ import pl.edu.agh.age.compute.stream.AfterStepAction;
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
 import pl.edu.agh.age.compute.stream.emas.StatisticsKeys;
 
-import javaslang.collection.HashMap;
-import javaslang.collection.List;
-import javaslang.collection.Map;
-import javaslang.collection.Seq;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 
 public final class SampleAfterStepAction implements AfterStepAction<EmasAgent, StatisticsKeys> {
 

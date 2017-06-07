@@ -22,9 +22,9 @@ package pl.edu.agh.age.compute.stream.emas;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.List;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 
 public final class Selectors {
 

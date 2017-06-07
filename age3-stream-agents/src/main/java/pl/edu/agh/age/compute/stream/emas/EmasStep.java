@@ -42,8 +42,8 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.function.Predicate;
 
-import javaslang.Tuple2;
-import javaslang.collection.List;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 
 /**
  * The class EmasStep implementing a default step for EMAS Agents based problems.

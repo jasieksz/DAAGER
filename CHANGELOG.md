@@ -1,5 +1,10 @@
 # AgE 3 Changelog
 
+## 0.6 -- TBD
+
+Other:
+– Switch from Javaslang to Vavr after the rebranding (#40).
+
 ## 0.5 -- 03.06.2017
 
 Core:

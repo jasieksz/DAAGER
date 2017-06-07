@@ -21,8 +21,8 @@
  * Base imports and definitions for JS DSL
  **/
 
-var List = Java.type('javaslang.collection.List');
-var HashMap = Java.type('javaslang.collection.HashMap');
+var List = Java.type('io.vavr.collection.List');
+var HashMap = Java.type('io.vavr.collection.HashMap');
 var TimedStopCondition = Java.type('pl.edu.agh.age.compute.stream.TimedStopCondition');
 var NoOpLoggingService = Java.type('pl.edu.agh.age.compute.stream.logging.NoOpLoggingService');
 var Topology = Java.type('pl.edu.agh.age.compute.api.topology.Topology');

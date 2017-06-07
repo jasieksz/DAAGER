@@ -26,15 +26,15 @@ import pl.edu.agh.age.compute.stream.emas.StatisticsKeys;
 
 import javax.inject.Inject;
 
-import javaslang.collection.HashMap;
-import javaslang.collection.List;
-import javaslang.collection.Map;
-import javaslang.collection.Seq;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 
 public final class SampleAfterStepActionWithLogging implements AfterStepAction<EmasAgent, StatisticsKeys> {
 
 	private static final long serialVersionUID = 999377795385214162L;
-	
+
 	private final AgentsRegistry<EmasAgent> registry;
 
 	@Inject public SampleAfterStepActionWithLogging(final AgentsRegistry<EmasAgent> registry) {

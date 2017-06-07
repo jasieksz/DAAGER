@@ -24,8 +24,8 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solutions;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javaslang.collection.List;
-import javaslang.collection.Stream;
+import io.vavr.collection.List;
+import io.vavr.collection.Stream;
 
 /**
  * Generators for agents

@@ -19,9 +19,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.Seq;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.Seq;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class BasicSexualReproductionTest {

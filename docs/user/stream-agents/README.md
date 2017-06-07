@@ -7,7 +7,7 @@ title: Stream Agents reference
 Stream Agents is a module providing a general multi-agent system that is a base for various more concrete implementations of agent-based computations.
 Currently, besides the base code, it offers a base implementation for Evolutionary Multi-Agent Systems.
 
-Stream Agents extensively use immutable collections and utilities from [Javaslang][javaslang].
+Stream Agents extensively use immutable collections and utilities from [Vavr][vavr].
 You need to keep that in mind when performing actions on collections returned from methods.
 Moreover, all objects are immutable if not mentioned otherwise.
 
@@ -224,4 +224,4 @@ It is much simpler than reproduction, as it only performs two operations:
 The fight generates a sequence of agents – the same agents that were passed to it, but with changed energy levels.
 
 [bib]: https://www.age.agh.edu.pl/bibliography/
-[javaslang]: http://www.javaslang.io/
+[vavr]: http://www.vavr.io/

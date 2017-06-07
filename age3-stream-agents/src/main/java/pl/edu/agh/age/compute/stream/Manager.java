@@ -19,8 +19,8 @@
 
 package pl.edu.agh.age.compute.stream;
 
-import javaslang.collection.Map;
-import javaslang.collection.Set;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 /**
  * Interface for workplaces to interact with the global state of computation.

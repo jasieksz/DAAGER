@@ -24,8 +24,8 @@ import pl.edu.agh.age.compute.stream.emas.solution.Solution;
 
 import java.util.function.Function;
 
-import javaslang.Tuple2;
-import javaslang.collection.Seq;
+import io.vavr.Tuple2;
+import io.vavr.collection.Seq;
 
 /**
  * Fight is the function generating a list of new agents from the fighting tuple of a two.

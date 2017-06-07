@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javaslang.collection.List;
-import javaslang.collection.Map;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 
 public class Workplace<T extends Agent> implements Runnable {
 
@@ -95,7 +95,7 @@ public class Workplace<T extends Agent> implements Runnable {
 		List<T> population = initialPopulation;
 		while (!Thread.currentThread().isInterrupted() && !manager.isStopConditionReached()) {
 			step.incrementAndGet();
-			
+
 			// Before step
 			population = beforeStepAction.apply(step.get(), population, incomingAgents.getAndSet(List.empty()));
 

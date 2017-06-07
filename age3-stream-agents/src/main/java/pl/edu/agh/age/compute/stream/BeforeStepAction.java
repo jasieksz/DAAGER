@@ -19,8 +19,8 @@
 
 package pl.edu.agh.age.compute.stream;
 
-import javaslang.Function3;
-import javaslang.collection.List;
+import io.vavr.Function3;
+import io.vavr.collection.List;
 
 /**
  * Interface for functions executed before the step execution in a workplace.

@@ -28,10 +28,10 @@ import org.junit.Test;
 
 import java.util.OptionalDouble;
 
-import javaslang.Tuple;
-import javaslang.Tuple3;
-import javaslang.collection.List;
-import javaslang.collection.Map;
+import io.vavr.Tuple;
+import io.vavr.Tuple3;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 
 /*
  * Created: 2016-11-21.

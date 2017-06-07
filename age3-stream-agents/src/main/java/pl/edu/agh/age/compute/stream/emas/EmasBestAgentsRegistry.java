@@ -36,9 +36,9 @@ import java.util.OptionalDouble;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javaslang.Tuple;
-import javaslang.Tuple3;
-import javaslang.collection.Seq;
+import io.vavr.Tuple;
+import io.vavr.Tuple3;
+import io.vavr.collection.Seq;
 
 public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 
@@ -77,10 +77,10 @@ public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 		return (bestAgent != null) ? OptionalDouble.of(bestAgent.solution.fitnessValue()) : OptionalDouble.empty();
 	}
 
-	@Override public javaslang.collection.Map<String, Tuple3<Long, Long, Long>> getBestAgentsStatistics() {
+	@Override public io.vavr.collection.Map<String, Tuple3<Long, Long, Long>> getBestAgentsStatistics() {
 		lock.readLock().lock();
 		try {
-			return javaslang.collection.HashMap.ofAll(bestSolutionsMap);
+			return io.vavr.collection.HashMap.ofAll(bestSolutionsMap);
 		} finally {
 			lock.readLock().unlock();
 		}

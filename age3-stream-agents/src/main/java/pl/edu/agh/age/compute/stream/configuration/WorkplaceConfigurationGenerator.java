@@ -31,7 +31,7 @@ import pl.edu.agh.age.compute.stream.emas.PopulationGenerator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javaslang.collection.Stream;
+import io.vavr.collection.Stream;
 
 public final class WorkplaceConfigurationGenerator<T extends Agent> {
 

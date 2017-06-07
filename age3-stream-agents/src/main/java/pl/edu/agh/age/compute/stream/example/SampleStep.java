@@ -30,8 +30,8 @@ import pl.edu.agh.age.compute.stream.emas.reproduction.recombination.Recombinati
 import pl.edu.agh.age.compute.stream.emas.reproduction.transfer.EnergyTransfer;
 import pl.edu.agh.age.compute.stream.emas.solution.DoubleSolution;
 
-import javaslang.Tuple2;
-import javaslang.collection.List;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 
 /**
  * Sample step showing all operations.
@@ -55,7 +55,7 @@ public final class SampleStep implements Step<EmasAgent> {
 	                                        final Environment environment) {
 		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
 			                                                  .selectPairsWithRepetitions(Selectors.random())
-			                                                  .reproduce(reproduction);		
+			                                                  .reproduce(reproduction);
 		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2) //
 			                                   .selectPairsWithRepetitions(Selectors.random())
 			                                   .fight(pair -> List.of(pair._1, pair._2));

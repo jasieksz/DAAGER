@@ -42,8 +42,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import javaslang.Tuple3;
-import javaslang.collection.Map;
+import io.vavr.Tuple3;
+import io.vavr.collection.Map;
 
 /**
  * Default implementation of the logging service for stream agents. It logs the data to the SLF4J logger named

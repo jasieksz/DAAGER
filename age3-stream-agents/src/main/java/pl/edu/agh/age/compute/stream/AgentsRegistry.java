@@ -21,10 +21,10 @@ package pl.edu.agh.age.compute.stream;
 
 import java.util.OptionalDouble;
 
-import javaslang.Tuple3;
-import javaslang.collection.HashMap;
-import javaslang.collection.Map;
-import javaslang.collection.Seq;
+import io.vavr.Tuple3;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 
 /**
  * Registry of the best agents.

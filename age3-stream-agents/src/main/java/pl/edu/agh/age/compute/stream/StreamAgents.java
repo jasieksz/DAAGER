@@ -51,10 +51,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import javaslang.collection.HashMap;
-import javaslang.collection.HashSet;
-import javaslang.collection.Map;
-import javaslang.collection.Set;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 /**
  * Main runtime for stream-like agents processing.
@@ -138,7 +138,7 @@ public final class StreamAgents implements Runnable, Manager {
 		}
 
 		loggingService.stop();
-		
+
 		workplaceFutures.forEach(StreamAgents::cancelWorkplaceFuture);
 		logger.info("Stream agents finished");
 	}

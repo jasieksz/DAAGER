@@ -25,7 +25,7 @@ import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.emas.solution.Solution;
 import pl.edu.agh.age.compute.stream.problem.Evaluator;
 
-import javaslang.collection.Seq;
+import io.vavr.collection.Seq;
 
 /**
  * PopulationEvaluator is a function that computes fitness and optionally improves all of the

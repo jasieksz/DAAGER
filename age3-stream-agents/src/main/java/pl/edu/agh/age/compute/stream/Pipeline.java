@@ -24,9 +24,9 @@ import static java.util.Objects.requireNonNull;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.List;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
 
 public class Pipeline<T, P extends Pipeline<T, P>> {
 
