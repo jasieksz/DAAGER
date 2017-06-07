@@ -45,7 +45,7 @@ public interface Solution<T> extends Serializable {
 	 *
 	 * @return a copy of this solution with new fitness
 	 */
-	Solution<T> updateFitness(double fitness);
+	Solution<T> withFitness(double fitness);
 
 	/**
 	 * Returns the real value of this solution.

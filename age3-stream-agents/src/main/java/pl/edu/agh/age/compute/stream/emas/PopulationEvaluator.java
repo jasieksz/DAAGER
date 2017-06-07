@@ -45,7 +45,7 @@ public interface PopulationEvaluator<A extends Agent> {
 		return (population) -> {
 			return population.map(agent -> {
 				final S solution = (S)agent.solution;
-				solution.updateFitness(evaluator.evaluate(solution));
+				solution.withFitness(evaluator.evaluate(solution));
 				return EmasAgent.create(agent.energy, solution);
 			});
 		};

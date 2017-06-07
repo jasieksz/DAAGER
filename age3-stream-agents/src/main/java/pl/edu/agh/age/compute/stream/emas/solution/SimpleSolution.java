@@ -47,7 +47,7 @@ public final class SimpleSolution<T extends Serializable> implements Solution<T>
 		return fitness;
 	}
 
-	@Override public SimpleSolution<T> updateFitness(final double newFitness) {
+	@Override public SimpleSolution<T> withFitness(final double newFitness) {
 		return new SimpleSolution<>(value, newFitness);
 	}
 

@@ -60,7 +60,7 @@ public final class DoubleVectorSolution implements Solution<Array<Double>> {
 		return fitness;
 	}
 
-	@Override public DoubleVectorSolution updateFitness(final double newFitness) {
+	@Override public DoubleVectorSolution withFitness(final double newFitness) {
 		return new DoubleVectorSolution(values, newFitness);
 	}
 

@@ -49,7 +49,7 @@ public final class DoubleSolution implements Solution<Double> {
 		return fitness;
 	}
 
-	@Override public DoubleSolution updateFitness(final double newFitness) {
+	@Override public DoubleSolution withFitness(final double newFitness) {
 		return new DoubleSolution(value, newFitness);
 	}
 

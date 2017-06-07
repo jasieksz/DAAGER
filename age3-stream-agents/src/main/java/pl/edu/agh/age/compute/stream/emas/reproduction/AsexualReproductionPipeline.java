@@ -106,7 +106,7 @@ public final class AsexualReproductionPipeline<S extends Solution<?>> {
 	@SuppressWarnings("unchecked") public AsexualReproductionPipeline<S> evaluate(final Evaluator<S> evaluator) {
 		checkState(childSolution != null, "Evaluation requires child solution");
 
-		final S evaluatedChild = (S)childSolution.updateFitness(evaluator.evaluate(childSolution));
+		final S evaluatedChild = (S)childSolution.withFitness(evaluator.evaluate(childSolution));
 		return new AsexualReproductionPipeline<>(parent, evaluatedChild);
 	}
 
