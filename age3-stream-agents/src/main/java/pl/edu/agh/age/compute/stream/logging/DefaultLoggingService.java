@@ -90,9 +90,8 @@ public final class DefaultLoggingService implements LoggingService {
 
 	private @Nullable ListenableScheduledFuture<?> loggerFuture = null;
 
-	@Inject
-	public DefaultLoggingService(final LoggingParameters parameters, final EvaluatorCounter evaluatorCounter,
-	                             final AgentsRegistry<? extends Agent> agentsRegistry) {
+	@Inject public DefaultLoggingService(final LoggingParameters parameters, final EvaluatorCounter evaluatorCounter,
+	                                     final AgentsRegistry<? extends Agent> agentsRegistry) {
 		this.parameters = requireNonNull(parameters);
 		this.evaluatorCounter = requireNonNull(evaluatorCounter);
 		this.agentsRegistry = requireNonNull(agentsRegistry);
@@ -110,9 +109,9 @@ public final class DefaultLoggingService implements LoggingService {
 		if (!loggingInterval.isZero()) {
 			logProblemDefinition(parameters.problemDefinition());
 			startTime = System.nanoTime();
-			// XXX: This will log statistics from all nodes and this is probably not expected
-			loggerFuture = threadPool.scheduleAtFixedRate(() -> logStatistics(statisticsManager.getStatistics()), 0,
-			                                              loggingInterval.toMillis(), TimeUnit.MILLISECONDS);
+			loggerFuture = threadPool.scheduleAtFixedRate(() -> {
+				logStatistics(statisticsManager.getLocalStatistics(), statisticsManager.getTotalWorkplacesCount());
+			}, 0, loggingInterval.toMillis(), TimeUnit.MILLISECONDS);
 			loggerFuture.addListener(() -> logBestSolutions(agentsRegistry.getBestAgentsStatistics()),
 			                         directExecutor());
 		}
@@ -133,19 +132,19 @@ public final class DefaultLoggingService implements LoggingService {
 		logger.debug("*** Starting AgE3 platform for solving problem of a following definition: {} ***", problemString);
 	}
 
-	private void logStatistics(final Map<Long, Map<Object, Object>> statistics) {
+	private void logStatistics(final Map<Long, Map<Object, Object>> statistics, final int workplacesCount) {
 		if (!statistics.isEmpty()) {
 			logHeaders(statistics);
 			final Long time = System.nanoTime() - startTime;
 			for (final Long workplaceId : statistics.keySet()) {
 				final Map<Object, Object> stats = statistics.get(workplaceId).get();
-				logWorkplaceStatistics(time, workplaceId, stats);
+				logWorkplaceStatistics(time, workplaceId, workplacesCount, stats);
 			}
 			logSummaryStatistics(time);
 		}
 	}
 
-	private void logWorkplaceStatistics(final Long time, final Long workplaceId,
+	private void logWorkplaceStatistics(final Long time, final Long workplaceId, final int workplacesCount,
 	                                    final Map<Object, Object> workplaceStats) {
 		final String[] values = new String[workplaceStats.size() + 3];
 		values[0] = Tags.WORKPLACE_ENTRY_TAG;
@@ -157,7 +156,7 @@ public final class DefaultLoggingService implements LoggingService {
 			i++;
 		}
 		stream_logger.info(String.join(DELIMITER, values));
-		logger.info("Workplace {} processed step number {}", workplaceId,
+		logger.info("Workplace {} out of {} processed step number {}", workplaceId, workplacesCount,
 		             workplaceStats.get(StatisticsKeys.STEP_NUMBER).getOrElse("<unknown>"));
 	}
 

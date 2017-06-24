@@ -52,11 +52,11 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<bean id="loggingService" class="pl.edu.agh.age.compute.stream.logging.DefaultLoggingService"/>
 
 	<bean id="evaluatorCounter" class="pl.edu.agh.age.compute.stream.problem.EvaluatorCounter" factory-method="empty"/>
-	<bean id="agentsComparator"
+	<bean id="agentComparator"
 	      class="pl.edu.agh.age.compute.stream.emas.EmasAgentComparators"
 	      factory-method="higherFitness"/>
 	<bean id="agentsRegistry" class="pl.edu.agh.age.compute.stream.emas.EmasBestAgentsRegistry">
-		<constructor-arg name="agentsComparator" ref="agentsComparator"/>
+		<constructor-arg name="agentComparator" ref="agentComparator"/>
 	</bean>
 
 	<!-- Define an after-step analyzer -->

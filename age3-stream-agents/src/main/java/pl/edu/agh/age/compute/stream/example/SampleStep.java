@@ -22,9 +22,9 @@ package pl.edu.agh.age.compute.stream.example;
 import pl.edu.agh.age.compute.stream.Environment;
 import pl.edu.agh.age.compute.stream.Step;
 import pl.edu.agh.age.compute.stream.emas.EmasAgent;
+import pl.edu.agh.age.compute.stream.emas.PairSelectors;
 import pl.edu.agh.age.compute.stream.emas.Pipeline;
 import pl.edu.agh.age.compute.stream.emas.Predicates;
-import pl.edu.agh.age.compute.stream.emas.Selectors;
 import pl.edu.agh.age.compute.stream.emas.reproduction.SexualReproduction;
 import pl.edu.agh.age.compute.stream.emas.reproduction.recombination.Recombination;
 import pl.edu.agh.age.compute.stream.emas.reproduction.transfer.EnergyTransfer;
@@ -54,10 +54,10 @@ public final class SampleStep implements Step<EmasAgent> {
 	@Override public List<EmasAgent> stepOn(final long stepNumber, final List<EmasAgent> population,
 	                                        final Environment environment) {
 		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
-			                                                  .selectPairsWithRepetitions(Selectors.random())
+			                                                  .selectPairsWithRepetitions(PairSelectors.random())
 			                                                  .reproduce(reproduction);
 		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2) //
-			                                   .selectPairsWithRepetitions(Selectors.random())
+			                                   .selectPairsWithRepetitions(PairSelectors.random())
 			                                   .fight(pair -> List.of(pair._1, pair._2));
 
 		final Tuple2<Pipeline, Pipeline> afterMigration = pipeline.migrateWhen(Predicates.random(0.2));

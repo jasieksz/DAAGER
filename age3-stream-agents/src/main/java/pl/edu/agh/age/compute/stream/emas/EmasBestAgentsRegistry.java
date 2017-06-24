@@ -47,7 +47,7 @@ public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 	/**
 	 * This comparator should put the best agent as the last
 	 */
-	private final Comparator<EmasAgent> agentsComparator;
+	private final Comparator<EmasAgent> agentComparator;
 
 	@GuardedBy("lock") private final Map<String, Tuple3<Long, Long, Long>> bestSolutionsMap = new HashMap<>();
 
@@ -55,8 +55,8 @@ public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 
 	private @Nullable EmasAgent bestAgent = null;
 
-	public EmasBestAgentsRegistry(final Comparator<EmasAgent> agentsComparator) {
-		this.agentsComparator = requireNonNull(agentsComparator);
+	public EmasBestAgentsRegistry(final Comparator<EmasAgent> agentComparator) {
+		this.agentComparator = requireNonNull(agentComparator);
 	}
 
 	@Override public void register(final long workplaceId, final long stepNumber, final Seq<EmasAgent> population) {
@@ -88,7 +88,7 @@ public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 
 	private void registerBestAgents(final long workplaceId, final long stepNumber, final Seq<EmasAgent> bestAgents) {
 		final EmasAgent randomAgent = bestAgents.get();
-		final int comparisonResult = (bestAgent != null) ? agentsComparator.compare(randomAgent, bestAgent) : 1;
+		final int comparisonResult = (bestAgent != null) ? agentComparator.compare(randomAgent, bestAgent) : 1;
 
 		if (comparisonResult > 0) {
 			// currently found agents are better than the best known so far
@@ -102,10 +102,10 @@ public final class EmasBestAgentsRegistry implements AgentsRegistry<EmasAgent> {
 	}
 
 	private Seq<EmasAgent> extractBestAgents(final Seq<EmasAgent> population) {
-		final Seq<EmasAgent> sortedPopulation = population.sorted(agentsComparator).reverse();
+		final Seq<EmasAgent> sortedPopulation = population.sorted(agentComparator).reverse();
 		final EmasAgent bestAgentInPopulation = sortedPopulation.get();
 		// At this point, the sortedPopulation sequence has always best agents placed at the sequence beginning
-		return sortedPopulation.takeWhile(agent -> agentsComparator.compare(bestAgentInPopulation, agent) == 0);
+		return sortedPopulation.takeWhile(agent -> agentComparator.compare(bestAgentInPopulation, agent) == 0);
 	}
 
 	private void appendBestAgents(final long workplaceId, final long stepNumber, final Seq<EmasAgent> bestAgents) {

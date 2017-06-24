@@ -68,10 +68,28 @@ public final class EmasAgentComparators {
 		};
 	}
 
+	/**
+	 * This method returns probability (from [0 ; 1] range) that the first agent should be chosen as the one having
+	 * bigger fitness than the second agent.
+	 *
+	 * @param first
+	 *        the first agent
+	 * @param second
+	 *        the second agent
+	 * @return the fitness proportion
+	 */
 	private static double getFitnessProportion(final EmasAgent first, final EmasAgent second) {
 		final double firstValue = first.solution.fitnessValue();
 		final double secondValue = second.solution.fitnessValue();
-		return firstValue / (firstValue + secondValue);
+		if (firstValue > 0 && secondValue > 0) { // both positive
+			return firstValue / (firstValue + secondValue);
+		}
+		if (firstValue < 0 && secondValue < 0) { // both negative - we need to swap probabilities
+			return secondValue / (firstValue + secondValue);
+		}
+		// different signs - we need to normalize values so that they are both grater than zero
+		final double smaller = Math.min(firstValue, secondValue);
+		final double delta = Math.max(1.0, 1.2 * Math.abs(smaller));
+		return (firstValue + delta) / (firstValue + secondValue + 2 * delta);
 	}
-
 }

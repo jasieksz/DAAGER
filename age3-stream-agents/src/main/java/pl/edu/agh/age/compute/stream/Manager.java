@@ -39,7 +39,17 @@ public interface Manager {
 	void postStatistics(long id, Map<Object, Object> statistics);
 
 	/**
-	 * Returns a read-only view of global statistics map.
+	 * Returns the number of all workplaces that participate in computations.
+	 */
+	int getTotalWorkplacesCount();
+
+	/**
+	 * Returns a read-only view of local statistics map of a current node.
+	 */
+	Map<Long, Map<Object, Object>> getLocalStatistics();
+
+	/**
+	 * Returns a read-only view of global statistics map of all available nodes.
 	 */
 	Map<Long, Map<Object, Object>> getStatistics();
 

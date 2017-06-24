@@ -46,10 +46,10 @@ public final class PipelineTest {
 
 		logger.info("Population before processing [{}]: {}", population.size(), population);
 		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
-		                                                      .selectPairsWithRepetitions(Selectors.random()) //
+		                                                      .selectPairsWithRepetitions(PairSelectors.random()) //
 		                                                      .reproduce(pair -> reproduce(pair));
 		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2) //
-		                                       .selectPairs(Selectors.random())._1 //
+		                                       .selectPairs(PairSelectors.random())._1 //
 		                                       .fight(pair -> List.of(pair._1, pair._2));
 		logger.info("Population after reproduction and fights [{}]: {}", pipeline.extract().size(), pipeline.extract());
 
@@ -114,10 +114,10 @@ public final class PipelineTest {
 
 		logger.info("Population before processing [{}]: {}", population.size(), population);
 		final Tuple2<Pipeline, Pipeline> reproduced = Pipeline.on(population) //
-                                                              .selectPairsWithRepetitions(Selectors.random()) //
+                                                              .selectPairsWithRepetitions(PairSelectors.random()) //
                                                               .reproduce(pair -> reproduce(pair));
 		final Pipeline pipeline = reproduced._1.mergeWith(reproduced._2)
-			                                   .selectPairs(Selectors.random())._1 //
+			                                   .selectPairs(PairSelectors.random())._1 //
 			                                   .fight(pair -> List.of(pair._1, pair._2));
 		logger.info("Population after reproduction and fights [{}]: {}", pipeline.extract().size(), pipeline.extract());
 
@@ -136,6 +136,5 @@ public final class PipelineTest {
 		logger.info("Population dead [{}]: {}", dead.extract().size(), dead.extract());
 		logger.info("Population alive (new population) [{}]: {}", alive.extract().size(), alive.extract());
 	}
-
 
 }

@@ -37,8 +37,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IdGenerator;
 
-import one.util.streamex.EntryStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +53,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import one.util.streamex.EntryStream;
 
 /**
  * Main runtime for stream-like agents processing.
@@ -188,8 +187,17 @@ public final class StreamAgents implements Runnable, Manager {
 		statistics.put(id, workplaceStatistics);
 	}
 
+	@Override public int getTotalWorkplacesCount() {
+		return statistics.size();
+	}
+
 	@Override public Map<Long, Map<Object, Object>> getStatistics() {
 		return HashMap.ofAll(statistics);
+	}
+
+	@Override public Map<Long, Map<Object, Object>> getLocalStatistics() {
+		final Set<Long> localWorkplaceIds = HashSet.ofAll(localWorkplaces.stream().map(workplace -> workplace.id()));
+		return HashMap.ofAll(statistics).filterKeys(localWorkplaceIds::contains);
 	}
 
 	@Override public Map<Long, Map<Object, Object>> getNeighboursStatistics(final long workplaceId) {
@@ -229,8 +237,8 @@ public final class StreamAgents implements Runnable, Manager {
 		performMigration(agent, targetWorkplace);
 	}
 
-	@Override
-	public void migrateUnconditionally(final Agent agent, final long sourceWorkplace, final long targetWorkplace) {
+	@Override public void migrateUnconditionally(final Agent agent, final long sourceWorkplace,
+	                                             final long targetWorkplace) {
 		requireNonNull(agent);
 		checkArgument(sourceWorkplace >= 0);
 		checkArgument(targetWorkplace >= 0);

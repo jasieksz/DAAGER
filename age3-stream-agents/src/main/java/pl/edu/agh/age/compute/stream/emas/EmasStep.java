@@ -40,10 +40,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
+import io.vavr.collection.Set;
 
 /**
  * The class EmasStep implementing a default step for EMAS Agents based problems.
@@ -62,7 +65,7 @@ import io.vavr.collection.List;
  */
 public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 
-	private final Comparator<EmasAgent> fightAgentsComparator;
+	private final Comparator<EmasAgent> fightAgentComparator;
 
 	private final FightEnergyTransfer fightEnergyTransfer;
 
@@ -88,27 +91,23 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 
 	private final MigrationParameters migrationParameters;
 
-	private final Predicate<EmasAgent> migrationPredicate;
-
 	static {
 		Locale.setDefault(Locale.US); // set default 'dot' decimal separator
 	}
 
-	public EmasStep(final Comparator<EmasAgent> fightAgentsComparator, final FightEnergyTransfer fightEnergyTransfer,
+	public EmasStep(final Comparator<EmasAgent> fightAgentComparator, final FightEnergyTransfer fightEnergyTransfer,
 	                final Recombination<S> recombination, final @Nullable Mutation<S> mutation,
-	                final PopulationEvaluator<EmasAgent> populationEvaluator,
-	                final Predicate<EmasAgent> deathPredicate, final Predicate<EmasAgent> reproductionPredicate,
-	                final EnergyTransfer sexualReproductionTransfer,
+	                final PopulationEvaluator<EmasAgent> populationEvaluator, final Predicate<EmasAgent> deathPredicate,
+	                final Predicate<EmasAgent> reproductionPredicate, final EnergyTransfer sexualReproductionTransfer,
 	                final AsexualEnergyTransfer asexualReproductionTransfer,
 	                final MigrationParameters migrationParameters) {
-		this.fightAgentsComparator = requireNonNull(fightAgentsComparator,
-		                                            "Fight agents comparator has not been defined");
+		this.fightAgentComparator = requireNonNull(fightAgentComparator, "Fight agents comparator has not been defined");
 		this.fightEnergyTransfer = requireNonNull(fightEnergyTransfer, "Fight energy transfer has not been defined");
 		this.fight = resolveFight();
 		this.recombination = requireNonNull(recombination, "Recombination has not been defined");
 		this.mutation = mutation;
 		this.populationEvaluator = requireNonNull(populationEvaluator, "Population evaluator has not been defined");
-		this.deathPredicate = deathPredicate;
+		this.deathPredicate = requireNonNull(deathPredicate);
 		this.reproductionPredicate = requireNonNull(reproductionPredicate,
 		                                            "Reproduction predicate has not been defined");
 		this.sexualReproductionTransfer = requireNonNull(sexualReproductionTransfer,
@@ -118,7 +117,6 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 		                                                  "Asexual reproduction energy transfer has not been defined");
 		this.asexualReproduction = resolveAsexualReproduction();
 		this.migrationParameters = requireNonNull(migrationParameters);
-		this.migrationPredicate = Predicates.random(migrationParameters.migrationProbability());
 	}
 
 	@Override
@@ -127,15 +125,13 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 		// select pairs
 		final Tuple2<PairPipeline, Pipeline> pipelines = Pipeline
 			                                                 .on(population)
-			                                                 .selectPairs(Selectors.random());
+			                                                 .selectPairs(PairSelectors.random());
 
 		// encounter paired agents -> reproduce or fight depending on their fitness value
-		final Tuple2<Pipeline, Pipeline> reproduced = pipelines._1.encounter(reproductionPredicate, sexualReproduction,
-		                                                                     fight);
+		final Tuple2<Pipeline, Pipeline> reproduced = pipelines._1.encounter(reproductionPredicate, sexualReproduction, fight);
 
 		// self reproduce agents which have not been paired
-		final Tuple2<Pipeline, Pipeline> selfReproduced = pipelines._2.selfReproduce(reproductionPredicate,
-		                                                                             asexualReproduction);
+		final Tuple2<Pipeline, Pipeline> selfReproduced = pipelines._2.selfReproduce(reproductionPredicate, asexualReproduction);
 
 		// merge parent and child agents
 		final Pipeline parentAgents = reproduced._1.mergeWith(selfReproduced._1);
@@ -149,22 +145,17 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 
 		// die
 		final Tuple2<Pipeline, Pipeline> afterDeath = pipeline.dieWhen(deathPredicate);
-		final List<EmasAgent> dead = afterDeath._1.extract();
-		environment.logPopulation("dead", dead);
+		final Pipeline dead = afterDeath._1;
+		final Pipeline alive = afterDeath._2;
+		environment.logPopulation("dead", dead.extract());
 
-		// migrate if necessary
-		if (shouldMigrate(stepNumber)) {
-			final Tuple2<Pipeline, Pipeline> afterMigration = pipeline.migrateWhen(migrationPredicate);
-			final List<EmasAgent> migrated = afterMigration._1.extract();
-			migrated.forEach(emasAgent -> environment.migrate(emasAgent, environment.neighbours().get()._1));
-			return afterMigration._2.extract();
-		}
-
-		return afterDeath._2.extract();
+		// migrate
+		final Pipeline afterMigration = migrateIfNecessary(alive, stepNumber, environment);
+		return afterMigration.extract();
 	}
 
 	private Fight resolveFight() {
-		return Fight.<S>builder().withComparator(fightAgentsComparator)
+		return Fight.<S>builder().withComparator(fightAgentComparator)
 		                         .withEnergyTransfer(fightEnergyTransfer)
 		                         .build();
 	}
@@ -188,9 +179,31 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 		return reproductionBuilder.build();
 	}
 
+	private Pipeline migrateIfNecessary(final Pipeline population, final long stepNumber,
+	                                    final Environment environment) {
+		if (environment.workplacesCount() > 1 && shouldMigrate(stepNumber)) {
+			final Predicate<EmasAgent> migrationPredicate = resolveMigrationPredicate(population);
+			final Tuple2<Pipeline, Pipeline> afterMigration = population.migrateWhen(migrationPredicate);
+			final List<EmasAgent> migrated = afterMigration._1.extract();
+			migrated.forEach(emasAgent -> environment.migrate(emasAgent, environment.neighbours().get()._1));
+			return afterMigration._2;
+		}
+		return population;
+	}
+
 	private boolean shouldMigrate(final long currentStepNumber) {
 		final long stepInterval = migrationParameters.stepInterval();
 		return (stepInterval != 0) ? ((currentStepNumber % stepInterval) == 0) : false;
+	}
+
+	private Predicate<EmasAgent> resolveMigrationPredicate(final Pipeline population) {
+		final int migratingAgentsCount = (int)Math.ceil(migrationParameters.partToMigrate() * population.extract().size());
+		final BiFunction<List<EmasAgent>, Integer, List<EmasAgent>> selector = migrationParameters.migrationStrategy()
+		                                                                                          .selector();
+		final Set<UUID> idsToMigrate = selector.apply(population.extract(), migratingAgentsCount)
+			                                   .map(agent -> agent.id)
+			                                   .toSet();
+		return agent -> idsToMigrate.contains(agent.id);
 	}
 
 }

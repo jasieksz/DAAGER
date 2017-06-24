@@ -21,26 +21,35 @@ package pl.edu.agh.age.compute.stream.emas.migration;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import javax.annotation.Nullable;
+
 public class MigrationParameters {
 
 	private final long stepInterval;
 
-	private final double migrationProbability;
+	private final double partToMigrate;
 
-	public MigrationParameters(final long stepInterval, final double migrationProbability) {
+	private final MigrationStrategy migrationStrategy;
+
+	public MigrationParameters(final long stepInterval, final double partToMigrate,
+	                           final @Nullable MigrationStrategy migrationStrategy) {
 		checkArgument(stepInterval >= 0);
-		checkArgument(migrationProbability >= 0 && migrationProbability <= 1,
-		    "Migration probability has invalid value");
+		checkArgument(partToMigrate >= 0 && partToMigrate <= 1, "Population part to migrate has an invalid value");
 		this.stepInterval = stepInterval;
-		this.migrationProbability = migrationProbability;
+		this.partToMigrate = partToMigrate;
+		this.migrationStrategy = migrationStrategy != null ? migrationStrategy : MigrationStrategy.RANDOM;
 	}
 
 	public long stepInterval() {
 		return stepInterval;
 	}
 
-	public double migrationProbability() {
-		return migrationProbability;
+	public double partToMigrate() {
+		return partToMigrate;
+	}
+
+	public MigrationStrategy migrationStrategy() {
+		return migrationStrategy;
 	}
 
 }

@@ -42,7 +42,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class MyBenchmark {
 
 	@BenchmarkMode(value = Mode.AverageTime) @Benchmark public void testRastriginEvaluator() {
-		RastriginEvaluator evaluator = new RastriginEvaluator();
+		final RastriginEvaluator evaluator = new RastriginEvaluator();
 		for (double i = -5.10; i < 5.10; i += 0.001) {
 			for (double j = -5.10; j < 5.10; j += 0.001) {
 				evaluator.evaluate(new double[] {i, j});
@@ -51,9 +51,9 @@ public class MyBenchmark {
 	}
 
 	@BenchmarkMode(value = Mode.AverageTime) @Benchmark public void testRastriginEvaluatorWithCache() {
-		RastriginEvaluatorWithCache evaluator = new RastriginEvaluatorWithCache();
+		final RastriginEvaluatorWithCache evaluator = new RastriginEvaluatorWithCache();
 		for (double i = -5.10; i < 5.10; i += 0.001) {
-			double startYRange = -5.10;
+			final double startYRange = -5.10;
 			for (double j = -5.10; j < 5.10; j += 0.001) {
 				if (j != startYRange) {
 					evaluator.evaluate(j);
@@ -65,12 +65,12 @@ public class MyBenchmark {
 		}
 	}
 
-	public static void main(String[] args) throws RunnerException {
-		Options opt = new OptionsBuilder().include(MyBenchmark.class.getSimpleName())
-		                                  .warmupIterations(5)
-		                                  .measurementIterations(5)
-		                                  .forks(1)
-		                                  .build();
+	public static void main(final String[] args) throws RunnerException {
+		final Options opt = new OptionsBuilder().include(MyBenchmark.class.getSimpleName())
+			                                    .warmupIterations(5)
+		                                        .measurementIterations(5)
+		                                        .forks(1)
+		                                        .build();
 
 		new Runner(opt).run();
 	}

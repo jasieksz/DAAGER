@@ -120,11 +120,6 @@ public final class AsexualReproductionPipeline<S extends Solution<?>> {
 	 */
 	public Tuple2<EmasAgent, EmasAgent> extract() {
 		checkState(child != null, "The child was not created. You must call transferEnergy before extraction.");
-
-		// Sanity check. Although evaluation is not required by API it is usually expected
-		// Not a checkState() because of possible performance issues
-		assert !Double.isNaN(child.solution.fitnessValue());
-
 		return Tuple.of(parent, child);
 	}
 
