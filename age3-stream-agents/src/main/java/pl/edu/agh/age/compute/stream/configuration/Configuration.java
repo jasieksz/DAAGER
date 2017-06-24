@@ -24,14 +24,22 @@ import pl.edu.agh.age.compute.stream.Agent;
 import pl.edu.agh.age.compute.stream.StopCondition;
 import pl.edu.agh.age.compute.stream.logging.LoggingService;
 
+import one.util.streamex.StreamEx;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Configuration for Stream Agents computation.
  */
 public final class Configuration {
+
+	private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
 	private final List<WorkplaceConfiguration<Agent>> workplaceConfigurations;
 
@@ -60,6 +68,15 @@ public final class Configuration {
 	}
 
 	public List<WorkplaceConfiguration<Agent>> workplaces() {
+		final Optional<List<WorkplaceConfiguration<Agent>>> shared = StreamEx.cartesianPower(2, workplaceConfigurations)
+		                                                                     .findAny(configs -> containsSameObjects(
+			                                                                     configs.get(0), configs.get(1)));
+		if (shared.isPresent()) {
+			logger.warn(
+				"Some of the configured workplaces share theirs objects with each other. "
+				+ "It may result in degraded performance. "
+				+ "Consider using `scope='prototype'` in the Spring configuration.");
+		}
 		return new ArrayList<>(workplaceConfigurations);
 	}
 
@@ -73,5 +90,15 @@ public final class Configuration {
 
 	@SuppressWarnings("unchecked") public <T extends Serializable> Topology<T> topology() {
 		return (Topology<T>)topology;
+	}
+
+	@SuppressWarnings("ObjectEquality")
+	private static boolean containsSameObjects(final WorkplaceConfiguration<Agent> w1,
+	                                           final WorkplaceConfiguration<Agent> w2) {
+		final boolean different = w1 != w2;
+		final boolean sameSteps = w1.step() == w2.step();
+		final boolean sameAgents = w1.agents() == w2.agents();
+		final boolean sameAfterSteps = w1.afterStep() == w2.afterStep();
+		return different && (sameSteps || sameAgents || sameAfterSteps);
 	}
 }

@@ -4,8 +4,10 @@
 
 Stream Agents:
 - `Solution#updateFitness` was changed to `Solution#withFitness` to follow naming used in the rest of the project (#41).
-- Remove unnecessary assertion from `AsexualReproductionPipeline` (#44)
-- Introduce different migration strategies in `pl.edu.agh.age.compute.stream.emas.migration` (#44)
+- Remove unnecessary assertion from `AsexualReproductionPipeline` (#44).
+- Introduce different migration strategies in `pl.edu.agh.age.compute.stream.emas.migration` (#44).
+- Change scope of workplace components in examples to prototype (#43).
+  This is a preferred option due to possible performance penalties when sharing objects between threads.
 
 Other:
 – Switch from Javaslang to Vavr after the rebranding (#40).

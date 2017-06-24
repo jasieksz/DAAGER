@@ -34,13 +34,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	</bean>
 
 	<!-- Define a step function for workplaces -->
-	<bean id="step" class="pl.edu.agh.age.compute.stream.example.SampleTopologyStep"/>
+	<bean id="step" class="pl.edu.agh.age.compute.stream.example.SampleTopologyStep" scope="prototype"/>
 
 	<!-- Define an after-step analyzer -->
-	<bean id="population-analyzer" class="pl.edu.agh.age.compute.stream.example.SampleAfterStepAction"/>
+	<bean id="population-analyzer" class="pl.edu.agh.age.compute.stream.example.SampleAfterStepAction" scope="prototype"/>
 
 	<!-- Define a list of agents for workplaces -->
-	<util:list id="agents-jul" value-type="pl.edu.agh.age.compute.stream.emas.EmasAgent">
+	<util:list id="agents-jul" value-type="pl.edu.agh.age.compute.stream.emas.EmasAgent" scope="prototype">
 		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
 		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
 		<bean class="pl.edu.agh.age.compute.stream.emas.Generators" factory-method="randomAgent"/>
