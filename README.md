@@ -47,7 +47,7 @@ You can use Gradle task located in `age3-examples` module:
 
 Then, start the shell:
 ```bash
-./gradlew --no-daemon age3-examples:shell
+./gradlew --no-daemon --console=plain age3-examples:shell
 ```
 
 ## Running AgE 3
@@ -69,14 +69,14 @@ To run the node:
 
 To run the console:
 ```bash
-./gradlew --no-daemon age3-console:shell
+./gradlew --no-daemon --console=plain age3-console:shell
 ```
 
 > **Note:** console requires that at least one node is run and accessible.
 
 To run the standalone node with the console:
 ```bash
-./gradlew --no-daemon age3-console:standalone
+./gradlew --no-daemon --console=plain age3-console:standalone
 ```
 
 > **Note:** both the non-interactive node and the standalone modes are not really useful when run from the `age3-console` package.
@@ -92,7 +92,7 @@ cd age3-stream-agents
 
 Firstly, you need to build the distribution jar and startup scripts:
 ```bash
-./gradlew age3-console:distShadowTar
+./gradlew age3-console:shadowDistTar
 ```
 This will create a tar file in the `age3-console/build/distributions/` directory.
 `cd` into it, unpack the tarball, and then run the following command to start the console:
@@ -106,10 +106,10 @@ age3-console/bin/age3-console standalone
 
 In a similar way, you can build and start the non-interactive node.
 ```bash
-./gradlew age3-core:distShadowTar
+./gradlew age3-core:shadowDistTar
 cd age3-core/build/distributions/
 tar -xvf age3-core.tar
-./gradlew age3-core:node
+age3-core/bin/age3-core
 ```
 
 ## Stream Agents

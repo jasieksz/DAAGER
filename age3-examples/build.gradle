@@ -19,7 +19,7 @@
 
 plugins {
 	id 'application'
-	id 'com.github.johnrengelman.shadow' version '1.2.3'
+	id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
 
 mainClassName = 'pl.edu.agh.age.console.ConsoleBootstrapper'
@@ -40,11 +40,15 @@ shadowJar {
 	version = null
 }
 
-distShadowTar {
+shadowDistTar {
+	version = null
+	classifier = null
 	version = null
 }
 
-distShadowZip {
+shadowDistZip {
+	version = null
+	classifier = null
 	version = null
 }
 
@@ -62,6 +66,7 @@ task(shell, dependsOn: 'classes') {
 		if (project.hasProperty('appArgs')) {
 			command.addAll(Eval.me(appArgs))
 		}
+		command.removeAll("")
 		def proc = new ProcessBuilder(command)
 			.redirectOutput(ProcessBuilder.Redirect.INHERIT)
 			.redirectInput(ProcessBuilder.Redirect.INHERIT)
@@ -85,6 +90,7 @@ task(standalone, dependsOn: 'classes') {
 		if (project.hasProperty('appArgs')) {
 			command.addAll(Eval.me(appArgs))
 		}
+		command.removeAll("")
 		def proc = new ProcessBuilder(command)
 			.redirectOutput(ProcessBuilder.Redirect.INHERIT)
 			.redirectInput(ProcessBuilder.Redirect.INHERIT)

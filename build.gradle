@@ -95,11 +95,6 @@ subprojects {
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
 
-	configurations {
-		checkerFrameworkAnnotatedJDK
-		checkerFramework
-	}
-
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
@@ -119,31 +114,14 @@ subprojects {
 		compile 'one.util:streamex:+'
 
 		runtime 'org.codehaus.groovy:groovy:+'
-		compile 'ch.qos.logback:logback-classic:+'
+		compile 'ch.qos.logback:logback-classic:1.2+'
 		compile 'org.logback-extensions:logback-ext-spring:+'
 
 		testCompile 'junit:junit:+'
 		testCompile 'org.mockito:mockito-core:+'
 		testCompile 'org.assertj:assertj-core:+'
 
-		checkerFrameworkAnnotatedJDK 'org.checkerframework:jdk8:+'
-		checkerFramework 'org.checkerframework:checker:+'
 		compile 'org.checkerframework:checker-qual:+'
-	}
-
-	if (project.hasProperty('withChecker')) {
-		println('Compiling with checker framework')
-		tasks.withType(JavaCompile).all { JavaCompile compile ->
-			compile.options.compilerArgs = [
-				'-processor', 'org.checkerframework.checker.nullness.NullnessChecker',
-				'-processorpath', "${configurations.checkerFramework.asPath}",
-				// uncomment to turn Checker Framework errors into warnings
-				// '-Awarns',
-				'-AassumeAssertionsAreEnabled',
-				'-Astubs=checkerframework/stubs',
-				"-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
-			]
-		}
 	}
 }
 
