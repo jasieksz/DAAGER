@@ -27,12 +27,12 @@ buildscript {
 }
 
 plugins {
-	id 'net.ltgt.errorprone' version '0.0.10'
+	id 'net.ltgt.errorprone' version '0.0.13'
 	id 'net.researchgate.release' version '2.6.0'
 }
 
-project.ext.hazelcastVersion = '3.8'
-project.ext.springVersion = '4.3'
+project.ext.hazelcastVersion = '3.9'
+project.ext.springVersion = '5.0'
 project.ext.jmhVersion = '1.18'
 
 allprojects {

@@ -142,7 +142,7 @@ public final class ComputationContext {
 			currentTask.cleanUp();
 			cleaned = true;
 			logger.debug("Destroying Spring context");
-			springContext.destroy();
+			springContext.close();
 			logger.debug("Cleaning up utilities");
 			computeThreadPool.shutdownAll();
 			computeDistributionUtilities.reset();
