@@ -98,7 +98,7 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 		STOP
 	}
 
-	public static final String CHANNEL_NAME = "lifecycle/channel";
+
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultNodeLifecycleService.class);
 
@@ -113,7 +113,7 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 
 	@Inject public DefaultNodeLifecycleService(final HazelcastInstance hazelcastInstance, final EventBus eventBus) {
 		messageHandlers.put(LifecycleMessage.Type.DESTROY, this::handleDestroy);
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 		this.eventBus = eventBus;
 
 		//@formatter:off

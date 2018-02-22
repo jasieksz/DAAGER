@@ -19,10 +19,9 @@
 
 package pl.edu.agh.age.client.hazelcast;
 
-import static pl.edu.agh.age.services.lifecycle.internal.DefaultNodeLifecycleService.CHANNEL_NAME;
-
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.services.lifecycle.LifecycleMessage;
+import pl.edu.agh.age.services.lifecycle.internal.HazelcastObjectNames;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
@@ -40,7 +39,7 @@ public final class HazelcastLifecycleServiceClient implements LifecycleServiceCl
 	private final ITopic<LifecycleMessage> topic;
 
 	@Inject public HazelcastLifecycleServiceClient(final HazelcastInstance hazelcastInstance) {
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 	}
 
 	@Override public void destroyCluster() {

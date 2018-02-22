@@ -69,10 +69,6 @@ import javax.inject.Named;
 @Named
 public final class DefaultTopologyService implements SmartLifecycle, TopologyService {
 
-	public static final String CONFIG_MAP_NAME = "topology/config";
-
-	public static final String CHANNEL_NAME = "topology/channel";
-
 	/**
 	 * States of the topology service.
 	 */
@@ -136,8 +132,8 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		this.eventBus = eventBus;
 		this.topologyProcessors = topologyProcessors;
 		// Obtain dependencies
-		runtimeConfig = hazelcastInstance.getMap(CONFIG_MAP_NAME);
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		runtimeConfig = hazelcastInstance.getMap(HazelcastObjectNames.CONFIG_MAP_NAME);
+		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 
 		logger.debug("Constructing DefaultTopologyService");
 		//@formatter:off
@@ -254,10 +250,10 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		if (identityService.nodeId().equals(maxIdentity.get().id())) {
 			logger.debug("I am master");
 			master = true;
-			runtimeConfig.put(ConfigKeys.MASTER, identityService.nodeId());
+			runtimeConfig.put(HazelcastObjectNames.ConfigKeys.MASTER, identityService.nodeId());
 
 			// Select initial topology type if this is the first election
-			if (!runtimeConfig.containsKey(ConfigKeys.TOPOLOGY_TYPE)) {
+			if (!runtimeConfig.containsKey(HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE)) {
 				logger.debug("Seems to be the first election. Selecting topology");
 				final Optional<TopologyProcessor> selectedProcessor = topologyProcessors.parallelStream()
 				                                                                        .max(Comparator.comparing(
@@ -266,9 +262,9 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 
 				currentTopologyProcessor = selectedProcessor.get();
 				logger.debug("Selected initial topology: {}", currentTopologyProcessor);
-				runtimeConfig.put(ConfigKeys.TOPOLOGY_TYPE, currentTopologyProcessor.name());
+				runtimeConfig.put(HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE, currentTopologyProcessor.name());
 			}
-			listenerKey = runtimeConfig.addEntryListener(new TopologyTypeChangeListener(), ConfigKeys.TOPOLOGY_TYPE,
+			listenerKey = runtimeConfig.addEntryListener(new TopologyTypeChangeListener(), HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE,
 			                                             true);
 
 			service.fire(Event.TOPOLOGY_TYPE_CHANGED);
@@ -296,7 +292,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	 *
 	 * Executed only on master.
 	 */
-	private void topologyChanged(final FSM<State, Event> stateEventFSM) {
+	private void topologyChanged(final FSM<State, Event> fsm) {
 		assert master;
 		logger.debug("Topology initialization");
 
@@ -310,7 +306,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		final Set<NodeDescriptor> computeNodes = allNodes();
 		cachedTopology = currentTopologyProcessor.createGraphFrom(computeNodes);
 		logger.debug("Topology: {}", cachedTopology);
-		runtimeConfig.put(ConfigKeys.TOPOLOGY_GRAPH, cachedTopology);
+		runtimeConfig.put(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH, cachedTopology);
 		topic.publish(TopologyMessage.createWithoutPayload(TOPOLOGY_SELECTED));
 	}
 
@@ -319,7 +315,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	 */
 	private void topologyConfigured(final FSM<State, Event> stateEventFSM) {
 		assert !master || (currentTopologyProcessor != null) : "Current topology processor null for master";
-		assert runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH) != null : "No topology graph in config";
+		assert runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH) != null : "No topology graph in config";
 
 		logger.debug("Topology has been configured. Caching the graph");
 		cachedTopology = getCurrentTopologyGraph();
@@ -333,11 +329,11 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	}
 
 	private @Nullable Graph<String, DefaultEdge> getCurrentTopologyGraph() {
-		return (Graph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH);
+		return (Graph<String, DefaultEdge>)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH);
 	}
 
 	@Override public Optional<String> masterId() {
-		return Optional.ofNullable((String)runtimeConfig.get(ConfigKeys.MASTER));
+		return Optional.ofNullable((String)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.MASTER));
 	}
 
 	@Override public boolean isLocalNodeMaster() {
@@ -354,7 +350,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	}
 
 	@Override public Optional<String> topologyType() {
-		return Optional.ofNullable((String)runtimeConfig.get(ConfigKeys.TOPOLOGY_TYPE));
+		return Optional.ofNullable((String)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE));
 	}
 
 	@Override public Set<String> neighbours() {
@@ -374,14 +370,6 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 
 	private Set<NodeDescriptor> allNodes() {
 		return discoveryService.allMembers();
-	}
-
-	private static class ConfigKeys {
-		public static final String MASTER = "master";
-
-		public static final String TOPOLOGY_GRAPH = "topologyGraph";
-
-		public static final String TOPOLOGY_TYPE = "topologyType";
 	}
 
 	@Subscribe public void handleNodeDestroyedEvent(final NodeDestroyedEvent event) {

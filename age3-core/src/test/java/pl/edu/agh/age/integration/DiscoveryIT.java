@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import pl.edu.agh.age.services.discovery.DiscoveryEvent;
 import pl.edu.agh.age.services.discovery.MemberAddedEvent;
 import pl.edu.agh.age.services.discovery.internal.HazelcastDiscoveryService;
+import pl.edu.agh.age.services.discovery.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.identity.NodeType;
@@ -71,7 +72,7 @@ public final class DiscoveryIT {
 
 	@Before public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		members = hazelcastInstance.getMap(HazelcastDiscoveryService.MEMBERS_MAP);
+		members = hazelcastInstance.getMap(HazelcastObjectNames.MEMBERS_MAP);
 		eventBus.register(this);
 		events.clear();
 	}

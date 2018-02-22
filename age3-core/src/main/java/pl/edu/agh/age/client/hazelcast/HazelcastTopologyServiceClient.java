@@ -20,6 +20,7 @@
 package pl.edu.agh.age.client.hazelcast;
 
 import pl.edu.agh.age.client.TopologyServiceClient;
+import pl.edu.agh.age.services.topology.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.topology.internal.TopologyMessage;
 
 import com.hazelcast.core.HazelcastInstance;
@@ -39,10 +40,6 @@ import javax.inject.Named;
 @Named
 public final class HazelcastTopologyServiceClient implements TopologyServiceClient {
 
-	public static final String CONFIG_MAP_NAME = "topology/config";
-
-	public static final String CHANNEL_NAME = "topology/channel";
-
 	private static final Logger log = LoggerFactory.getLogger(HazelcastTopologyServiceClient.class);
 
 	private final IMap<String, Object> runtimeConfig;
@@ -52,28 +49,20 @@ public final class HazelcastTopologyServiceClient implements TopologyServiceClie
 	@Inject public HazelcastTopologyServiceClient(final HazelcastInstance hazelcastInstance) {
 		log.debug("Constructing NonParticipatingTopologyService.");
 		// Obtain dependencies
-		runtimeConfig = hazelcastInstance.getMap(CONFIG_MAP_NAME);
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		runtimeConfig = hazelcastInstance.getMap(HazelcastObjectNames.CONFIG_MAP_NAME);
+		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 	}
 
 	@Override public Optional<String> masterId() {
-		return Optional.ofNullable((String)runtimeConfig.get(ConfigKeys.MASTER));
+		return Optional.ofNullable((String)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.MASTER));
 	}
 
 	@Override public Optional<Graph<String, DefaultEdge>> topologyGraph() {
-		return Optional.ofNullable((Graph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH));
+		return Optional.ofNullable((Graph<String, DefaultEdge>)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH));
 	}
 
 	@Override public Optional<String> topologyType() {
-		return Optional.ofNullable((String)runtimeConfig.get(ConfigKeys.TOPOLOGY_TYPE));
-	}
-
-	private static class ConfigKeys {
-		public static final String MASTER = "master";
-
-		public static final String TOPOLOGY_GRAPH = "topologyGraph";
-
-		public static final String TOPOLOGY_TYPE = "topologyType";
+		return Optional.ofNullable((String)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE));
 	}
 
 }

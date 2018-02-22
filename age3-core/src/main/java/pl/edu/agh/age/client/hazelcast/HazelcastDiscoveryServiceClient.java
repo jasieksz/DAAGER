@@ -21,9 +21,9 @@ package pl.edu.agh.age.client.hazelcast;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-import static pl.edu.agh.age.services.discovery.internal.HazelcastDiscoveryService.MEMBERS_MAP;
 
 import pl.edu.agh.age.client.DiscoveryServiceClient;
+import pl.edu.agh.age.services.discovery.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 
 import com.google.common.collect.ImmutableSet;
@@ -42,7 +42,7 @@ public final class HazelcastDiscoveryServiceClient implements DiscoveryServiceCl
 	private final IMap<String, NodeDescriptor> members;
 
 	@Inject public HazelcastDiscoveryServiceClient(final HazelcastInstance hazelcastInstance) {
-		members = hazelcastInstance.getMap(MEMBERS_MAP);
+		members = hazelcastInstance.getMap(HazelcastObjectNames.MEMBERS_MAP);
 	}
 
 	@Override public Set<NodeDescriptor> membersMatching(final String criteria) {

@@ -105,18 +105,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		COMPUTATION_FAILED,
 	}
 
-	public enum ConfigurationKey {
-		CONFIGURATION,
-		COMPUTATION_STATE,
-		ERROR,
-	}
-
-	public static final String CHANNEL_NAME = "worker/channel";
-
-	public static final String CONFIGURATION_MAP_NAME = "worker/config";
-
-	public static final String STATE_MAP_NAME = "worker/state";
-
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkerService.class);
 
 	private final ListeningScheduledExecutorService executorService = listeningDecorator(newScheduledThreadPool(5));
@@ -143,7 +131,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	private final ITopic<WorkerMessage<Serializable>> topic;
 
-	private final Map<ConfigurationKey, Object> configurationMap;
+	private final Map<HazelcastObjectNames.ConfigurationKey, Object> configurationMap;
 
 	private final IMap<String, ComputationState> nodeComputationState;
 
@@ -260,10 +248,10 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> service.fire(Event.CLEAN));
 
 		logger.debug("Hazelcast instance: {}", hazelcastInstance);
-		topic = hazelcastInstance.getTopic(CHANNEL_NAME);
+		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 		topic.addMessageListener(new DistributedMessageListener());
-		configurationMap = hazelcastInstance.getMap(CONFIGURATION_MAP_NAME);
-		nodeComputationState = hazelcastInstance.getMap(STATE_MAP_NAME);
+		configurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
+		nodeComputationState = hazelcastInstance.getMap(HazelcastObjectNames.STATE_MAP_NAME);
 		eventBus.register(this);
 		computeDistributionUtilities = new HazelcastDistributionUtilities(hazelcastInstance);
 	}
@@ -351,7 +339,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		assert computationContext == null : "Task is already configured.";
 
 		final WorkerConfiguration configuration = (WorkerConfiguration)configurationMap.get(
-			ConfigurationKey.CONFIGURATION);
+			HazelcastObjectNames.ConfigurationKey.CONFIGURATION);
 		computationContext = new ComputationContext(configuration, communicationFacilities,
 		                                            computeDistributionUtilities);
 		setNodeComputationState(ComputationState.CONFIGURED);
@@ -440,7 +428,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	private ComputationState globalComputationState() {
-		return configurationValue(ConfigurationKey.COMPUTATION_STATE, ComputationState.class).orElseGet(
+		return configurationValue(HazelcastObjectNames.ConfigurationKey.COMPUTATION_STATE, ComputationState.class).orElseGet(
 			() -> ComputationState.NONE);
 	}
 
@@ -453,7 +441,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		nodeComputationState.set(identityService.nodeId(), state);
 	}
 
-	private <T> Optional<T> configurationValue(final ConfigurationKey key, final Class<T> klass) {
+	private <T> Optional<T> configurationValue(final HazelcastObjectNames.ConfigurationKey key, final Class<T> klass) {
 		return Optional.ofNullable((T)configurationMap.get(key));
 	}
 
@@ -461,16 +449,16 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		assert state != null;
 
 		if (topologyService.isLocalNodeMaster()) {
-			configurationMap.put(ConfigurationKey.COMPUTATION_STATE, state);
+			configurationMap.put(HazelcastObjectNames.ConfigurationKey.COMPUTATION_STATE, state);
 		}
 	}
 
 	private void changeErrorIfMaster(final @Nullable Throwable error) {
 		if (topologyService.isLocalNodeMaster()) {
 			if (error == null) {
-				configurationMap.remove(ConfigurationKey.ERROR);
+				configurationMap.remove(HazelcastObjectNames.ConfigurationKey.ERROR);
 			} else {
-				configurationMap.put(ConfigurationKey.ERROR, error);
+				configurationMap.put(HazelcastObjectNames.ConfigurationKey.ERROR, error);
 			}
 		}
 	}

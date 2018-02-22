@@ -21,7 +21,6 @@ package pl.edu.agh.age.services.discovery.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static pl.edu.agh.age.services.discovery.internal.HazelcastDiscoveryService.MEMBERS_MAP;
 
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.identity.NodeIdentityService;
@@ -64,7 +63,7 @@ public final class HazelcastDiscoveryServiceTest {
 			new pl.edu.agh.age.services.identity.internal.NodeDescriptor(uuid, NodeType.COMPUTE,
 			                                                             Collections.emptySet()));
 
-		members = hazelcastInstance.getMap(MEMBERS_MAP);
+		members = hazelcastInstance.getMap(HazelcastObjectNames.MEMBERS_MAP);
 		serviceUnderTest = new HazelcastDiscoveryService(hazelcastInstance, eventBus, identityService);
 		serviceUnderTest.start();
 	}

@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.worker.internal;
 
 import static java.util.Objects.requireNonNull;
-import static pl.edu.agh.age.services.worker.internal.DefaultWorkerService.CONFIGURATION_MAP_NAME;
 
 import pl.edu.agh.age.compute.api.TopologyProvider;
 import pl.edu.agh.age.compute.api.topology.FullMeshTopology;
@@ -60,7 +59,7 @@ public final class ComputeTopologyProvider implements TopologyProvider<Serializa
 
 	private final WorkerCommunication workerCommunication;
 
-	private final Map<DefaultWorkerService.ConfigurationKey, Object> configurationMap;
+	private final Map<HazelcastObjectNames.ConfigurationKey, Object> configurationMap;
 
 	/**
 	 * Global set of IDs.
@@ -81,8 +80,8 @@ public final class ComputeTopologyProvider implements TopologyProvider<Serializa
 	                               final WorkerCommunication workerCommunication) {
 		this.workerCommunication = requireNonNull(workerCommunication);
 		// FIXME: Awful, inject shared structures with spring
-		configurationMap = hazelcastInstance.getMap(CONFIGURATION_MAP_NAME);
-		idsSet = hazelcastInstance.getSet("compute/topology-ids");
+		configurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
+		idsSet = hazelcastInstance.getSet(HazelcastObjectNames.COMPUTE_TOPOLOGY_ID_SET);
 		idsSet.addItemListener(new IdsListener(), false);
 		logger.debug("Compute topology service initialized");
 	}

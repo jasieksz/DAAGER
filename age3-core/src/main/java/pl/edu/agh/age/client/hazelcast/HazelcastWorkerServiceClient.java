@@ -21,8 +21,8 @@ package pl.edu.agh.age.client.hazelcast;
 
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.WorkerMessage;
+import pl.edu.agh.age.services.worker.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
-import pl.edu.agh.age.services.worker.internal.DefaultWorkerService;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import com.google.common.collect.ImmutableSet;
@@ -49,11 +49,11 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 
 	private final ITopic<WorkerMessage<?>> workerTopic;
 
-	private final Map<DefaultWorkerService.ConfigurationKey, Object> workerConfigurationMap;
+	private final Map<HazelcastObjectNames.ConfigurationKey, Object> workerConfigurationMap;
 
 	@Inject public HazelcastWorkerServiceClient(final HazelcastInstance hazelcastInstance) {
-		workerTopic = hazelcastInstance.getTopic(DefaultWorkerService.CHANNEL_NAME);
-		workerConfigurationMap = hazelcastInstance.getMap(DefaultWorkerService.CONFIGURATION_MAP_NAME);
+		workerTopic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
+		workerConfigurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
 	}
 
 	@Override public void startComputation() {
@@ -73,7 +73,7 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 
 	@Override public void prepareConfiguration(final WorkerConfiguration configuration) throws InterruptedException {
 		logger.debug("Preparing configuration");
-		workerConfigurationMap.put(DefaultWorkerService.ConfigurationKey.CONFIGURATION, configuration);
+		workerConfigurationMap.put(HazelcastObjectNames.ConfigurationKey.CONFIGURATION, configuration);
 		TimeUnit.SECONDS.sleep(2L);
 		workerTopic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.LOAD_CONFIGURATION));
 	}
@@ -91,16 +91,16 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 	}
 
 	@Override public ComputationState computationState() {
-		return (ComputationState)configurationValue(DefaultWorkerService.ConfigurationKey.COMPUTATION_STATE).orElseGet(
+		return (ComputationState)configurationValue(HazelcastObjectNames.ConfigurationKey.COMPUTATION_STATE).orElseGet(
 			() -> ComputationState.NONE);
 	}
 
 	@Override public Optional<WorkerConfiguration> currentConfiguration() {
-		return configurationValue(DefaultWorkerService.ConfigurationKey.CONFIGURATION);
+		return configurationValue(HazelcastObjectNames.ConfigurationKey.CONFIGURATION);
 	}
 
 	@Override public Optional<Throwable> currentError() {
-		return configurationValue(DefaultWorkerService.ConfigurationKey.ERROR);
+		return configurationValue(HazelcastObjectNames.ConfigurationKey.ERROR);
 	}
 
 	@Override public void waitForComputationEnd() throws InterruptedException {
@@ -111,7 +111,7 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 		logger.debug("Computation finished");
 	}
 
-	private <T> Optional<T> configurationValue(final DefaultWorkerService.ConfigurationKey key) {
+	private <T> Optional<T> configurationValue(final HazelcastObjectNames.ConfigurationKey key) {
 		return Optional.ofNullable((T)workerConfigurationMap.get(key));
 	}
 }

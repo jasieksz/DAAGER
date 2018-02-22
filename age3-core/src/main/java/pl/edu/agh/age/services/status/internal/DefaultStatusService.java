@@ -55,10 +55,6 @@ import javax.inject.Named;
 @Named
 public final class DefaultStatusService implements SmartLifecycle {
 
-	public static final String CHANNEL_NAME = "status/channel";
-
-	public static final String MAP_NAME = "status/map";
-
 	private static final @s long UPDATE_PERIOD_IN_S = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultStatusService.class);
@@ -88,7 +84,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 		this.eventBus = eventBus;
 
 		nodeId = identityService.nodeId();
-		statusMap = hazelcastInstance.getMap(MAP_NAME);
+		statusMap = hazelcastInstance.getMap(HazelcastObjectNames.MAP_NAME);
 		eventBus.register(this);
 	}
 

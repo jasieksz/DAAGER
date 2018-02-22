@@ -66,8 +66,6 @@ import javax.inject.Named;
 @Named
 public final class HazelcastDiscoveryService implements SmartLifecycle, DiscoveryService {
 
-	public static final String MEMBERS_MAP = "discovery/members";
-
 	private static final @s long UPDATE_PERIOD_IN_S = 10L;
 
 	private static final Logger logger = LoggerFactory.getLogger(HazelcastDiscoveryService.class);
@@ -96,7 +94,7 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 		this.eventBus = eventBus;
 		this.identityService = identityService;
 		nodeId = identityService.nodeId();
-		members = hazelcastInstance.getMap(MEMBERS_MAP);
+		members = hazelcastInstance.getMap(HazelcastObjectNames.MEMBERS_MAP);
 		entryListenerId = members.addEntryListener(new NeighbourMapListener(), true);
 	}
 

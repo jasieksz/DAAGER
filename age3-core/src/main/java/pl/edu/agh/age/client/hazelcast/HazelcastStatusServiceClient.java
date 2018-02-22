@@ -23,6 +23,7 @@ import pl.edu.agh.age.client.StatusServiceClient;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.status.Status;
 import pl.edu.agh.age.services.status.internal.DefaultStatusService;
+import pl.edu.agh.age.services.status.internal.HazelcastObjectNames;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -41,7 +42,7 @@ public final class HazelcastStatusServiceClient implements StatusServiceClient {
 	private IMap<String, Status> statusMap;
 
 	@Inject public HazelcastStatusServiceClient(final HazelcastInstance hazelcastInstance) {
-		statusMap = hazelcastInstance.getMap(DefaultStatusService.MAP_NAME);
+		statusMap = hazelcastInstance.getMap(HazelcastObjectNames.MAP_NAME);
 	}
 
 	@Override public @Nullable Status getStatusForNode(final NodeDescriptor descriptor) {
