@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.client.TopologyServiceClient;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jline.terminal.Terminal;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public final class TopologyCommand implements Command {
 
 	@Operation(description = "Prints information about topology.") public void info() {
 		final Optional<String> masterId = topologyService.masterId();
-		final Optional<DirectedGraph<String, DefaultEdge>> topology = topologyService.topologyGraph();
+		final Optional<Graph<String, DefaultEdge>> topology = topologyService.topologyGraph();
 		final Optional<String> topologyType = topologyService.topologyType();
 
 		writer.println("Topology info = {");

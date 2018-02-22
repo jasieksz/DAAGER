@@ -39,7 +39,7 @@ import one.util.streamex.StreamEx;
 
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public final class ComputeTopologyProvider implements TopologyProvider<Serializa
 	// Modifying it does not require holding a lock.
 	private Topology<Serializable> topology = new FullMeshTopology<>();
 
-	@GuardedBy("lock") private @Nullable DirectedGraph<Serializable, AnnotatedEdge> cachedTopology = null;
+	@GuardedBy("lock") private @Nullable Graph<Serializable, AnnotatedEdge> cachedTopology = null;
 
 	@GuardedBy("lock") private boolean needUpgrade = true;
 

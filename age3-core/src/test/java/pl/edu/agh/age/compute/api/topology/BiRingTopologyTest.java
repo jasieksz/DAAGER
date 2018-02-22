@@ -25,7 +25,7 @@ import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +43,7 @@ public final class BiRingTopologyTest {
 
 	@Test public void test() {
 		final Set<Integer> ids = ImmutableSet.of(10, 1, 3, 5, 12, 43, 6);
-		final DirectedGraph<Integer, AnnotatedEdge> graph = topology.apply(ids);
+		final Graph<Integer, AnnotatedEdge> graph = topology.apply(ids);
 
 		assertThat(ids).describedAs("all vertices satisfy").allSatisfy(i -> {
 			assertThat(graph.outDegreeOf(i)).describedAs("out degree of vertex is 2").isEqualTo(2);
@@ -61,7 +61,7 @@ public final class BiRingTopologyTest {
 
 	@Test public void testEmpty() {
 		final Set<Integer> ids = ImmutableSet.of();
-		final DirectedGraph<Integer, AnnotatedEdge> graph = topology.apply(ids);
+		final Graph<Integer, AnnotatedEdge> graph = topology.apply(ids);
 
 		assertThat(graph.vertexSet()).describedAs("no vertices").isEmpty();
 		assertThat(graph.edgeSet()).describedAs("no edges").isEmpty();
@@ -69,7 +69,7 @@ public final class BiRingTopologyTest {
 
 	@Test public void testSingleVertex() {
 		final Set<Integer> ids = ImmutableSet.of(1);
-		final DirectedGraph<Integer, AnnotatedEdge> graph = topology.apply(ids);
+		final Graph<Integer, AnnotatedEdge> graph = topology.apply(ids);
 
 		assertThat(graph.vertexSet()).describedAs("one vertex").hasSize(1);
 		assertThat(graph.edgeSet()).describedAs("one tight loop edge")

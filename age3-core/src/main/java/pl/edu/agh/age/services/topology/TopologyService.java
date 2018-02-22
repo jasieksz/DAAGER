@@ -18,7 +18,7 @@
  */
 package pl.edu.agh.age.services.topology;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ public interface TopologyService {
 	 *
 	 * @return an Optional containing the topology graph or empty when no topology was set.
 	 */
-	Optional<DirectedGraph<String, DefaultEdge>> topologyGraph();
+	Optional<Graph<String, DefaultEdge>> topologyGraph();
 
 	Optional<String> topologyType();
 

@@ -21,7 +21,7 @@ package pl.edu.agh.age.compute.api.topology;
 
 import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -34,7 +34,7 @@ import java.util.function.Function;
  * 		a type of elements in vertices of the topology graph
  */
 @FunctionalInterface
-public interface Topology<T extends Serializable> extends Function<Set<T>, DirectedGraph<T, AnnotatedEdge>> {
+public interface Topology<T extends Serializable> extends Function<Set<T>, Graph<T, AnnotatedEdge>> {
 
 	/**
 	 * Creates a new unidirectional ring topology.

@@ -26,9 +26,9 @@ import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 import one.util.streamex.IntStreamEx;
 import one.util.streamex.StreamEx;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.AsUnmodifiableGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.UnmodifiableDirectedGraph;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -47,7 +47,7 @@ import java.util.Set;
  */
 public final class FullMeshTopology<T extends Serializable> implements Topology<T> {
 
-	@Override public DirectedGraph<T, AnnotatedEdge> apply(final Set<T> identities) {
+	@Override public Graph<T, AnnotatedEdge> apply(final Set<T> identities) {
 		requireNonNull(identities);
 
 		final DefaultDirectedGraph<T, AnnotatedEdge> graph = new DefaultDirectedGraph<>(AnnotatedEdge.class);
@@ -58,7 +58,7 @@ public final class FullMeshTopology<T extends Serializable> implements Topology<
 		                               .without(v1)
 		                               .zipWith(IntStreamEx.ints().mapToObj(String::valueOf).map(AnnotatedEdge::new))
 		                               .forEach(v2 -> graph.addEdge(v1, v2.getKey(), v2.getValue())));
-		return new UnmodifiableDirectedGraph<>(graph);
+		return new AsUnmodifiableGraph<>(graph);
 	}
 
 	@Override public String toString() {

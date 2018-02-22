@@ -24,10 +24,10 @@ import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.AsUnmodifiableGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.UnmodifiableDirectedGraph;
 
 import java.util.Set;
 
@@ -47,7 +47,7 @@ public final class FullyConnectedWithLocalLoopsTopologyProcessor implements Topo
 	}
 
 	@Override
-	public DirectedGraph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
+	public Graph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
 		requireNonNull(identities);
 
 		final DefaultDirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
@@ -57,7 +57,7 @@ public final class FullyConnectedWithLocalLoopsTopologyProcessor implements Topo
 			final NodeDescriptor id2 = elem.get(1);
 			graph.addEdge(id1.id(), id2.id());
 		});
-		return new UnmodifiableDirectedGraph<>(graph);
+		return new AsUnmodifiableGraph<>(graph);
 	}
 
 	@Override public String toString() {

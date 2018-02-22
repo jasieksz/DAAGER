@@ -21,6 +21,7 @@ package pl.edu.agh.age.services.worker.internal.task;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static java.util.Objects.requireNonNull;
 import static pl.edu.agh.age.util.Runnables.withThreadName;
 
@@ -41,12 +42,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ByteArrayResource;
 
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -160,7 +159,7 @@ public final class TaskBuilder {
 			logger.info("Starting execution of {}", runnable);
 			final ListenableScheduledFuture<?> future = executorService.schedule(withThreadName("COMPUTE", runnable),
 			                                                                     0L, TimeUnit.SECONDS);
-			Futures.addCallback(future, executionListener);
+			Futures.addCallback(future, executionListener, directExecutor());
 			if (runnable instanceof Pauseable) {
 				return new PauseableStartedTask(className, (Pauseable)runnable, future);
 			}

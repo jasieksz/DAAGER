@@ -25,9 +25,9 @@ import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import one.util.streamex.StreamEx;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.AsUnmodifiableGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.UnmodifiableDirectedGraph;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -51,12 +51,12 @@ import java.util.Set;
  */
 public final class BiRingTopology<T extends Serializable> implements Topology<T> {
 
-	@Override public DirectedGraph<T, AnnotatedEdge> apply(final Set<T> identities) {
+	@Override public Graph<T, AnnotatedEdge> apply(final Set<T> identities) {
 		requireNonNull(identities);
 		final DefaultDirectedGraph<T, AnnotatedEdge> graph = new DefaultDirectedGraph<>(AnnotatedEdge.class);
 
 		if (identities.isEmpty()) {
-			return new UnmodifiableDirectedGraph<>(graph);
+			return new AsUnmodifiableGraph<>(graph);
 		}
 
 		identities.forEach(graph::addVertex);
@@ -76,7 +76,7 @@ public final class BiRingTopology<T extends Serializable> implements Topology<T>
 			graph.addEdge(first, last, new AnnotatedEdge("left"));
 		}
 
-		return new UnmodifiableDirectedGraph<>(graph);
+		return new AsUnmodifiableGraph<>(graph);
 	}
 
 	@Override public String toString() {

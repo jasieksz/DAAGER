@@ -39,7 +39,6 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;

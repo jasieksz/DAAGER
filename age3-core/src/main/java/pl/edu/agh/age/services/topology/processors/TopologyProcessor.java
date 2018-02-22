@@ -21,7 +21,7 @@ package pl.edu.agh.age.services.topology.processors;
 
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.Set;
@@ -60,5 +60,5 @@ public interface TopologyProcessor {
 	 *
 	 * @return a directed graph of node connections.
 	 */
-	DirectedGraph<String, DefaultEdge> createGraphFrom(Set<? extends NodeDescriptor> identities);
+	Graph<String, DefaultEdge> createGraphFrom(Set<? extends NodeDescriptor> identities);
 }

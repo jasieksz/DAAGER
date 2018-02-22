@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * This example shows how the minimal runnable should be configured.

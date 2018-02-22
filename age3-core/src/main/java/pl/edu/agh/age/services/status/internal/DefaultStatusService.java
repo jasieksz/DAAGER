@@ -20,6 +20,7 @@
 package pl.edu.agh.age.services.status.internal;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
@@ -108,7 +109,7 @@ public final class DefaultStatusService implements SmartLifecycle {
 		                                                                                       UPDATE_PERIOD_IN_S,
 		                                                                                       UPDATE_PERIOD_IN_S,
 		                                                                                       TimeUnit.SECONDS);
-		Futures.addCallback(mapUpdateTask, new MapUpdateCallback());
+		Futures.addCallback(mapUpdateTask, new MapUpdateCallback(), directExecutor());
 
 		logger.info("Status service started");
 	}

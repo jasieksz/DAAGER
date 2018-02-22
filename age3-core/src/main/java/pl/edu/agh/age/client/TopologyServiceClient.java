@@ -19,7 +19,7 @@
 
 package pl.edu.agh.age.client;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.Optional;
@@ -27,7 +27,7 @@ import java.util.Optional;
 public interface TopologyServiceClient {
 	Optional<String> masterId();
 
-	Optional<DirectedGraph<String, DefaultEdge>> topologyGraph();
+	Optional<Graph<String, DefaultEdge>> topologyGraph();
 
 	Optional<String> topologyType();
 }

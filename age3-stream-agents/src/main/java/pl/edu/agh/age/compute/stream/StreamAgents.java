@@ -37,6 +37,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IdGenerator;
 
+import one.util.streamex.EntryStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,6 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
-import one.util.streamex.EntryStream;
 
 /**
  * Main runtime for stream-like agents processing.

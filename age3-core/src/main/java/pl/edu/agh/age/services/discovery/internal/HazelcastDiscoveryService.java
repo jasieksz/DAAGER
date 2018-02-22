@@ -19,6 +19,7 @@
 
 package pl.edu.agh.age.services.discovery.internal;
 
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
 import static com.google.common.util.concurrent.MoreExecutors.shutdownAndAwaitTermination;
 import static java.util.Objects.isNull;
@@ -118,7 +119,7 @@ public final class HazelcastDiscoveryService implements SmartLifecycle, Discover
 		final ListenableScheduledFuture<?> mapUpdateTask = executorService.scheduleAtFixedRate(
 			Runnables.withThreadName("discovery-map-update", this::updateMap), UPDATE_PERIOD_IN_S, UPDATE_PERIOD_IN_S,
 			TimeUnit.SECONDS);
-		Futures.addCallback(mapUpdateTask, new MapUpdateCallback());
+		Futures.addCallback(mapUpdateTask, new MapUpdateCallback(), directExecutor());
 		logger.info("Discovery service started");
 	}
 

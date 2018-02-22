@@ -20,7 +20,6 @@
 package pl.edu.agh.age.services.worker.internal.configuration;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.collect.Maps.newHashMap;
 
 import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
@@ -32,8 +31,6 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 public final class SpringConfiguration implements WorkerConfiguration {

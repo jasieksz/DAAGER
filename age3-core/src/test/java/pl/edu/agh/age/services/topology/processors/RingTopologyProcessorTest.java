@@ -29,7 +29,7 @@ import pl.edu.agh.age.services.identity.internal.NodeDescriptor;
 import com.google.common.collect.ImmutableSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +57,7 @@ public final class RingTopologyProcessorTest {
 		final NodeDescriptor nodeDescriptor = new NodeDescriptor(nodeId, NodeType.UNKNOWN, Collections.emptySet());
 		final ImmutableSet<NodeDescriptor> identities = ImmutableSet.of(nodeDescriptor);
 
-		final DirectedGraph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
+		final Graph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
 
 		assertThat(graph.containsVertex(nodeId)).isTrue();
 		assertThat(graph.inDegreeOf(nodeId)).isEqualTo(1);
@@ -72,7 +72,7 @@ public final class RingTopologyProcessorTest {
 		final NodeDescriptor node2Identity = new NodeDescriptor(node2Id, NodeType.UNKNOWN, Collections.emptySet());
 		final ImmutableSet<NodeDescriptor> identities = ImmutableSet.of(node1Identity, node2Identity);
 
-		final DirectedGraph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
+		final Graph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
 
 		assertThat(graph.containsVertex(node1Id)).isTrue();
 		assertThat(graph.inDegreeOf(node1Id)).isEqualTo(1);
@@ -94,7 +94,7 @@ public final class RingTopologyProcessorTest {
 		                                                                          Collections.emptySet()));
 
 		final Set<NodeDescriptor> identities = ImmutableSet.copyOf(map.values());
-		final DirectedGraph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
+		final Graph<String, DefaultEdge> graph = processor.createGraphFrom(identities);
 
 		map.keySet().forEach(nodeId -> {
 			assertThat(graph.containsVertex(nodeId)).isTrue();

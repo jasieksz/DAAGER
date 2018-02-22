@@ -20,7 +20,6 @@
 package pl.edu.agh.age.integration;
 
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import pl.edu.agh.age.client.WorkerServiceClient;

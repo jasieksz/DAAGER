@@ -49,7 +49,7 @@ import com.hazelcast.core.MessageListener;
 import com.hazelcast.map.listener.EntryUpdatedListener;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +125,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 
 	private @Nullable String listenerKey;
 
-	private @Nullable DirectedGraph<String, DefaultEdge> cachedTopology;
+	private @Nullable Graph<String, DefaultEdge> cachedTopology;
 
 	@Inject
 	public DefaultTopologyService(final DiscoveryService discoveryService, final NodeIdentityService identityService,
@@ -332,8 +332,8 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		                         .findFirst();
 	}
 
-	private @Nullable DirectedGraph<String, DefaultEdge> getCurrentTopologyGraph() {
-		return (DirectedGraph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH);
+	private @Nullable Graph<String, DefaultEdge> getCurrentTopologyGraph() {
+		return (Graph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH);
 	}
 
 	@Override public Optional<String> masterId() {
@@ -349,7 +349,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		return service.isInState(State.WITH_TOPOLOGY);
 	}
 
-	@Override public Optional<DirectedGraph<String, DefaultEdge>> topologyGraph() {
+	@Override public Optional<Graph<String, DefaultEdge>> topologyGraph() {
 		return Optional.ofNullable(cachedTopology);
 	}
 
@@ -362,7 +362,7 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 			throw new IllegalStateException("Topology not ready");
 		}
 
-		final DirectedGraph<String, DefaultEdge> graph = getCurrentTopologyGraph();
+		final Graph<String, DefaultEdge> graph = getCurrentTopologyGraph();
 		final Set<DefaultEdge> outEdges = graph.outgoingEdgesOf(identityService.nodeId());
 		return outEdges.stream().map(graph::getEdgeTarget).collect(Collectors.toSet());
 	}

@@ -26,7 +26,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ITopic;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +60,8 @@ public final class HazelcastTopologyServiceClient implements TopologyServiceClie
 		return Optional.ofNullable((String)runtimeConfig.get(ConfigKeys.MASTER));
 	}
 
-	@Override public Optional<DirectedGraph<String, DefaultEdge>> topologyGraph() {
-		return Optional.ofNullable((DirectedGraph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH));
+	@Override public Optional<Graph<String, DefaultEdge>> topologyGraph() {
+		return Optional.ofNullable((Graph<String, DefaultEdge>)runtimeConfig.get(ConfigKeys.TOPOLOGY_GRAPH));
 	}
 
 	@Override public Optional<String> topologyType() {

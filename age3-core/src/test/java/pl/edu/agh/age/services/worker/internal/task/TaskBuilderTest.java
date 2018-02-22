@@ -30,7 +30,6 @@ import pl.edu.agh.age.runnables.SimpleTestWithProperty;
 import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
