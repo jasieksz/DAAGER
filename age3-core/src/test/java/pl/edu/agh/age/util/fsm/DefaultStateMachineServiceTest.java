@@ -37,7 +37,6 @@ public final class DefaultStateMachineServiceTest {
 		STATE1,
 		STATE2,
 		STATE3,
-		ERROR,
 		END
 	}
 
@@ -45,7 +44,7 @@ public final class DefaultStateMachineServiceTest {
 		EVENT1,
 		EVENT2,
 		EVENT3,
-		FAIL
+		GLOBAL_EVENT,
 	}
 
 	private static final String SERVICE_NAME = "name";
@@ -64,38 +63,39 @@ public final class DefaultStateMachineServiceTest {
 
 	private DefaultStateMachineService<State, Event> fsmService;
 
-	@SuppressWarnings({"ProhibitedExceptionThrown", "CastToConcreteClass"}) @Before public void setUp() {
+	@SuppressWarnings("ProhibitedExceptionThrown") @Before public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
 		collectedThrowables.clear();
 		builder = StateMachineServiceBuilder.withStatesAndEvents(State.class, Event.class);
+		//@formatter:off
 		builder.withName(SERVICE_NAME)
 		       .startWith(State.STATE1)
-		       .withEventBus(eventBus)
-		       .terminateIn(State.END, State.ERROR)
-		       .ifFailed()
-		       .fireAndCall(Event.FAIL, exceptionHandler)
-		       .inAnyState()
-		       .on(Event.FAIL)
-		       .goTo(State.ERROR)
-		       .commit()
+		       .notifyOn(eventBus)
+		       .terminateIn(State.END)
+		       .whenFailedCall(exceptionHandler)
 		       .in(State.STATE1)
-		       .on(Event.EVENT1)
-		       .goTo(State.STATE2)
-		       .commit()
+			       .on(Event.EVENT1)
+			       .goTo(State.STATE2)
+			       .commit()
 		       .in(State.STATE2)
-		       .on(Event.EVENT2)
-		       .execute((fsm) -> {})
-		       .goTo(State.STATE3)
-		       .commit()
+			       .on(Event.EVENT2)
+			       .execute(fsm -> {})
+			       .goTo(State.STATE3)
+			       .commit()
 		       .in(State.STATE1)
-		       .on(Event.EVENT2)
-		       .goTo(State.STATE2)
-		       .execute(fsm -> {
-			       throw new RuntimeException("FAILED");
-		       })
-		       .commit()
+			       .on(Event.EVENT2)
+			       .goTo(State.STATE2)
+			       .execute(fsm -> {
+				       throw new RuntimeException("FAILED");
+			       })
+			       .commit()
+		       .inAnyState()
+				   .on(Event.GLOBAL_EVENT)
+	               .goTo(State.END)
+	               .commit()
 		       .synchronous();
+		//@formatter:on
 		fsmService = (DefaultStateMachineService<State, Event>)builder.build();
 	}
 
@@ -111,11 +111,29 @@ public final class DefaultStateMachineServiceTest {
 		assertThat(fsmService.isInState(State.STATE2)).isTrue();
 	}
 
-	@Test public void testFailure() {
-		fsmService.fire(Event.FAIL);
+	@Test public void testSingleTransition_unexpectedEvent() {
+		fsmService.fire(Event.EVENT3);
 		fsmService.execute();
 
-		assertThat(fsmService.isInState(State.ERROR)).isTrue();
+		assertThat(fsmService.isFailed()).isFalse();
+		assertThat(fsmService.isTerminated()).isFalse();
+		assertThat(fsmService.isInState(State.STATE1)).isTrue();
+	}
+
+	@SuppressWarnings("NewExceptionWithoutArguments") @Test public void testFailure() {
+		final Exception e = new Exception();
+		fsmService.failWithError(e);
+		fsmService.execute();
+
+		assertThat(fsmService.isFailed()).isTrue();
+	}
+
+	@Test public void testSingleTransition_globalEvent() {
+		fsmService.fire(Event.GLOBAL_EVENT);
+		fsmService.execute();
+
+		assertThat(fsmService.isFailed()).isFalse();
+		assertThat(fsmService.isInState(State.END)).isTrue();
 	}
 
 	@Test public void testSingleTransition_failedAction() {

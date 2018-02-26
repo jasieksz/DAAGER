@@ -79,7 +79,6 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		MASTER_ELECTED_SLAVE,
 		// Only in this state we can communicate
 		WITH_TOPOLOGY,
-		FAILED,
 		TERMINATED
 	}
 
@@ -92,7 +91,6 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		MEMBERSHIP_CHANGED,
 		TOPOLOGY_TYPE_CHANGED,
 		TOPOLOGY_CONFIGURED,
-		ERROR,
 		STOP
 	}
 
@@ -141,44 +139,39 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 			.withStatesAndEvents(State.class, Event.class)
 			.withName("topology")
 			.startWith(State.OFFLINE)
-			.terminateIn(State.TERMINATED, State.FAILED)
+			.terminateIn(State.TERMINATED)
 
 			.in(State.OFFLINE)
 				.on(Event.START).execute(this::internalStart).goTo(State.STARTING)
-				.on(Event.MEMBERSHIP_CHANGED).goTo(State.OFFLINE) // Ignore event
 				.commit()
 
 			.in(State.STARTING)
-				.on(Event.STARTED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE)
+				.on(Event.STARTED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE).and()
 				.on(Event.MEMBERSHIP_CHANGED).goTo(State.STARTING)
 				.commit()
 
 			.in(State.MASTER_ELECTED_MASTER)
-				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE)
+				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE).and()
 				.on(Event.TOPOLOGY_TYPE_CHANGED).execute(this::topologyChanged).goTo(State.WITH_TOPOLOGY)
 				.commit()
 
 			.in(State.MASTER_ELECTED_SLAVE)
-				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE)
-				.on(Event.TOPOLOGY_TYPE_CHANGED).goTo(State.MASTER_ELECTED_SLAVE)
+				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE).and()
 				.on(Event.TOPOLOGY_CONFIGURED).execute(this::topologyConfigured).goTo(State.WITH_TOPOLOGY)
 				.commit()
 
 			.in(State.WITH_TOPOLOGY)
-				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE)
-				.on(Event.TOPOLOGY_TYPE_CHANGED).execute(this::topologyChanged).goTo(State.WITH_TOPOLOGY)
+				.on(Event.MEMBERSHIP_CHANGED).execute(this::electMaster).goTo(State.MASTER_ELECTED_MASTER, State.MASTER_ELECTED_SLAVE).and()
+				.on(Event.TOPOLOGY_TYPE_CHANGED).execute(this::topologyChanged).goTo(State.WITH_TOPOLOGY).and()
 				.on(Event.TOPOLOGY_CONFIGURED).execute(this::topologyConfigured).goTo(State.WITH_TOPOLOGY)
 				.commit()
 
 			.inAnyState()
 				.on(Event.STOP).execute(this::internalStop).goTo(State.TERMINATED)
-				.on(Event.ERROR).execute(this::handleError).goTo(State.FAILED)
 				.commit()
 
-			.ifFailed()
-				.fireAndCall(Event.ERROR, new ExceptionHandler())
-
-			.withEventBus(eventBus)
+			.whenFailedCall(new ExceptionHandler())
+			.notifyOn(eventBus)
 			.build();
 		//@formatter:on
 	}
@@ -224,10 +217,6 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 		logger.debug("Topology service stopping");
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
 		logger.info("Topology service stopped");
-	}
-
-	private void handleError(final FSM<State, Event> fsm) {
-
 	}
 
 	// Topology methods

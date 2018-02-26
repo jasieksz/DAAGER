@@ -66,10 +66,6 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 		RUNNING,
 		DISCONNECTED,
 		/**
-		 * Node has failed.
-		 */
-		FAILED,
-		/**
 		 * Node has terminated (terminal state).
 		 */
 		TERMINATED
@@ -87,11 +83,6 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 		START,
 		CONNECTION_DOWN,
 		RECONNECTED,
-		DESTROY,
-		/**
-		 * Indicates that an error occurred.
-		 */
-		ERROR,
 		/**
 		 * Terminates the node.
 		 */
@@ -121,7 +112,7 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 			.withStatesAndEvents(State.class, Event.class)
 			.withName("lifecycle")
 			.startWith(State.OFFLINE)
-			.terminateIn(State.TERMINATED, State.FAILED)
+			.terminateIn(State.TERMINATED)
 
 			.in(State.OFFLINE)
 				.on(Event.START).execute(this::internalStart).goTo(State.RUNNING)
@@ -136,15 +127,11 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 				.commit()
 
 			.inAnyState()
-				.on(Event.DESTROY).execute(this::destroy).goTo(State.TERMINATED)
 				.on(Event.STOP).execute(this::internalStop).goTo(State.TERMINATED)
-				.on(Event.ERROR).execute(fsm -> logger.debug("ERROR")).goTo(State.FAILED)
 				.commit()
 
-			.ifFailed()
-				.fireAndCall(Event.ERROR, new ExceptionHandler())
-
-			.withEventBus(eventBus)
+			.whenFailedCall(new ExceptionHandler())
+			.notifyOn(eventBus)
 			.build();
 		//@formatter:on
 	}
@@ -206,6 +193,9 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 	private void internalStop(final FSM<State, Event> fsm) {
 		logger.debug("Node lifecycle service stopping");
 
+		logger.info("Destroying the node");
+		eventBus.post(new NodeDestroyedEvent());
+
 		logger.info("Node lifecycle service stopped");
 	}
 
@@ -217,17 +207,12 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 		logger.debug("Reconnected");
 	}
 
-	private void destroy(final FSM<State, Event> fsm) {
-		logger.info("Destroying the node");
-		eventBus.post(new NodeDestroyedEvent());
-	}
-
 	// Message handling
 
 	private void handleDestroy(final @Nullable Serializable serializable) {
 		assert serializable == null;
 		logger.debug("Destroy message received");
-		service.fire(Event.DESTROY);
+		service.fire(Event.STOP);
 	}
 
 	// Listeners

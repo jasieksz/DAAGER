@@ -85,13 +85,11 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		FINISHED,
 		COMPUTATION_CANCELED,
 		COMPUTATION_FAILED,
-		FAILED,
 		TERMINATED
 	}
 
 	public enum Event {
 		START,
-		ERROR,
 		TERMINATE,
 		// Requested by external command
 		CONFIGURE,
@@ -156,7 +154,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			.withStatesAndEvents(State.class, Event.class)
 			.withName("worker")
 			.startWith(State.OFFLINE)
-			.terminateIn(State.TERMINATED, State.FAILED)
+			.terminateIn(State.TERMINATED)
 
 			.in(State.OFFLINE)
 				.on(Event.START).execute(this::internalStart).goTo(State.RUNNING)
@@ -167,79 +165,43 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				.commit()
 
 			.in(State.CONFIGURED)
-				.on(Event.START_EXECUTION).execute(this::startTask).goTo(State.EXECUTING, State.CONFIGURED, State.COMPUTATION_FAILED)
+				.on(Event.START_EXECUTION).execute(this::startTask).goTo(State.EXECUTING, State.CONFIGURED, State.COMPUTATION_FAILED).and()
 				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-                // Ignore incorrect user events
-				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.CONFIGURED)
-				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
-                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
-				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.CONFIGURED)
 				.commit()
 
 			.in(State.EXECUTING)
-				.on(Event.PAUSE_EXECUTION).execute(this::pauseTask).goTo(State.PAUSED)
-				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED)
-				.on(Event.COMPUTATION_FAILED).execute(this::taskFailed).goTo(State.COMPUTATION_FAILED)
+				.on(Event.PAUSE_EXECUTION).execute(this::pauseTask).goTo(State.PAUSED).and()
+				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED).and()
+				.on(Event.COMPUTATION_FAILED).execute(this::taskFailed).goTo(State.COMPUTATION_FAILED).and()
 				.on(Event.COMPUTATION_FINISHED).execute(this::taskFinished).goTo(State.FINISHED)
-                // Ignore incorrect user events
-				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.EXECUTING)
-                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.EXECUTING)
-                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.EXECUTING)
-                .on(Event.CLEAN).execute(this::logEventIgnored).goTo(State.EXECUTING)
 				.commit()
 
 			.in(State.PAUSED)
-				.on(Event.RESUME_EXECUTION).execute(this::resumeTask).goTo(State.EXECUTING)
-				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED)
-				.on(Event.COMPUTATION_FAILED).goTo(State.COMPUTATION_FAILED)
+				.on(Event.RESUME_EXECUTION).execute(this::resumeTask).goTo(State.EXECUTING).and()
+				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED).and()
+				.on(Event.COMPUTATION_FAILED).goTo(State.COMPUTATION_FAILED).and()
 				.on(Event.COMPUTATION_FINISHED).goTo(State.FINISHED)
-				// Ignore incorrect user events
-				.on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.PAUSED)
-                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.PAUSED)
-                .on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.PAUSED)
-                .on(Event.CLEAN).execute(this::logEventIgnored).goTo(State.PAUSED)
 				.commit()
 
 			.in(State.FINISHED) // Terminal for compute
 				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-                // Ignore everything else
-                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.FINISHED)
-                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
-				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
-                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
-				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.FINISHED)
 				.commit()
 
 			.in(State.COMPUTATION_FAILED) // Terminal for compute
 				// Must be CLEAN-ed
 				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-                // Ignore everything else
-                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
-                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
-				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
-                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
-				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_FAILED)
                 .commit()
 
             .in(State.COMPUTATION_CANCELED) // Terminal for compute
 				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-				// Ignore everything else
-                .on(Event.CONFIGURE).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
-                .on(Event.START_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
-				.on(Event.CANCEL_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
-                .on(Event.RESUME_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
-				.on(Event.PAUSE_EXECUTION).execute(this::logEventIgnored).goTo(State.COMPUTATION_CANCELED)
                 .commit()
 
 			.inAnyState()
 				.on(Event.TERMINATE).execute(this::terminate).goTo(State.TERMINATED)
-				.on(Event.ERROR).execute(this::handleError).goTo(State.FAILED)
 				.commit()
 
-			.ifFailed()
-				.fireAndCall(Event.ERROR, new ExceptionHandler())
-
-			.withEventBus(eventBus)
+			.whenFailedCall(new ExceptionHandler())
+			.notifyOn(eventBus)
 			.build();
 		//@formatter:on
 		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> service.fire(Event.CONFIGURE));
@@ -329,10 +291,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		logger.debug("Worker service stopping.");
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
 		logger.info("Worker service stopped.");
-	}
-
-	private void handleError(final FSM<State, Event> fsm) {
-
 	}
 
 	private void configure(final FSM<State, Event> fsm) {

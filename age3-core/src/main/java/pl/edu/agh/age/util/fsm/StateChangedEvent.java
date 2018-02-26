@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -34,10 +34,7 @@ import java.util.Objects;
  * 		a states type.
  * @param <E>
  * 		an events type
- *
- * @author AGH AgE Team
  */
-
 public class StateChangedEvent<S extends Enum<S>, E extends Enum<E>> {
 
 	private final S previousState;
@@ -58,32 +55,10 @@ public class StateChangedEvent<S extends Enum<S>, E extends Enum<E>> {
 	 * @param newState
 	 * 		a new state.
 	 */
-	protected StateChangedEvent(final S previousState, final E event, final S newState) {
+	StateChangedEvent(final S previousState, final E event, final S newState) {
 		this.previousState = requireNonNull(previousState);
 		this.event = requireNonNull(event);
 		this.newState = requireNonNull(newState);
-	}
-
-	/**
-	 * Creates a new event.
-	 *
-	 * @param <S>
-	 * 		a states type.
-	 * @param <E>
-	 * 		an events type
-	 * @param previousState
-	 * 		a previous state.
-	 * @param event
-	 * 		an event that caused the transition.
-	 * @param newState
-	 * 		a new state.
-	 *
-	 * @return a new event.
-	 */
-	public static <S extends Enum<S>, E extends Enum<E>> StateChangedEvent<S, E> create(final S previousState,
-	                                                                                    final E event,
-	                                                                                    final S newState) {
-		return new StateChangedEvent<>(previousState, event, newState);
 	}
 
 	/**

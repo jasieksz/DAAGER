@@ -19,18 +19,26 @@
 
 package pl.edu.agh.age.util.fsm;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
-import com.google.common.collect.Table;
+import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
+
+import one.util.streamex.StreamEx;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.function.Consumer;
+
+import io.vavr.Tuple2;
+import io.vavr.collection.Set;
 
 public final class StateMachineServiceBuilderTest {
 
@@ -54,12 +62,6 @@ public final class StateMachineServiceBuilderTest {
 
 	private static final Consumer<FSM<State, Event>> consumer2 = fsm -> {};
 
-	private static class StateChangedEvent_Helper extends StateChangedEvent<State, Event> {
-		protected StateChangedEvent_Helper(final State previousState, final Event event, final State newState) {
-			super(previousState, event, newState);
-		}
-	}
-
 	@Before public void setUp() {
 		builder = StateMachineServiceBuilder.withStatesAndEvents(State.class, Event.class);
 	}
@@ -73,15 +75,16 @@ public final class StateMachineServiceBuilderTest {
 	@Test public void testConstructor_correctInitialization() {
 		assertThat(builder.stateClass()).isEqualTo(State.class);
 		assertThat(builder.eventClass()).isEqualTo(Event.class);
-		assertThat(builder.getStateChangedEventClass()).isEqualTo(StateChangedEvent.class);
+		assertThat(builder.eventBus()).isNull();
 	}
 
-	@Test public void testNotifyWithType() {
-		builder.notifyWithType(StateChangedEvent_Helper.class);
-		assertThat(builder.getStateChangedEventClass()).isEqualTo(StateChangedEvent_Helper.class);
+	@Test public void testNotifyOn() {
+		final EventBus eventBus = new EventBus();
+		builder.notifyOn(eventBus);
+		assertThat(builder.eventBus()).isEqualTo(eventBus);
 	}
 
-	@Test public void testWithName() throws Exception {
+	@Test public void testWithName() {
 		builder.withName(SERVICE_NAME);
 		assertThat(builder.name()).isEqualTo(SERVICE_NAME);
 	}
@@ -89,45 +92,51 @@ public final class StateMachineServiceBuilderTest {
 	@Test public void testStateDefinition_singleEvent() {
 		builder.in(State.STATE1).on(Event.EVENT1).execute(consumer1).goTo(State.STATE2).commit();
 
-		final Table<State, Event, Consumer<FSM<State, Event>>> actions = builder.actions();
-		final Table<State, Event, Set<State>> transitions = builder.transitions();
+		final Multimap<State, Transition<State, Event>> transitions = builder.transitions();
+		final Collection<Transition<State, Event>> stateTransitions = transitions.get(State.STATE1);
 
-		final Consumer<FSM<State, Event>> action = actions.get(State.STATE1, Event.EVENT1);
-		final Set<State> states = transitions.get(State.STATE1, Event.EVENT1);
+		assertThat(stateTransitions).isNotNull().hasSize(1);
 
-		assertThat(action).isNotNull();
-		assertThat(action).isEqualTo(consumer1);
-		assertThat(states).isNotEmpty();
-		assertThat(states).contains(State.STATE2);
+		final Transition<State, Event> transition = getOnlyElement(stateTransitions);
+		assertThat(transition).isNotNull();
+		assertThat(transition.action()).isEqualTo(consumer1);
+		assertThat(transition.targets()).isNotEmpty().contains(State.STATE2);
 	}
 
 	@Test public void testStateDefinition_multipleEvents() {
+		//@formatter:off
 		builder.in(State.STATE1)
-		       .on(Event.EVENT1)
-		       .execute(consumer1)
-		       .goTo(State.STATE2)
-		       .on(Event.EVENT2)
-		       .execute(consumer2)
-		       .goTo(State.STATE3)
+					.on(Event.EVENT1)
+					.execute(consumer1)
+					.goTo(State.STATE2)
+               .and()
+					.on(Event.EVENT2)
+					.execute(consumer2)
+					.goTo(State.STATE3)
 		       .commit();
+		//@formatter:on
 
-		final Table<State, Event, Consumer<FSM<State, Event>>> actions = builder.actions();
-		final Table<State, Event, Set<State>> transitions = builder.transitions();
+		final Multimap<State, Transition<State, Event>> transitions = builder.transitions();
 
-		final Consumer<FSM<State, Event>> action1 = actions.get(State.STATE1, Event.EVENT1);
-		final Set<State> states1 = transitions.get(State.STATE1, Event.EVENT1);
-		final Consumer<FSM<State, Event>> action2 = actions.get(State.STATE1, Event.EVENT2);
-		final Set<State> states2 = transitions.get(State.STATE1, Event.EVENT2);
+		final Collection<Transition<State, Event>> stateTransitions = transitions.get(State.STATE1);
 
-		assertThat(action1).isNotNull();
-		assertThat(action1).isEqualTo(consumer1);
-		assertThat(states1).isNotEmpty();
-		assertThat(states1).contains(State.STATE2);
+		assertThat(stateTransitions).isNotNull().hasSize(2);
 
-		assertThat(action2).isNotNull();
-		assertThat(action2).isEqualTo(consumer2);
-		assertThat(states2).isNotEmpty();
-		assertThat(states2).contains(State.STATE3);
+		final Optional<Transition<State, Event>> e1transition = StreamEx.of(stateTransitions)
+		                                                                .filter(t -> t.event() == Event.EVENT1)
+		                                                                .findAny();
+		final Optional<Transition<State, Event>> e2transition = StreamEx.of(stateTransitions)
+		                                                                .filter(t -> t.event() == Event.EVENT2)
+		                                                                .findAny();
+
+		assertThat(e1transition).isNotEmpty()
+		                        .get()
+		                        .matches(t -> t.action().equals(consumer1))
+		                        .matches(t -> t.targets().contains(State.STATE2));
+		assertThat(e2transition).isNotEmpty()
+		                        .get()
+		                        .matches(t -> t.action().equals(consumer2))
+		                        .matches(t -> t.targets().contains(State.STATE3));
 	}
 
 	@Test(expected = IllegalStateException.class) public void testStateDefinition_incorrectDefinition() {
@@ -149,11 +158,13 @@ public final class StateMachineServiceBuilderTest {
 	@Test public void testAnyStateDefinition_singleEvent() {
 		builder.inAnyState().on(Event.EVENT1).execute(consumer1).goTo(State.STATE2).commit();
 
-		final Map<Event, Consumer<FSM<State, Event>>> actions = builder.getAnyActions();
-		final Map<Event, Set<State>> transitions = builder.getAnyTransitions();
+		final Map<Event, Tuple2<Set<State>, Consumer<FSM<State, Event>>>>
+			transitions = builder.wildcardTransitions();
 
-		final Consumer<FSM<State, Event>> action = actions.get(Event.EVENT1);
-		final Set<State> states = transitions.get(Event.EVENT1);
+		final Tuple2<Set<State>, Consumer<FSM<State, Event>>> t2 = transitions.get(Event.EVENT1);
+
+		final Set<State> states = t2._1;
+		final Consumer<FSM<State, Event>> action = t2._2;
 
 		assertThat(action).isNotNull();
 		assertThat(action).isEqualTo(consumer1);
@@ -166,18 +177,21 @@ public final class StateMachineServiceBuilderTest {
 		       .on(Event.EVENT1)
 		       .execute(consumer1)
 		       .goTo(State.STATE2)
+		       .and()
 		       .on(Event.EVENT2)
 		       .execute(consumer2)
 		       .goTo(State.STATE3)
 		       .commit();
 
-		final Map<Event, Consumer<FSM<State, Event>>> actions = builder.getAnyActions();
-		final Map<Event, Set<State>> transitions = builder.getAnyTransitions();
+		final Map<Event, Tuple2<Set<State>, Consumer<FSM<State, Event>>>> transitions = builder.wildcardTransitions();
 
-		final Consumer<FSM<State, Event>> action1 = actions.get(Event.EVENT1);
-		final Set<State> states1 = transitions.get(Event.EVENT1);
-		final Consumer<FSM<State, Event>> action2 = actions.get(Event.EVENT2);
-		final Set<State> states2 = transitions.get(Event.EVENT2);
+		final Tuple2<Set<State>, Consumer<FSM<State, Event>>> t1 = transitions.get(Event.EVENT1);
+		final Set<State> states1 = t1._1;
+		final Consumer<FSM<State, Event>> action1 = t1._2;
+
+		final Tuple2<Set<State>, Consumer<FSM<State, Event>>> t2 = transitions.get(Event.EVENT2);
+		final Set<State> states2 = t2._1;
+		final Consumer<FSM<State, Event>> action2 = t2._2;
 
 		assertThat(action1).isNotNull();
 		assertThat(action1).isEqualTo(consumer1);
@@ -233,29 +247,27 @@ public final class StateMachineServiceBuilderTest {
 		failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 	}
 
-	@Test(expected = NullPointerException.class) public void testIfFailed() {
-		builder.ifFailed().fireAndCall(Event.EVENT1, throwables -> {});
+	@Test public void testIfFailed() {
+		final Consumer<Throwable> c = t -> {};
 
-		assertThat(builder.getFailureEvent()).isEqualTo(Event.EVENT1);
+		assertThat(builder.exceptionHandler()).isNotNull();
 
-		builder.ifFailed().fireAndCall(null, throwables -> {});
+		builder.whenFailedCall(c);
 
-		failBecauseExceptionWasNotThrown(NullPointerException.class);
+		assertThat(builder.exceptionHandler()).isEqualTo(c);
 	}
 
-	@Test public void testMinimalBuild() {
-		builder.withName(SERVICE_NAME)
-		       .startWith(State.STATE1)
-		       .terminateIn(State.STATE3)
-		       .withEventBus(new EventBus())
-		       .ifFailed()
-		       .fireAndCall(Event.EVENT2, throwables -> {})
-		       .in(State.STATE1)
-		       .on(Event.EVENT1)
-		       .goTo(State.STATE2)
-		       .commit()
-		       .build();
-
+	@Test public void testMinimalBuildDoesNotThrow() {
+		assertThatCode(() -> builder.withName(SERVICE_NAME)
+		                            .startWith(State.STATE1)
+		                            .terminateIn(State.STATE3)
+		                            .notifyOn(new EventBus())
+		                            .whenFailedCall(t -> {})
+		                            .in(State.STATE1)
+		                            .on(Event.EVENT1)
+		                            .goTo(State.STATE2)
+		                            .commit()
+		                            .build()).doesNotThrowAnyException();
 	}
 
 }

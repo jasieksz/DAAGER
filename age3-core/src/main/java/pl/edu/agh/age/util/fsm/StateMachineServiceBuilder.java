@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -16,122 +16,95 @@
  * You should have received a copy of the GNU General Public License
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- * Created: 2012-08-21.
- * $Id: 53954ddb2f07014defed684e02246fe0ee1a1afa $
- */
 
 package pl.edu.agh.age.util.fsm;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newEnumMap;
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.annotation.ForTestsOnly;
 
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
+
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
+import io.vavr.collection.Stream;
 
 /**
  * A builder of {@link DefaultStateMachineService} instances. It offers a simple, flexible interface for creation of
  * state
  * machines.
- * <p>
- * <p>
+ *
  * Initially, a user is required to provide at least:
  * <ul>
  * <li> an enumeration of states,
  * <li> an enumeration of transitions,
  * <li> an entry state ({@link #startWith}),
- * <li> terminal states ({@link #terminateIn}),
- * <li> an event to fire on failures and errors ({@link #ifFailed}).
+ * <li> terminal states ({@link #terminateIn}).
  * </ul>
+ *
  * Failure to do so results in {@link IllegalStateException} when {@link #build} is called.
  *
  * @param <S>
  * 		the states enumeration.
  * @param <E>
  * 		the events enumeration.
- *
- * @author AGH AgE Team
  */
-@SuppressWarnings({"ReturnOfThis", "ReturnOfInnerClass", "InstanceVariableMayNotBeInitialized",
-		                  "MethodReturnOfConcreteClass"})
+@SuppressWarnings({"ReturnOfInnerClass", "AssignmentOrReturnOfFieldWithMutableType"})
 public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<E>> {
 
-	private static final Logger log = LoggerFactory.getLogger(StateMachineServiceBuilder.class);
+	private static final Logger logger = LoggerFactory.getLogger(StateMachineServiceBuilder.class);
 
-	private final FailureBehaviorBuilder failureBehaviorBuilder = new FailureBehaviorBuilder();
+	private final Multimap<S, Transition<S, E>> transitions = HashMultimap.create();
 
-	private final Table<S, E, Set<S>> transitions;
-
-	private final Map<E, Set<S>> noStateTransitions;
-
-	private final Table<S, E, @Nullable Consumer<FSM<S, E>>> actions;
-
-	private final Map<E, @Nullable Consumer<FSM<S, E>>> noStateActions;
+	private final EnumMap<E, Tuple2<Set<S>, @Nullable Consumer<FSM<S, E>>>> wildcardTransitions;
 
 	private final Class<S> stateClass;
 
 	private final Class<E> eventClass;
 
-	private @MonotonicNonNull S initialState;
+	private @MonotonicNonNull S initialState = null;
 
-	private @MonotonicNonNull EnumSet<S> terminalStates;
+	private @MonotonicNonNull EnumSet<S> terminalStates = null;
 
-	private @MonotonicNonNull EventBus eventBus;
+	private @MonotonicNonNull EventBus eventBus = null;
 
-	private @MonotonicNonNull String name;
+	private @MonotonicNonNull String name = null;
 
-	private boolean shutdownWhenTerminated;
-
-	private Class<? extends StateChangedEvent> stateChangedEventClass = StateChangedEvent.class;
+	private Consumer<Throwable> exceptionHandler = t -> {};
 
 	private boolean synchronous = false;
 
-	StateMachineServiceBuilder(final Class<S> states, final Class<E> events) {
+	private StateMachineServiceBuilder(final Class<S> states, final Class<E> events) {
 		stateClass = requireNonNull(states);
 		eventClass = requireNonNull(events);
-
-		transitions = ArrayTable.create(EnumSet.allOf(stateClass), EnumSet.allOf(eventClass));
-		actions = ArrayTable.create(EnumSet.allOf(stateClass), EnumSet.allOf(eventClass));
-
-		noStateTransitions = newEnumMap(eventClass);
-		noStateActions = newEnumMap(eventClass);
+		wildcardTransitions = newEnumMap(eventClass);
 	}
+
+	// Builder methods
 
 	public static <S extends Enum<S>, E extends Enum<E>> StateMachineServiceBuilder<S, E> withStatesAndEvents(
-			final Class<S> states, final Class<E> events) {
+		final Class<S> states, final Class<E> events) {
 		return new StateMachineServiceBuilder<>(states, events);
-	}
-
-	/**
-	 * Requests that events will be sent synchronously.
-	 *
-	 * @return this builder instance.
-	 */
-	public StateMachineServiceBuilder<S, E> notifyWithType(final Class<? extends StateChangedEvent<S, E>> klass) {
-		stateChangedEventClass = requireNonNull(klass);
-		return this;
 	}
 
 	@EnsuresNonNull("this.name") public StateMachineServiceBuilder<S, E> withName(final String name) {
@@ -147,8 +120,8 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 *
 	 * @return an action builder.
 	 */
-	public ActionBuilder in(final S state) {
-		return new ActionBuilder(state);
+	public TransitionBuilder in(final S state) {
+		return new TransitionBuilder(state);
 	}
 
 	/**
@@ -156,12 +129,12 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 *
 	 * @return an action builder.
 	 */
-	public AnyStateActionBuilder inAnyState() {
-		return new AnyStateActionBuilder();
+	public WildcardTransitionBuilder inAnyState() {
+		return new WildcardTransitionBuilder();
 	}
 
 	/**
-	 * Declares an initialState state.
+	 * Declares an initial state.
 	 *
 	 * @param state
 	 * 		a state.
@@ -170,23 +143,23 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 */
 	@EnsuresNonNull("initialState") public StateMachineServiceBuilder<S, E> startWith(final S state) {
 		initialState = requireNonNull(state);
-		log.debug("Starting state: {}.", initialState);
+		logger.debug("Starting state: {}", initialState);
 		return this;
 	}
 
 	/**
-	 * Indicates which states are terminalStates.
+	 * Indicates which states are terminal states.
 	 *
 	 * @param states
-	 * 		states that should be marked as terminalStates.
+	 * 		states that should be marked as terminal states.
 	 *
 	 * @return this builder instance.
 	 */
 	@EnsuresNonNull("terminalStates") public StateMachineServiceBuilder<S, E> terminateIn(final S... states) {
-		checkArgument(states.length > 0, "Must provide at least one terminating state.");
+		checkArgument(states.length > 0, "Must provide at least one terminating state");
 
 		terminalStates = EnumSet.copyOf(Arrays.asList(states));
-		log.debug("Terminal states: {}.", terminalStates);
+		logger.debug("Terminal states: {}", terminalStates);
 		return this;
 	}
 
@@ -195,11 +168,12 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 *
 	 * @return a failure behaviour builder.
 	 */
-	public FailureBehaviorBuilder ifFailed() {
-		return failureBehaviorBuilder;
+	public StateMachineServiceBuilder<S, E> whenFailedCall(final Consumer<Throwable> exceptionHandler) {
+		this.exceptionHandler = requireNonNull(exceptionHandler);
+		return this;
 	}
 
-	@EnsuresNonNull("this.eventBus") public StateMachineServiceBuilder<S, E> withEventBus(final EventBus eventBus) {
+	@EnsuresNonNull("this.eventBus") public StateMachineServiceBuilder<S, E> notifyOn(final EventBus eventBus) {
 		this.eventBus = requireNonNull(eventBus);
 		return this;
 	}
@@ -209,12 +183,9 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 *
 	 * @return a new {@code StateMachineService}.
 	 */
-	@RequiresNonNull({"name", "initialState", "terminalStates"}) public StateMachineService<S, E> build() {
-		log.debug("Building a state machine: N={}, S={}, E={}.", name, stateClass, eventClass);
-		checkState(name != null);
-		checkState(initialState != null);
-		checkState(terminalStates != null);
-		checkState(getFailureEvent() != null);
+	public StateMachineService<S, E> build() {
+		checkState((name != null) && (initialState != null) && (terminalStates != null));
+		logger.debug("Building a state machine: N={}, S={}, E={}", name, stateClass, eventClass);
 
 		return new DefaultStateMachineService<>(this);
 	}
@@ -236,14 +207,9 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		return name;
 	}
 
-	Table<S, E, Set<S>> transitions() {
+	Multimap<S, Transition<S, E>> transitions() {
 		assert transitions != null;
 		return transitions;
-	}
-
-	Table<S, E, Consumer<FSM<S, E>>> actions() {
-		assert actions != null;
-		return actions;
 	}
 
 	S initialState() {
@@ -256,119 +222,76 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		return terminalStates;
 	}
 
-	EventBus eventBus() {
-		assert eventBus != null;
+	@Nullable EventBus eventBus() {
 		return eventBus;
 	}
 
-	Map<E, Set<S>> getAnyTransitions() {
-		return noStateTransitions;
+	EnumMap<E, Tuple2<Set<S>, @Nullable Consumer<FSM<S, E>>>> wildcardTransitions() {
+		return wildcardTransitions;
 	}
 
-	Map<E, Consumer<FSM<S, E>>> getAnyActions() {
-		return noStateActions;
+	Consumer<Throwable> exceptionHandler() {
+		assert exceptionHandler != null;
+		return exceptionHandler;
 	}
 
-	Method stateChangedEventCreateMethod() {
-		Method eventCreateMethod;
-		try {
-			eventCreateMethod = stateChangedEventClass.getMethod("create", stateClass, eventClass, stateClass);
-		} catch (final NoSuchMethodException ignored) {
-			try {
-				eventCreateMethod = stateChangedEventClass.getMethod("create", Enum.class, Enum.class, Enum.class);
-			} catch (final NoSuchMethodException e1) {
-				log.error("Incorrect event class.", e1);
-				throw new IllegalStateException(e1);
-			}
+	boolean isSynchronous() {
+		return synchronous;
+	}
+
+	HashMap<S, State<S, E>> buildStatesMap() {
+		HashMap<S, State<S, E>> map = HashMap.empty();
+
+		for (final S state : EnumSet.allOf(stateClass)) {
+			final Map<E, Transition<S, E>> wildcardTransitionMap = Stream.ofAll(wildcardTransitions.entrySet())
+			                                                             .toMap(entry -> Tuple.of(entry.getKey(),
+			                                                                                      new Transition<>(
+				                                                                                      state,
+				                                                                                      entry.getKey(),
+				                                                                                      entry.getValue()._1,
+				                                                                                      entry.getValue()._2)));
+
+			final Map<E, Transition<S, E>> transitionsMap = Stream.ofAll(transitions.get(state))
+			                                                      .toMap(t -> Tuple.of(t.event(), t));
+
+			final Map<E, Transition<S, E>> hashMap = transitionsMap.merge(wildcardTransitionMap);
+			map = map.put(state, new State<>(state, terminalStates.contains(state), hashMap));
 		}
-		return eventCreateMethod;
+
+		if (logger.isDebugEnabled()) {
+			map.values()
+			   .flatMap(State::transitions)
+			   .forEach(descriptor -> logger.debug("New transition: {}", descriptor));
+		}
+
+		return map;
 	}
 
-	E getFailureEvent() {
-		return failureBehaviorBuilder.event();
-	}
-
-	Consumer<Throwable> getExceptionHandler() {
-		return failureBehaviorBuilder.function();
-	}
-
-	@ForTestsOnly Class<? extends StateChangedEvent> getStateChangedEventClass() {
-		return stateChangedEventClass;
-	}
+	// Methods used only by tests
 
 	@ForTestsOnly void synchronous() {
 		synchronous = true;
 	}
 
-	/**
-	 * Returns always false.
-	 * <p>
-	 * Unit tests should override it with true in order to process events synchronously.
-	 */
-	@ForTestsOnly boolean isSynchronous() {
-		return synchronous;
-	}
-
-	/**
-	 * Builds the transitions table.
-	 *
-	 * @return an immutable transitions table.
-	 */
-	Table<S, E, TransitionDescriptor<S, E>> buildTransitionsTable() {
-		final EnumSet<S> allStates = EnumSet.allOf(stateClass);
-		final EnumSet<E> allEvents = EnumSet.allOf(eventClass);
-		final Table<S, E, TransitionDescriptor<S, E>> table = ArrayTable.create(allStates, allEvents);
-
-		for (final S state : allStates) {
-			for (final E event : allEvents) {
-				table.put(state, event, TransitionDescriptor.nullDescriptor());
-			}
-		}
-
-		for (final S state : allStates) {
-			noStateTransitions.forEach((event, targetStates) -> {
-				final TransitionDescriptor<S, E> descriptor = new TransitionDescriptor<>(state, event, targetStates,
-				                                                                         noStateActions.get(event));
-				table.put(state, event, descriptor);
-			});
-			transitions.row(state).forEach((event, targetStates) -> {
-				if (isNull(targetStates)) {
-					return;
-				}
-				final TransitionDescriptor<S, E> descriptor = new TransitionDescriptor<>(state, event, targetStates,
-				                                                                         actions.get(state, event));
-				table.put(state, event, descriptor);
-			});
-		}
-
-		if (log.isDebugEnabled()) {
-			table.values().forEach(descriptor -> {
-				if (descriptor != TransitionDescriptor.nullDescriptor()) {
-					log.debug("New transition: {}.", descriptor);
-				}
-			});
-		}
-
-		return ImmutableTable.copyOf(table);
-	}
+	// Additional builders for transitions
 
 	/**
 	 * An action builder.
 	 *
 	 * @author AGH AgE Team
 	 */
-	@SuppressWarnings("InstanceMethodNamingConvention")
-	public final class ActionBuilder {
+	@SuppressWarnings("NonStaticInnerClassInSecureContext")
+	public final class TransitionBuilder {
 
 		private final S entry;
 
-		private @Nullable E event;
+		private @Nullable E event = null;
 
-		private @Nullable Set<S> exit;
+		private @Nullable Set<S> exitStates = null;
 
-		private @Nullable Consumer<FSM<S, E>> action;
+		private @Nullable Consumer<FSM<S, E>> action = null;
 
-		private ActionBuilder(final S entry) {
+		private TransitionBuilder(final S entry) {
 			assert entry != null;
 			this.entry = entry;
 		}
@@ -381,17 +304,9 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		public ActionBuilder on(final E initiatingEvent) {
-			requireNonNull(initiatingEvent);
-			if (event != null) {
-				checkState(exit != null, "Declaring new event without configuring previous.");
-				transitions.put(entry, event, exit);
-				actions.put(entry, event, action);
-				event = null;
-				exit = null;
-				action = null;
-			}
-			event = initiatingEvent;
+		public TransitionBuilder on(final E initiatingEvent) {
+			checkState(event == null, "Transition cannot be redeclared");
+			event = requireNonNull(initiatingEvent);
 			return this;
 		}
 
@@ -403,7 +318,7 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		public ActionBuilder execute(final Consumer<FSM<S, E>> actionToExecute) {
+		public TransitionBuilder execute(final Consumer<FSM<S, E>> actionToExecute) {
 			action = requireNonNull(actionToExecute);
 			return this;
 		}
@@ -416,11 +331,22 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		@SafeVarargs public final ActionBuilder goTo(final S... state) {
+		@SafeVarargs public final TransitionBuilder goTo(final S... state) {
 			requireNonNull(state);
-			checkArgument(state.length > 0, "Empty set of targets.");
+			checkArgument(state.length > 0, "Empty set of targets");
 
-			exit = ImmutableSet.copyOf(state);
+			exitStates = HashSet.of(state);
+			return this;
+		}
+
+		public TransitionBuilder and() {
+			checkState(event != null, "Event not provided");
+			checkState((exitStates != null) && !exitStates.isEmpty(), "Transition targets not provided");
+
+			transitions.put(entry, new Transition<>(entry, event, HashSet.ofAll(exitStates), action));
+			event = null;
+			exitStates = null;
+			action = null;
 			return this;
 		}
 
@@ -430,12 +356,10 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 * @return a state machine builder.
 		 */
 		public StateMachineServiceBuilder<S, E> commit() {
-			checkState(event != null, "Event not provided.");
-			checkState(exit != null, "Transition targets not provided.");
-			checkState(!exit.isEmpty(), "Transition targets not provided.");
+			checkState(event != null, "Event not provided");
+			checkState((exitStates != null) && !exitStates.isEmpty(), "Transition targets not provided");
 
-			transitions.put(entry, event, exit);
-			actions.put(entry, event, action);
+			transitions.put(entry, new Transition<>(entry, event, HashSet.ofAll(exitStates), action));
 			return StateMachineServiceBuilder.this;
 		}
 	}
@@ -445,14 +369,14 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 	 *
 	 * @author AGH AgE Team
 	 */
-	@SuppressWarnings("InstanceMethodNamingConvention")
-	public final class AnyStateActionBuilder {
+	@SuppressWarnings("NonStaticInnerClassInSecureContext")
+	public final class WildcardTransitionBuilder {
 
-		private @Nullable E event;
+		private @Nullable E event = null;
 
-		private @Nullable Set<S> exit;
+		private @Nullable Set<S> exitStates = null;
 
-		private @Nullable Consumer<FSM<S, E>> action;
+		private @Nullable Consumer<FSM<S, E>> action = null;
 
 		/**
 		 * Declares an event that causes the action.
@@ -462,17 +386,9 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		public AnyStateActionBuilder on(final E initiatingEvent) {
-			requireNonNull(initiatingEvent);
-			if (event != null) {
-				checkState(exit != null, "Declaring new event without configuring previous.");
-				noStateTransitions.put(event, exit);
-				noStateActions.put(event, action);
-				event = null;
-				exit = null;
-				action = null;
-			}
-			event = initiatingEvent;
+		public WildcardTransitionBuilder on(final E initiatingEvent) {
+			checkState(event == null, "Transition cannot be redeclared");
+			event = requireNonNull(initiatingEvent);
 			return this;
 		}
 
@@ -484,7 +400,7 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		public AnyStateActionBuilder execute(final Consumer<FSM<S, E>> actionToExecute) {
+		public WildcardTransitionBuilder execute(final Consumer<FSM<S, E>> actionToExecute) {
 			action = requireNonNull(actionToExecute);
 			return this;
 		}
@@ -497,11 +413,22 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 *
 		 * @return this action builder.
 		 */
-		@SafeVarargs public final AnyStateActionBuilder goTo(final S... state) {
+		@SafeVarargs public final WildcardTransitionBuilder goTo(final S... state) {
 			requireNonNull(state);
-			checkArgument(state.length > 0, "Empty set of targets.");
+			checkArgument(state.length > 0, "Empty set of targets");
 
-			exit = ImmutableSet.copyOf(state);
+			exitStates = HashSet.of(state);
+			return this;
+		}
+
+		public WildcardTransitionBuilder and() {
+			checkState(event != null, "Event not provided");
+			checkState((exitStates != null) && !exitStates.isEmpty(), "Transition targets not provided");
+
+			wildcardTransitions.put(event, Tuple.of(exitStates, action));
+			event = null;
+			exitStates = null;
+			action = null;
 			return this;
 		}
 
@@ -511,53 +438,11 @@ public final class StateMachineServiceBuilder<S extends Enum<S>, E extends Enum<
 		 * @return a state machine builder.
 		 */
 		public StateMachineServiceBuilder<S, E> commit() {
-			checkState(event != null, "Event not provided.");
-			checkState(exit != null, "Transition targets not provided.");
-			checkState(!exit.isEmpty(), "Transition targets not provided.");
+			checkState(event != null, "Event not provided");
+			checkState((exitStates != null) && !exitStates.isEmpty(), "Transition targets not provided");
 
-			noStateTransitions.put(event, exit);
-			noStateActions.put(event, action);
+			wildcardTransitions.put(event, Tuple.of(exitStates, action));
 			return StateMachineServiceBuilder.this;
-		}
-	}
-
-	/**
-	 * A builder for internal FSM failure.
-	 *
-	 * @author AGH AgE Team
-	 */
-	@SuppressWarnings("InstanceMethodNamingConvention")
-	public final class FailureBehaviorBuilder {
-
-		@MonotonicNonNull private E event;
-
-		private @MonotonicNonNull Consumer<Throwable> function;
-
-		FailureBehaviorBuilder() {}
-
-		/**
-		 * Declares which event should be fired when failure occurs.
-		 *
-		 * @param eventToFire
-		 * 		an event to fire.
-		 *
-		 * @return a state machine builder.
-		 */
-		public StateMachineServiceBuilder<S, E> fireAndCall(final E eventToFire,
-		                                                    final Consumer<Throwable> exceptionHandler) {
-			event = requireNonNull(eventToFire);
-			function = requireNonNull(exceptionHandler);
-			return StateMachineServiceBuilder.this;
-		}
-
-		E event() {
-			assert event != null;
-			return event;
-		}
-
-		Consumer<Throwable> function() {
-			assert function != null;
-			return function;
 		}
 	}
 

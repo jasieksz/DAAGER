@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -65,6 +65,8 @@ public interface StateMachineService<S extends Enum<S>, E extends Enum<E>> exten
 	 * Tells whether the machine has failed.
 	 */
 	boolean isFailed();
+
+	void failWithError(Throwable e);
 
 	/**
 	 * Tells whether the machine is already terminated.
