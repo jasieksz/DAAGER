@@ -44,7 +44,7 @@ public final class WorkerMessage<T extends Serializable> implements Serializable
 	public enum Type {
 		LOAD_CONFIGURATION(false),
 		START_COMPUTATION(false),
-		STOP_COMPUTATION(false),
+		CANCEL_COMPUTATION(false),
 		CLEAN_CONFIGURATION(false),
 
 		// Internal

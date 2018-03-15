@@ -138,7 +138,14 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 
 	@Override public void fire(final E event) {
 		log.debug("{}: {} fired", serviceName, event);
-		logIfTerminated();
+		final long stamp = stateLock.readLock();
+		try {
+			if (terminated) {
+				log.warn("{}: Service already terminated ({}) – caused by event {}", serviceName, currentState, event);
+			}
+		} finally {
+			stateLock.unlock(stamp);
+		}
 		eventQueue.add(event);
 	}
 
@@ -297,17 +304,6 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 		log.info("{}: Service has been shut down", serviceName);
 	}
 
-	private void logIfTerminated() {
-		final long stamp = stateLock.readLock();
-		try {
-			if (terminated) {
-				log.warn("{}: Service already terminated ({})", serviceName, currentState);
-			}
-		} finally {
-			stateLock.unlock(stamp);
-		}
-	}
-
 	private final class Dispatcher implements Runnable {
 		@Override public void run() {
 			if (isTerminated() || isFailed()) {
@@ -345,6 +341,7 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 
 				if (transitionOption.isEmpty()) {
 					// Ignore event
+					currentEvent = null;
 					return;
 				}
 				transition = transitionOption.get();

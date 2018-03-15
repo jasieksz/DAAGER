@@ -63,7 +63,7 @@ public final class HazelcastWorkerServiceClient implements WorkerServiceClient {
 
 	@Override public void stopComputation() {
 		logger.debug("Stopping computation");
-		workerTopic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.STOP_COMPUTATION));
+		workerTopic.publish(WorkerMessage.createBroadcastWithoutPayload(WorkerMessage.Type.CANCEL_COMPUTATION));
 	}
 
 	@Override public void cleanConfiguration() {

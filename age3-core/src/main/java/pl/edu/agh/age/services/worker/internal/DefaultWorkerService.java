@@ -30,21 +30,14 @@ import pl.edu.agh.age.services.identity.NodeIdentityService;
 import pl.edu.agh.age.services.lifecycle.NodeDestroyedEvent;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 import pl.edu.agh.age.services.topology.TopologyService;
-import pl.edu.agh.age.services.worker.FailedComputationSetupException;
-import pl.edu.agh.age.services.worker.TaskFailedEvent;
-import pl.edu.agh.age.services.worker.TaskFinishedEvent;
-import pl.edu.agh.age.services.worker.TaskStartedEvent;
 import pl.edu.agh.age.services.worker.WorkerMessage;
 import pl.edu.agh.age.services.worker.WorkerService;
-import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
-import pl.edu.agh.age.services.worker.internal.task.ComputationContext;
 import pl.edu.agh.age.util.fsm.FSM;
 import pl.edu.agh.age.util.fsm.StateMachineService;
 import pl.edu.agh.age.util.fsm.StateMachineServiceBuilder;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hazelcast.core.HazelcastInstance;
@@ -53,7 +46,6 @@ import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -61,11 +53,8 @@ import org.springframework.context.SmartLifecycle;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -79,28 +68,12 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	public enum State {
 		OFFLINE,
 		RUNNING,
-		CONFIGURED,
-		EXECUTING,
-		PAUSED,
-		FINISHED,
-		COMPUTATION_CANCELED,
-		COMPUTATION_FAILED,
 		TERMINATED
 	}
 
 	public enum Event {
 		START,
 		TERMINATE,
-		// Requested by external command
-		CONFIGURE,
-		START_EXECUTION,
-		PAUSE_EXECUTION,
-		RESUME_EXECUTION,
-		CANCEL_EXECUTION,
-		CLEAN,
-		// Triggered by computation
-		COMPUTATION_FINISHED,
-		COMPUTATION_FAILED,
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkerService.class);
@@ -111,8 +84,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		WorkerMessage.Type.class);
 
 	private final Set<CommunicationFacility> communicationFacilities = newHashSet();
-
-	private final HazelcastDistributionUtilities computeDistributionUtilities;
 
 	private final Map<WorkerMessage.Type, Consumer<Serializable>> messageHandlers = newEnumMap(
 		WorkerMessage.Type.class);
@@ -129,13 +100,9 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	private final ITopic<WorkerMessage<Serializable>> topic;
 
-	private final Map<HazelcastObjectNames.ConfigurationKey, Object> configurationMap;
-
-	private final IMap<String, ComputationState> nodeComputationState;
-
 	private final StateMachineService<State, Event> service;
 
-	private @Nullable ComputationContext computationContext = null;
+	private final ComputationService computationService;
 
 	@Inject
 	private DefaultWorkerService(final NodeIdentityService identityService, final ApplicationContext applicationContext,
@@ -160,42 +127,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				.on(Event.START).execute(this::internalStart).goTo(State.RUNNING)
 				.commit()
 
-			.in(State.RUNNING)
-				.on(Event.CONFIGURE).execute(this::configure).goTo(State.CONFIGURED)
-				.commit()
-
-			.in(State.CONFIGURED)
-				.on(Event.START_EXECUTION).execute(this::startTask).goTo(State.EXECUTING, State.CONFIGURED, State.COMPUTATION_FAILED).and()
-				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-				.commit()
-
-			.in(State.EXECUTING)
-				.on(Event.PAUSE_EXECUTION).execute(this::pauseTask).goTo(State.PAUSED).and()
-				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED).and()
-				.on(Event.COMPUTATION_FAILED).execute(this::taskFailed).goTo(State.COMPUTATION_FAILED).and()
-				.on(Event.COMPUTATION_FINISHED).execute(this::taskFinished).goTo(State.FINISHED)
-				.commit()
-
-			.in(State.PAUSED)
-				.on(Event.RESUME_EXECUTION).execute(this::resumeTask).goTo(State.EXECUTING).and()
-				.on(Event.CANCEL_EXECUTION).execute(this::cancelTask).goTo(State.COMPUTATION_CANCELED).and()
-				.on(Event.COMPUTATION_FAILED).goTo(State.COMPUTATION_FAILED).and()
-				.on(Event.COMPUTATION_FINISHED).goTo(State.FINISHED)
-				.commit()
-
-			.in(State.FINISHED) // Terminal for compute
-				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-				.commit()
-
-			.in(State.COMPUTATION_FAILED) // Terminal for compute
-				// Must be CLEAN-ed
-				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-                .commit()
-
-            .in(State.COMPUTATION_CANCELED) // Terminal for compute
-				.on(Event.CLEAN).execute(this::cleanUpAfterTask).goTo(State.RUNNING)
-                .commit()
-
 			.inAnyState()
 				.on(Event.TERMINATE).execute(this::terminate).goTo(State.TERMINATED)
 				.commit()
@@ -204,18 +135,24 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 			.notifyOn(eventBus)
 			.build();
 		//@formatter:on
-		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> service.fire(Event.CONFIGURE));
-		messageHandlers.put(WorkerMessage.Type.START_COMPUTATION, payload -> service.fire(Event.START_EXECUTION));
-		messageHandlers.put(WorkerMessage.Type.STOP_COMPUTATION, payload -> service.fire(Event.CANCEL_EXECUTION));
-		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> service.fire(Event.CLEAN));
 
 		logger.debug("Hazelcast instance: {}", hazelcastInstance);
 		topic = hazelcastInstance.getTopic(HazelcastObjectNames.CHANNEL_NAME);
 		topic.addMessageListener(new DistributedMessageListener());
-		configurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
-		nodeComputationState = hazelcastInstance.getMap(HazelcastObjectNames.STATE_MAP_NAME);
+
 		eventBus.register(this);
-		computeDistributionUtilities = new HazelcastDistributionUtilities(hazelcastInstance);
+
+		final IMap<String, ComputationState> nodeComputationState = hazelcastInstance.getMap(HazelcastObjectNames.STATE_MAP_NAME);
+		final HazelcastDistributionUtilities computeDistributionUtilities = new HazelcastDistributionUtilities(hazelcastInstance);
+		final String nodeId = identityService.nodeId();
+		final IMap<HazelcastObjectNames.ConfigurationKey, Object> configurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
+
+		computationService = new ComputationService(configurationMap, eventBus, nodeComputationState, computeDistributionUtilities, nodeId, communicationFacilities, topologyService);
+
+		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> computationService.triggerConfigurationLoad());
+		messageHandlers.put(WorkerMessage.Type.START_COMPUTATION, payload -> computationService.triggerStart());
+		messageHandlers.put(WorkerMessage.Type.CANCEL_COMPUTATION, payload -> computationService.triggerCancel());
+		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> computationService.triggerClear());
 	}
 
 	@Override public boolean isAutoStartup() {
@@ -259,18 +196,19 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	//
 
 	private void internalStart(final FSM<State, Event> fsm) {
-		logger.debug("Worker service starting");
+		logger.debug("Worker service is starting");
 
-		setNodeComputationState(ComputationState.NONE);
-
-		// Catch up to other nodes if computation is running
-		if (globalComputationState() == ComputationState.CONFIGURED) {
-			service.fire(Event.CONFIGURE);
-		}
-
-		if (globalComputationState() == ComputationState.RUNNING) {
-			service.fire(Event.CONFIGURE);
-			service.fire(Event.START_EXECUTION);
+		try {
+			while (!isEnvironmentReady()) {
+				logger.warn("Trying to start computation when node is not ready");
+				// Reschedule the event once again
+				TimeUnit.SECONDS.sleep(1L);
+			}
+		} catch (final InterruptedException ignored) {
+			if (!isEnvironmentReady()) {
+				Thread.currentThread().interrupt();
+				service.failWithError(new RuntimeException("Interrupted when waiting for the environment"));
+			}
 		}
 
 		// Configure communication facilities (as singletons)
@@ -288,137 +226,16 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 	}
 
 	private void terminate(final FSM<State, Event> fsm) {
-		logger.debug("Worker service stopping.");
+		logger.debug("Worker service is stopping");
+		computationService.triggerTermination();
 		shutdownAndAwaitTermination(executorService, 10L, TimeUnit.SECONDS);
-		logger.info("Worker service stopped.");
-	}
-
-	private void configure(final FSM<State, Event> fsm) {
-		assert computationContext == null : "Task is already configured.";
-
-		final WorkerConfiguration configuration = (WorkerConfiguration)configurationMap.get(
-			HazelcastObjectNames.ConfigurationKey.CONFIGURATION);
-		computationContext = new ComputationContext(configuration, communicationFacilities,
-		                                            computeDistributionUtilities);
-		setNodeComputationState(ComputationState.CONFIGURED);
-		changeGlobalComputationStateIfMaster(ComputationState.CONFIGURED);
-	}
-
-	private void startTask(final FSM<State, Event> fsm) {
-		assert computationContext != null;
-
-		if (!isEnvironmentReady()) {
-			logger.warn("Trying to start computation when node is not ready");
-			// Reschedule the event once again
-			executorService.schedule(() -> service.fire(Event.START_EXECUTION), 1L, TimeUnit.SECONDS);
-			fsm.goTo(State.CONFIGURED);
-			return;
-		}
-
-		logger.debug("Starting computation {}", computationContext);
-		try {
-			computationContext.startTask(executorService, new ExecutionListener());
-			eventBus.post(new TaskStartedEvent());
-			setNodeComputationState(ComputationState.RUNNING);
-			changeGlobalComputationStateIfMaster(ComputationState.RUNNING);
-			fsm.goTo(State.EXECUTING);
-		} catch (final FailedComputationSetupException e) {
-			logger.error("Computation could not be started", e);
-			changeGlobalComputationStateIfMaster(ComputationState.FAILED);
-			changeErrorIfMaster(e);
-			fsm.goTo(State.COMPUTATION_FAILED);
-		}
-	}
-
-	private void pauseTask(final FSM<State, Event> fsm) {
-		computationContext.pause();
-	}
-
-	private void resumeTask(final FSM<State, Event> fsm) {
-		computationContext.resume();
-	}
-
-	private void cancelTask(final FSM<State, Event> fsm) {
-		computationContext.cancel();
-	}
-
-	private void stopTask(final FSM<State, Event> fsm) {
-		computationContext.stop();
-	}
-
-	private void taskFinished(final FSM<State, Event> fsm) {
-		setNodeComputationState(ComputationState.FINISHED);
-		final Collection<ComputationState> states = nodeComputationState.values(
-			v -> v.getValue() != ComputationState.FINISHED);
-		if (states.isEmpty()) {
-			logger.debug("All nodes finished computation");
-			changeGlobalComputationStateIfMaster(ComputationState.FINISHED);
-		}
-	}
-
-	private void taskFailed(final FSM<State, Event> fsm) {
-		changeGlobalComputationStateIfMaster(ComputationState.FAILED);
-	}
-
-	private void cleanUpAfterTask(final FSM<State, Event> fsm) {
-		assert computationContext != null;
-
-		logger.debug("Cleaning up");
-
-		if (computationContext.isTaskActive()) {
-			computationContext.cleanUp();
-		}
-		computationContext = null;
-		setNodeComputationState(ComputationState.NONE);
-		changeGlobalComputationStateIfMaster(ComputationState.NONE);
-		changeErrorIfMaster(null);
-		logger.debug("Clean up finished");
-	}
-
-	private void logEventIgnored(final FSM<State, Event> fsm) {
-		logger.debug("User event was ignored");
+		logger.info("Worker service stopped");
 	}
 
 	// Utilities
 
 	private boolean isEnvironmentReady() {
 		return lifecycleService.isRunning() && topologyService.hasTopology();
-	}
-
-	private ComputationState globalComputationState() {
-		return configurationValue(HazelcastObjectNames.ConfigurationKey.COMPUTATION_STATE, ComputationState.class).orElseGet(
-			() -> ComputationState.NONE);
-	}
-
-	private ComputationState nodeComputationState() {
-		return nodeComputationState.get(identityService.nodeId());
-	}
-
-	private void setNodeComputationState(final ComputationState state) {
-		assert state != null;
-		nodeComputationState.set(identityService.nodeId(), state);
-	}
-
-	private <T> Optional<T> configurationValue(final HazelcastObjectNames.ConfigurationKey key, final Class<T> klass) {
-		return Optional.ofNullable((T)configurationMap.get(key));
-	}
-
-	private void changeGlobalComputationStateIfMaster(final ComputationState state) {
-		assert state != null;
-
-		if (topologyService.isLocalNodeMaster()) {
-			configurationMap.put(HazelcastObjectNames.ConfigurationKey.COMPUTATION_STATE, state);
-		}
-	}
-
-	private void changeErrorIfMaster(final @Nullable Throwable error) {
-		if (topologyService.isLocalNodeMaster()) {
-			if (error == null) {
-				configurationMap.remove(HazelcastObjectNames.ConfigurationKey.ERROR);
-			} else {
-				configurationMap.put(HazelcastObjectNames.ConfigurationKey.ERROR, error);
-			}
-		}
 	}
 
 	// Event bus handlers
@@ -432,11 +249,11 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 		@Override public void onMessage(final Message<WorkerMessage<Serializable>> message) {
 			final WorkerMessage<Serializable> workerMessage = requireNonNull(message.getMessageObject());
-			logger.debug("WorkerMessage received: {}.", workerMessage);
+			logger.debug("WorkerMessage received: {}", workerMessage);
 
 			try {
 				if (!workerMessage.isRecipient(identityService.nodeId())) {
-					logger.debug("Message {} was not directed to me.", workerMessage);
+					logger.debug("Message {} was not directed to me", workerMessage);
 					return;
 				}
 
@@ -444,7 +261,7 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 				final Set<CommunicationFacility> listeners = workerMessageListeners.get(type);
 				boolean eaten = false;
 				for (final CommunicationFacility listener : listeners) {
-					logger.debug("Notifying listener {}.", listener);
+					logger.debug("Notifying listener {}", listener);
 					if (listener.onMessage(workerMessage)) {
 						eaten = true;
 						break;
@@ -457,28 +274,8 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 				messageHandlers.get(type).accept(workerMessage.payload().orElse(null));
 			} catch (final Throwable t) {
-				logger.info("T", t);
+				logger.error("Error when handling a message", t);
 			}
-		}
-	}
-
-	private final class ExecutionListener implements FutureCallback<Object> {
-
-		@Override public void onSuccess(final Object result) {
-			logger.info("Task {} finished", computationContext.currentTaskDescription());
-			eventBus.post(new TaskFinishedEvent());
-			service.fire(Event.COMPUTATION_FINISHED);
-		}
-
-		@Override public void onFailure(final Throwable t) {
-			if (t instanceof CancellationException) {
-				logger.debug("Task {} was cancelled. Ignoring exception", computationContext.currentTaskDescription());
-			} else {
-				logger.error("Task {} failed with error", computationContext.currentTaskDescription(), t);
-				eventBus.post(new TaskFailedEvent(t));
-			}
-			changeErrorIfMaster(t);
-			service.fire(Event.COMPUTATION_FAILED);
 		}
 	}
 
