@@ -119,7 +119,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 
 			return true;
 		} else if (workerMessage.hasType(WorkerMessage.Type.UNICAST_CONTROL)) {
-			final WorkerAddress neighbourWorkerAddress = workerMessage.requiredPayload();
+			final WorkerAddress neighbourWorkerAddress = (WorkerAddress)workerMessage.requiredPayload();
 			log.debug("Adding new neighbour: {}.", neighbourWorkerAddress);
 			computeNeighbours.add(neighbourWorkerAddress);
 			return true;
@@ -132,6 +132,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 		return ImmutableSet.of(WorkerMessage.Type.UNICAST_CONTROL, WorkerMessage.Type.UNICAST_MESSAGE);
 	}
 
+	@SuppressWarnings("FutureReturnValueIgnored")
 	@Override public void start() {
 		log.debug("Starting local unicast messenger.");
 		workerCommunication.scheduleAtFixedRate(this::broadcastMyAddress, 1L, 5L, TimeUnit.SECONDS);

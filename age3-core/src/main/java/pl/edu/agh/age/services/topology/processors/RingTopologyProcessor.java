@@ -63,7 +63,7 @@ public final class RingTopologyProcessor implements TopologyProcessor {
 		                                         .map(NodeDescriptor::id)
 		                                         .sorted()
 		                                         .collect(Collectors.toList());
-		sortedIds.stream().reduce(getLast(sortedIds), (nodeIdentity1, nodeIdentity2) -> {
+		final String ignored = sortedIds.stream().reduce(getLast(sortedIds), (nodeIdentity1, nodeIdentity2) -> {
 			graph.addEdge(nodeIdentity1, nodeIdentity2);
 			return nodeIdentity2;
 		});

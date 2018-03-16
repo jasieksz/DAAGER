@@ -94,6 +94,7 @@ task build() {
 
 subprojects {
 	apply plugin: 'java'
+	apply plugin: 'net.ltgt.errorprone'
 
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8

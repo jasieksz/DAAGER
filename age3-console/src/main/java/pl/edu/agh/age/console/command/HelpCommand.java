@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,7 +79,8 @@ public final class HelpCommand implements Command {
 		                             .collect(toList());
 
 		List<AttributedString> lines; // Workaround for the compiler oddness ("variable already assigned")
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(HELP)))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(HELP),
+		                                                                      Charset.forName("UTF-8")))) {
 			lines = reader.lines().map(l -> {
 				final AttributedStringBuilder builder = new AttributedStringBuilder();
 				builder.appendAnsi(l);

@@ -44,7 +44,7 @@ final class HazelcastDistributionUtilities implements DistributionUtilities {
 		this.hazelcastInstance = hazelcastInstance;
 	}
 
-	public <K, V> IMap<K, V> getMap(final String name) {
+	@Override public <K, V> IMap<K, V> getMap(final String name) {
 		final IMap<K, V> map = hazelcastInstance.getMap("compute/" + name);
 		distributedObjects.add(map);
 		return map;

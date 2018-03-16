@@ -139,9 +139,9 @@ public final class WorkerMessage<T extends Serializable> implements Serializable
 		return Optional.ofNullable((X)payload);
 	}
 
-	public <X extends T> X requiredPayload() {
+	public Serializable requiredPayload() {
 		checkState(payload != null, "No payload to provide");
-		return (X)payload;
+		return payload;
 	}
 
 	public Set<String> recipients() {

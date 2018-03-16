@@ -39,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public final class NashornLoader {
 			engine.eval("load('classpath:base.js');");
 
 			logger.debug("Evaluating user script");
-			engine.eval(new InputStreamReader(configuration));
+			engine.eval(new InputStreamReader(configuration, Charset.defaultCharset()));
 
 			final StopCondition stopCondition = (StopCondition)engine.get("stopCondition");
 			logger.debug("Stop condition: {}", stopCondition);

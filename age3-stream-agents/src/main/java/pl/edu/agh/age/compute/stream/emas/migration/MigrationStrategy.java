@@ -20,6 +20,7 @@ import io.vavr.collection.List;
  * non-probabilistic selectors for more accurate selection, as the probabilistic ones tend to have rather uniform
  * probability distribution in such situations.
  */
+@SuppressWarnings("ImmutableEnumChecker")
 public enum MigrationStrategy {
 
 	RANDOM(Selectors.random()),

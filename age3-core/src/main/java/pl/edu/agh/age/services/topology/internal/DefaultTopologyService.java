@@ -388,6 +388,9 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 				case TOPOLOGY_SELECTED:
 					service.fire(Event.TOPOLOGY_CONFIGURED);
 					break;
+				case MASTER_ELECTED:
+					// Ignore
+					break;
 			}
 		}
 	}

@@ -46,6 +46,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ByteArrayResource;
 
+import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -104,7 +105,7 @@ public final class TaskBuilder {
 			final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 			configurer.setPropertySources(propertySources);
 			taskContext.addBeanFactoryPostProcessor(configurer);
-			taskContext.load(new ByteArrayResource(configuration.getBytes()));
+			taskContext.load(new ByteArrayResource(configuration.getBytes(Charset.forName("UTF-8"))));
 			logger.debug("Task setup finished");
 
 			return new TaskBuilder(taskContext);

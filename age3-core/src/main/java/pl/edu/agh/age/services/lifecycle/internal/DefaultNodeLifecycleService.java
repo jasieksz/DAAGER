@@ -231,7 +231,7 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 		}
 	}
 
-	private class ExceptionHandler implements Consumer<Throwable> {
+	private static class ExceptionHandler implements Consumer<Throwable> {
 		@Override public void accept(final Throwable throwable) {
 			assert throwable != null;
 			logger.error("Node lifecycle service error", throwable);

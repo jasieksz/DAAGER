@@ -49,7 +49,7 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 
 	// XXX: We can force all services to implement one interface.
 	// We are defining by a class name in order to not depend on them in compile time.
-	private static final Set<String> SERVICES_NAMES = ImmutableSet.of(
+	private static final ImmutableSet<String> SERVICES_NAMES = ImmutableSet.of(
 			"pl.edu.agh.age.services.discovery.DiscoveryService",
 			"pl.edu.agh.age.services.lifecycle.NodeLifecycleService",
 			"pl.edu.agh.age.services.topology.TopologyService", "pl.edu.agh.age.services.worker.WorkerService",
