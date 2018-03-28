@@ -8,4 +8,5 @@ hs_err_pid*
 *.iml
 *.log
 !/gradle/wrapper/gradle-wrapper.jar
+!/age3-core/src/test/resources/test-module-1.0.jar
 /gradle.properties

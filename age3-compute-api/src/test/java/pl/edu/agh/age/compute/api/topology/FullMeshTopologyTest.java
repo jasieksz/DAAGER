@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -20,8 +20,6 @@
 package pl.edu.agh.age.compute.api.topology;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -50,14 +48,14 @@ public final class FullMeshTopologyTest {
 			assertThat(graph.inDegreeOf(i)).describedAs("in degree of vertex is 6").isEqualTo(6);
 
 			assertThat(graph.outgoingEdgesOf(i)).describedAs("all outgoing edges satisfy")
-			                                    .allSatisfy(e -> assertThat(e.annotations()).describedAs(
+			          .allSatisfy(e -> assertThat(e.annotations()).describedAs(
 				                                    "single annotation within range").hasSize(1)
-			                                                                                .isSubsetOf(annotations));
+			                                     .isSubsetOf(annotations));
 			assertThat(graph.incomingEdgesOf(i)).describedAs("all incoming edges satisfy")
-			                                    .allSatisfy(e -> assertThat(e.annotations()).describedAs(
+			          .allSatisfy(e -> assertThat(e.annotations()).describedAs(
 				                                    "single annotation within range")
-			                                                                                .hasSize(1)
-			                                                                                .isSubsetOf(annotations));
+			                                     .hasSize(1)
+			                                     .isSubsetOf(annotations));
 		});
 	}
 

@@ -26,10 +26,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.when;
 
+import pl.edu.agh.age.compute.api.BroadcastMessageListener;
+import pl.edu.agh.age.compute.api.BroadcastMessenger;
 import pl.edu.agh.age.runnables.SimpleTestWithProperty;
 import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
@@ -39,8 +42,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -55,20 +61,79 @@ public final class TaskBuilderTest {
 	}
 
 	@Test public void testFromClass() throws FailedComputationSetupException {
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName(),
+		                                                      ImmutableList.of());
 
 		assertThat(taskBuilder.springContext()).isNotNull();
 		assertThat(taskBuilder.isConfigured()).isFalse();
 	}
 
+	@Test public void testBuildingAndScheduling_fromJar() throws FailedComputationSetupException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+
+		final String jarPath = getClass().getResource("/test-module-1.0.jar").getFile();
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass("pl.edu.agh.age.TestClass", ImmutableList.of(jarPath));
+
+		assertThat(taskBuilder.springContext()).isNotNull();
+		assertThat(taskBuilder.isConfigured()).isFalse();
+
+		taskBuilder.finishConfiguration();
+
+		assertThat(taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(StartedTask.class);
+	}
+
+	@Test public void testBuildingAndScheduling_fromDir() throws FailedComputationSetupException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+
+		final String dir = Paths.get(getClass().getResource("/test-module-1.0.jar").getFile()).getParent().toString();
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass("pl.edu.agh.age.TestClass", ImmutableList.of(dir));
+
+		assertThat(taskBuilder.springContext()).isNotNull();
+		assertThat(taskBuilder.isConfigured()).isFalse();
+
+		taskBuilder.finishConfiguration();
+
+		assertThat(taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(StartedTask.class);
+	}
+
+	@Test public void testBuildingAndScheduling_fromNonexistentJar() {
+		assertThatThrownBy(() -> TaskBuilder.fromClass("pl.edu.agh.age.TestClass",
+		                                               ImmutableList.of("i-am-not-here.jar"))).isExactlyInstanceOf(
+			FailedComputationSetupException.class).hasRootCauseInstanceOf(FileNotFoundException.class);
+	}
+
+	@Test public void testBuildingAndSchedulingWithDependency_fromJar() throws FailedComputationSetupException {
+		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
+
+		final String jarPath = getClass().getResource("/test-module-1.0.jar").getFile();
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass("pl.edu.agh.age.TestClassWithDependency",
+		                                                      ImmutableList.of(jarPath));
+		taskBuilder.registerSingleton(new BroadcastMessenger() {
+			@Override public <T extends Serializable> void send(final T message) {}
+
+			@Override
+			public <T extends Serializable> void registerListener(final BroadcastMessageListener<T> listener) {}
+
+			@Override public <T extends Serializable> void removeListener(final BroadcastMessageListener<T> listener) {}
+		});
+
+		assertThat(taskBuilder.springContext()).isNotNull();
+		assertThat(taskBuilder.isConfigured()).isFalse();
+
+		taskBuilder.finishConfiguration();
+
+		assertThat(taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(StartedTask.class);
+	}
+
 	@Test public void testFromClass_notExisting() throws FailedComputationSetupException {
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass("org.class.NotExisting");
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass("org.class.NotExisting", ImmutableList.of());
 		assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(FailedComputationSetupException.class);
 	}
 
 	@Test public void testBuildAndSchedule() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName(),
+		                                                      ImmutableList.of());
 		taskBuilder.finishConfiguration();
 
 		assertThat(taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(StartedTask.class);
@@ -76,7 +141,8 @@ public final class TaskBuilderTest {
 
 	@Test public void testBuildAndSchedule_needsToBeConfigured() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName(),
+		                                                      ImmutableList.of());
 
 		assertThatThrownBy(() -> taskBuilder.buildAndSchedule(executorService, callback)).isInstanceOf(
 			IllegalStateException.class);
@@ -84,7 +150,8 @@ public final class TaskBuilderTest {
 
 	@Test public void testCannotConfigureTwoTimes() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName(),
+		                                                      ImmutableList.of());
 
 		taskBuilder.finishConfiguration();
 		assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(IllegalStateException.class);
@@ -92,7 +159,8 @@ public final class TaskBuilderTest {
 
 	@Test public void testCannotUpdateAfterFinishingConfiguration() throws FailedComputationSetupException {
 		when(executorService.schedule(any(Runnable.class), eq(0L), any(TimeUnit.class))).then(RETURNS_MOCKS);
-		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName());
+		final TaskBuilder taskBuilder = TaskBuilder.fromClass(FromClassUtil.class.getCanonicalName(),
+		                                                      ImmutableList.of());
 		taskBuilder.finishConfiguration();
 
 		assertThatThrownBy(() -> taskBuilder.registerSingleton(new Object())).isInstanceOf(IllegalStateException.class);
@@ -105,7 +173,7 @@ public final class TaskBuilderTest {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
 			final Properties properties = new Properties();
 			properties.setProperty("age.property", "Test property");
-			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, properties);
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, properties, ImmutableList.of());
 			taskBuilder.finishConfiguration();
 			final Task task = taskBuilder.buildAndSchedule(executorService, callback);
 			final SimpleTestWithProperty runnable = (SimpleTestWithProperty)task.runnable();
@@ -120,7 +188,7 @@ public final class TaskBuilderTest {
 
 		try (InputStream resourceAsStream = getClass().getResourceAsStream("/compute/spring-test-with-property.xml")) {
 			final String s = CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
-			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, new Properties());
+			final TaskBuilder taskBuilder = TaskBuilder.fromString(s, new Properties(), ImmutableList.of());
 
 			assertThatThrownBy(taskBuilder::finishConfiguration).isInstanceOf(FailedComputationSetupException.class);
 		}

@@ -18,8 +18,6 @@
  */
 package pl.edu.agh.age.node;
 
-import static java.util.Objects.isNull;
-
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
@@ -68,10 +66,10 @@ public final class NodeBootstrapper {
 
 	public static void main(final String... args) throws InterruptedException, IOException {
 		final String configName = NodeSystemProperties.CONFIG.get();
-		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(configName)) {
+		try (final ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(configName)) {
 			context.registerShutdownHook();
 			final NodeLifecycleService lifecycleService = context.getBean(NodeLifecycleService.class);
-			if (isNull(lifecycleService)) {
+			if (lifecycleService == null) {
 				logger.error("No node lifecycle service is defined");
 				return;
 			}

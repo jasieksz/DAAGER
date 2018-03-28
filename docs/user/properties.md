@@ -31,3 +31,6 @@ They can be passed using the standard `-D` option to the `java` command.
 - `age.console.log.file.level=classpath_path_to.xml` – logging level to use with the log file. 
   Any value from `ch.qos.logback.classic.Level` is correct.
   Default is **ALL**.
+- `age.console.lib.path=path/to/dir/` – path to the directory with additional JARs containing commands that should be loaded.
+  Default is **./lib/**.
+

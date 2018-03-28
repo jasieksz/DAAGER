@@ -93,16 +93,21 @@ public final class ComputationCommand implements Command {
 	           type = List.class,
 	           optional = true,
 	           description = "Files with properties to use")
+	@Parameter(name = "jars",
+	           type = List.class,
+	           optional = true,
+	           description = "Paths to jar files to load")
 	public void load(final Map<String, Object> parameters) {
 		final Optional<String> classToLoad = getAndCastNullable(parameters, "class", String.class);
 		final Optional<String> configToLoad = getAndCastNullable(parameters, "config", String.class);
 		final Map<String, String> passedProperties = getAndCastDefault(parameters, "properties", Map.class, emptyMap());
 		final List<String> propertiesFiles = getAndCastDefault(parameters, "propertiesFiles", List.class, emptyList());
+		final List<String> jars = getAndCastDefault(parameters, "jars", List.class, emptyList());
 
 		final WorkerConfiguration configuration;
 		if (classToLoad.isPresent()) {
 			logger.debug("Loading class {}", classToLoad);
-			configuration = new SingleClassConfiguration(classToLoad.get());
+			configuration = new SingleClassConfiguration(classToLoad.get(), jars);
 		} else if (configToLoad.isPresent()) {
 			logger.debug("Loading config from {}", configToLoad);
 			final Resource resource = resourceLoader.getResource(configToLoad.get());
@@ -121,7 +126,7 @@ public final class ComputationCommand implements Command {
 
 			if (resource.exists() && resource.isReadable()) {
 				try {
-					configuration = new SpringConfiguration(resource, properties);
+					configuration = new SpringConfiguration(resource, properties, jars);
 				} catch (final IOException e) {
 					writer.printf("File %s cannot be loaded due to an exception: %s.%n", configToLoad, e.getMessage());
 					return;

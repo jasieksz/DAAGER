@@ -21,7 +21,6 @@ docker run -v /local/dependencies/path:/dependencies --net=host age3
 The container needs the following volumes:
 * `/dependencies` — with all jars needed for your application.
  
-With the default Hazelcast configuration, multicast is required to work. Thus, you need to provide `--net=host` option
-in order to bind to the host interface.
-
+With the default Hazelcast configuration, multicast is required to work.
+Thus, you need to provide `--net=host` option in order to bind to the host interface.
 

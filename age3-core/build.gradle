@@ -48,6 +48,7 @@ shadowDistZip {
 }
 
 dependencies {
+	compile project(':age3-compute-api')
 	compile 'org.springframework:spring-context:default'
 	compile('com.hazelcast:hazelcast:default') {
 		// Not needed and would introduce a lot of duplicated annotations

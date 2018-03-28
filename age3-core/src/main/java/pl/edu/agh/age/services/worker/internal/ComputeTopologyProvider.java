@@ -22,10 +22,10 @@ package pl.edu.agh.age.services.worker.internal;
 import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.compute.api.TopologyProvider;
+import pl.edu.agh.age.compute.api.topology.AnnotatedEdge;
 import pl.edu.agh.age.compute.api.topology.FullMeshTopology;
 import pl.edu.agh.age.compute.api.topology.Topology;
 import pl.edu.agh.age.services.worker.WorkerMessage;
-import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.HazelcastInstance;

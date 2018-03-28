@@ -25,12 +25,14 @@ import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Properties;
 
 public final class SpringConfiguration implements WorkerConfiguration {
@@ -43,15 +45,23 @@ public final class SpringConfiguration implements WorkerConfiguration {
 
 	private final Properties properties = new Properties();
 
+	private final List<String> jars;
+
 	public SpringConfiguration(final Resource resource, final Properties properties) throws IOException {
+		this(resource, properties, ImmutableList.of());
+	}
+
+	public SpringConfiguration(final Resource resource, final Properties properties, final List<String> jars)
+		throws IOException {
 		resourceInfo = String.format("%s, length=%d", resource.getURL(), resource.contentLength());
 		configuration = CharStreams.toString(new InputStreamReader(resource.getInputStream(), Charsets.UTF_8));
 		//noinspection UseOfPropertiesAsHashtable
 		this.properties.putAll(properties);
+		this.jars = ImmutableList.copyOf(jars);
 	}
 
 	@Override public TaskBuilder taskBuilder() throws FailedComputationSetupException {
-		return TaskBuilder.fromString(configuration, properties);
+		return TaskBuilder.fromString(configuration, properties, jars);
 	}
 
 	@Override public String toString() {

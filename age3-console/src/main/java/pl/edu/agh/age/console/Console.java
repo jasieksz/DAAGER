@@ -89,6 +89,7 @@ public final class Console {
 		}
 
 		final Collection<Command> commands = applicationContext.getBeansOfType(Command.class).values();
+		logger.debug("Loaded commands: {}", commands);
 		commands.forEach(command -> engine.put(command.name(), command));
 
 		try {

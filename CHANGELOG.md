@@ -2,6 +2,18 @@
 
 ## 0.6 -- TBD
 
+Console:
+– ComputationCommand now supports the `jars` parameter that can be assigned with a list of paths to JAR files that
+  should be loaded for the compute configuration (#48).
+
+Core:
+– It is now possible to load JAR files containing compute classes to an already running node (#48).
+– Compute API was moved from the **age3-core** module to a separate one (#49).
+
+Examples:
+– Due to #48 and #49 age3-examples no longer supports building an integrated node.
+  To run examples, it is required to use a clean node build and pass the `jars` parameter to the **computation.load** command.
+
 Stream Agents:
 - `Solution#updateFitness` was changed to `Solution#withFitness` to follow naming used in the rest of the project (#41).
 - Remove unnecessary assertion from `AsexualReproductionPipeline` (#44).

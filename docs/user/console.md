@@ -7,35 +7,47 @@ title: Console
 AgE provides a simple console that is intended to make cluster and computation management easier.
 It is located in the [**age3-console** module](https://gitlab.com/age-agh/age3/tree/develop/age3-console).
 
-The current version of the console is backed by Nashorn JavaScript engine. It make the full integration with Java code possible right from the console.
+The current version of the console is backed by Nashorn JavaScript engine.
+It make the full integration with Java code possible right from the console.
+
+## Building console
+
+To build a standalone executable JAR, execute:
+
+```bash
+./gradlew age3-console:shadowJar
+```
+
+The built JAR file will be located in age3-console/build/libs/age3-console.jar
 
 ## Running console
 
-### From the build JAR
+### From standalone JAR
 
-To start the console, you need to have `age3-console` jar and all its dependencies. Then execute:
+To start the console, you need to build the standalone JAR file. Then execute:
+
 ```bash
-java -cp YOUR_JARS pl.edu.agh.age.console.ConsoleBootstrapper
+java -jar age3-console.jar
 ```
-Replacing YOUR_JARS with the proper classpath.
+
+If you need to provide additional commands, package them into a JAR file and drop them into the `lib` directory located in the current directory.
+You can change the location of additional JARs using `age.console.lib.path` property.
+You can also specify additional JAR-s using the standard `-cp` parameter.
 
 ### From the source
 
-You can either tun:
+If you have the raw sources, you can run the console using:
+
 ```bash
-./gradlew --no-daemon age3-console:shell
+./gradlew --no-daemon --console=plain age3-console:shell
 ```
-or build the distribution tar and run the console using the generated script:
-```bash
-./gradlew age3-console:distShadowTar
-cd age3-console/build/distribution/
-tar -xvf age3-console-0.3-SNAPSHOT.tar
-age3-console-0.3-SNAPSHOT/bin/age3-console
-```
+
+The above remarks about additional JAR-s apply in this case, too. 
 
 ## Using console
 
 After starting the console, you will be greeted with the message and the prompt:
+
 ```
 Welcome to the AgE console. Type help() to see usage information.
 AgE> 
@@ -48,13 +60,17 @@ Type `help()` to see a list of them. You can also use `help(group)` to display h
 
 To execute one of the default commands, you need to call the method on a command group, for example, to call `destroy` from `cluster` group,
 you use:
+
 ```js
 cluster.destroy()
 ```
+
 Some commands require parameters. You pass them as a JS dictionary:
+
 ```js
 cluster.nodes({ id: 1, longOutput: true })
 ```
+
 Optional parameters may be omitted.
 
 ## Batch mode

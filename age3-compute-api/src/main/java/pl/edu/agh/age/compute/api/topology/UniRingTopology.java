@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -20,8 +20,6 @@
 package pl.edu.agh.age.compute.api.topology;
 
 import static java.util.Objects.requireNonNull;
-
-import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import one.util.streamex.StreamEx;
 

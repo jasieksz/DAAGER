@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -41,15 +41,19 @@ dependencies {
 shadowJar {
 	// Required for merging spring handler definitions (e.g. from Hazelcast)
 	mergeServiceFiles('META-INF/spring.*')
+	baseName = 'age3-console'
+	classifier = null
+	version = null
 }
 
 // Use ProcessBuilder to have a correct tty on Linux
-task(shell, dependsOn: 'classes') {
+task shell(dependsOn: 'classes') {
 	doLast {
 		def classpath = sourceSets.main.runtimeClasspath
 		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
 		def command = [
 			'java',
+			'-ea',
 			'-cp', classpath.collect().join(java.io.File.pathSeparator),
 			systemProperties,
 			'pl.edu.agh.age.console.ConsoleBootstrapper'
@@ -67,12 +71,13 @@ task(shell, dependsOn: 'classes') {
 	}
 }
 
-task(standalone, dependsOn: 'classes') {
+task standalone(dependsOn: 'classes') {
 	doLast {
 		def classpath = sourceSets.main.runtimeClasspath
 		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
 		def command = [
 			'java',
+			'-ea',
 			'-cp', classpath.collect().join(java.io.File.pathSeparator),
 			'pl.edu.agh.age.console.ConsoleBootstrapper',
 			systemProperties,

@@ -33,11 +33,11 @@ Clone <https://gitlab.com/age-agh/age3-sample-project.git> repository and use it
     }
     ```
 
-3. Add a dependency on **age3-core**. For example, in Gradle:
+3. Add a dependency on **age3-compute-api**. For example, in Gradle:
 
     ```groovy
     dependencies {
-	    compile 'pl.edu.agh.age:age3-core:0.3-SNAPSHOT'
+	    compile 'pl.edu.agh.age:age3-compute-api:0.6-SNAPSHOT'
     }
     ```
 
@@ -70,11 +70,13 @@ Clone <https://gitlab.com/age-agh/age3-sample-project.git> repository and use it
     ```
 
 6. Compile the project.
-7. Run your computation in AgE:
+7. Start the node:
 
-    ```bash
-    java -cp YOUR_CLASSPATH -enableassertions pl.edu.agh.age.node.NodeBootstrapper file:src/main/resources/spring-sample.xml
-    ```
+   ```bash
+   java -jar age3-core.jar
+   ```
+   
+7. Run your computation
     
     Two things are important in this command:
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -20,8 +20,6 @@
 package pl.edu.agh.age.compute.api.topology;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import pl.edu.agh.age.services.worker.internal.topology.AnnotatedEdge;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -50,11 +48,11 @@ public final class BiRingTopologyTest {
 			assertThat(graph.inDegreeOf(i)).describedAs("in degree of vertex is 2").isEqualTo(2);
 
 			assertThat(graph.outgoingEdgesOf(i)).describedAs("all outgoing edges satisfy")
-			                                    .allSatisfy(e -> assertThat(e.annotations()).describedAs(
+			          .allSatisfy(e -> assertThat(e.annotations()).describedAs(
 				                                    "annotations within range").isSubsetOf(annotations));
 
 			assertThat(graph.incomingEdgesOf(i)).describedAs("all incoming edges satisfy")
-			                                    .allSatisfy(e -> assertThat(e.annotations()).describedAs(
+			          .allSatisfy(e -> assertThat(e.annotations()).describedAs(
 				                                    "annotations within range").isSubsetOf(annotations));
 		});
 	}
@@ -73,8 +71,8 @@ public final class BiRingTopologyTest {
 
 		assertThat(graph.vertexSet()).describedAs("one vertex").hasSize(1);
 		assertThat(graph.edgeSet()).describedAs("one tight loop edge")
-		                           .hasSize(1)
-		                           .flatExtracting(AnnotatedEdge::annotations)
-		                           .containsExactlyInAnyOrder(annotations);
+		          .hasSize(1)
+		          .flatExtracting(AnnotatedEdge::annotations)
+		          .containsExactlyInAnyOrder(annotations);
 	}
 }

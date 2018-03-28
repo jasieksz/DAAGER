@@ -33,6 +33,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
+import one.util.streamex.StreamEx;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -46,9 +48,22 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ByteArrayResource;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -71,12 +86,18 @@ public final class TaskBuilder {
 		this.springContext = springContext;
 	}
 
-	public static TaskBuilder fromClass(final String className) throws FailedComputationSetupException {
+	public static TaskBuilder fromClass(final String className, final List<String> jars)
+		throws FailedComputationSetupException {
 		requireNonNull(className);
+		requireNonNull(jars);
 
 		try {
 			logger.debug("Setting up task from class {}", className);
 			final AnnotationConfigApplicationContext taskContext = new AnnotationConfigApplicationContext();
+
+			final URLClassLoader loader = loadJars(jars);
+			logger.debug("My class loader is {} and parent is {}", loader, loader.getParent());
+			taskContext.setClassLoader(loader);
 
 			// Configure task
 			final BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(className);
@@ -84,21 +105,26 @@ public final class TaskBuilder {
 			logger.debug("Task setup finished");
 
 			return new TaskBuilder(taskContext);
-		} catch (final BeanCreationException e) {
+		} catch (final BeanCreationException | UncheckedIOException e) {
 			logger.error("Cannot create the task from class", e);
 			throw new FailedComputationSetupException("Cannot create the task from class", e);
 		}
 	}
 
-	public static TaskBuilder fromString(final String configuration, final Properties properties)
-		throws FailedComputationSetupException {
+	public static TaskBuilder fromString(final String configuration, final Properties properties,
+	                                     final List<String> jars) throws FailedComputationSetupException {
 		requireNonNull(configuration);
 		requireNonNull(properties);
+		requireNonNull(jars);
 
 		try {
 			logger.debug("Setting up task from config {}", configuration.substring(0, 50));
 			logger.debug("Properties are: {}", properties);
 			final GenericXmlApplicationContext taskContext = new GenericXmlApplicationContext();
+
+			final URLClassLoader loader = loadJars(jars);
+			logger.debug("My class loader is {} and parent is {}", loader, loader.getParent());
+			taskContext.setClassLoader(loader);
 
 			final MutablePropertySources propertySources = new MutablePropertySources();
 			propertySources.addFirst(new PropertiesPropertySource("local", properties));
@@ -109,7 +135,7 @@ public final class TaskBuilder {
 			logger.debug("Task setup finished");
 
 			return new TaskBuilder(taskContext);
-		} catch (final BeanCreationException e) {
+		} catch (final BeanCreationException | UncheckedIOException e) {
 			logger.error("Cannot create the task from file", e);
 			throw new FailedComputationSetupException("Cannot create the task from file", e);
 		}
@@ -175,4 +201,35 @@ public final class TaskBuilder {
 		return toStringHelper(this).add("context", springContext).add("configured", configured).toString();
 	}
 
+	/**
+	 * @throws UncheckedIOException
+	 * 		in case of any error occurring – cause will contain a detailed error
+	 */
+	private static URLClassLoader loadJars(final Collection<String> jarPath) {
+		final URL[] array = StreamEx.of(jarPath).map(p -> Paths.get(p)).flatMap(p -> {
+			if (p.toFile().isDirectory()) {
+				try (Stream<Path> list = Files.list(p)) {
+					// Convert to array to prevent leaking opened stream
+					return StreamEx.of(list.toArray(Path[]::new));
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			} else {
+				return StreamEx.of(p);
+			}
+		}).filter(path -> path.getFileName().toString().endsWith(".jar")).map(p -> {
+			try {
+				if (!p.toFile().exists()) {
+					throw new UncheckedIOException(
+						new FileNotFoundException(String.format("Requested jar `%s` does not exist", p)));
+				}
+				return p.toUri().toURL();
+			} catch (MalformedURLException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).toArray(URL.class);
+
+		logger.info("Loading jars from {}", Arrays.toString(array));
+		return new URLClassLoader(array);
+	}
 }

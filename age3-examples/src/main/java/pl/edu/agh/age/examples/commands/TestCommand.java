@@ -32,6 +32,7 @@ import pl.edu.agh.age.examples.SimpleLongRunningWithError;
 import pl.edu.agh.age.services.worker.internal.configuration.SingleClassConfiguration;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 
@@ -110,7 +111,10 @@ public final class TestCommand implements Command {
 		logger.debug("Executing example");
 
 		try {
-			final WorkerConfiguration configuration = new SingleClassConfiguration(EXAMPLES_PACKAGE + '.' + example);
+			final WorkerConfiguration configuration = new SingleClassConfiguration(EXAMPLES_PACKAGE + '.' + example,
+			                                                                       ImmutableList.of(System.getProperty(
+				                                                                       "age.console.lib.path",
+				                                                                       "lib/")));
 			TimeUnit.SECONDS.sleep(1L);
 			logger.debug("Sending {}", configuration);
 			workerServiceClient.prepareConfiguration(configuration);
@@ -141,7 +145,8 @@ public final class TestCommand implements Command {
 		                         ? SimpleLongRunningWithError.class.getCanonicalName()
 		                         : SimpleLongRunning.class.getCanonicalName();
 		try {
-			workerServiceClient.prepareConfiguration(new SingleClassConfiguration(className));
+			workerServiceClient.prepareConfiguration(new SingleClassConfiguration(className, ImmutableList.of(
+				System.getProperty("age.console.lib.path", "lib/"))));
 			writer.println("Starting computation...");
 			workerServiceClient.startComputation();
 			writer.println("Waiting...");

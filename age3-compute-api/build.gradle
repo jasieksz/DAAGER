@@ -17,4 +17,11 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.edu.agh.age.services.worker.internal.topology;
+dependencies {
+	compile('com.hazelcast:hazelcast:default') {
+		// Not needed and would introduce a lot of duplicated annotations
+		exclude group: 'net.sourceforge.findbugs'
+	}
+	compile 'org.jgrapht:jgrapht-core:+'
+}
+

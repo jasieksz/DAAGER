@@ -19,8 +19,8 @@
 
 rootProject.name = 'age3'
 
-include 'age3-core'
+include 'age3-compute-api'
 include 'age3-console'
+include 'age3-core'
 include 'age3-examples'
 include 'age3-stream-agents'
-

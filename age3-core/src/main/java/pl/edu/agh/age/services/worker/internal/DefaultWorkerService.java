@@ -94,8 +94,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 	private final TopologyService topologyService;
 
-	private final EventBus eventBus;
-
 	private final ApplicationContext applicationContext;
 
 	private final ITopic<WorkerMessage<Serializable>> topic;
@@ -113,7 +111,6 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 		this.identityService = identityService;
 		this.applicationContext = applicationContext;
 		this.topologyService = topologyService;
-		this.eventBus = eventBus;
 		this.lifecycleService = lifecycleService;
 
 		//@formatter:off

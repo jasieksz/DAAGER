@@ -160,6 +160,7 @@ subprojects {
 }
 
 def exportedProjects = [
+	":age3-compute-api",
 	":age3-console",
 	":age3-core",
 	":age3-examples",

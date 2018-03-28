@@ -25,18 +25,29 @@ import static java.util.Objects.requireNonNull;
 import pl.edu.agh.age.services.worker.FailedComputationSetupException;
 import pl.edu.agh.age.services.worker.internal.task.TaskBuilder;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
+
 public final class SingleClassConfiguration implements WorkerConfiguration {
 
 	private static final long serialVersionUID = 1113065883705198832L;
 
 	private final String className;
 
+	private final List<String> jars;
+
 	public SingleClassConfiguration(final String className) {
+		this(className, ImmutableList.of());
+	}
+
+	public SingleClassConfiguration(final String className, final List<String> jars) {
 		this.className = requireNonNull(className);
+		this.jars = ImmutableList.copyOf(jars);
 	}
 
 	@Override public TaskBuilder taskBuilder() throws FailedComputationSetupException {
-		return TaskBuilder.fromClass(className);
+		return TaskBuilder.fromClass(className, jars);
 	}
 
 	@Override public String toString() {

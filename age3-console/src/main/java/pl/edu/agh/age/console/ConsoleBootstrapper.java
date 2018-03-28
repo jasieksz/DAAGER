@@ -19,20 +19,31 @@
 
 package pl.edu.agh.age.console;
 
-import static java.util.Objects.isNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import pl.edu.agh.age.client.LifecycleServiceClient;
 import pl.edu.agh.age.services.lifecycle.NodeLifecycleService;
 
 import com.google.common.base.Throwables;
 
+import one.util.streamex.StreamEx;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * Bootstrapper for the console.
@@ -47,15 +58,20 @@ import java.util.Arrays;
  */
 @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CallToSystemExit", "ThrowableResultOfMethodCallIgnored"})
 public final class ConsoleBootstrapper {
+
+	private static final URL[] EMPTY_URLS = {};
+
 	static {
 		System.setProperty("logback.statusListenerClass", "ch.qos.logback.core.status.NopStatusListener");
 	}
+
+	private static final String LIB_PATH = System.getProperty("age.console.lib.path", "lib/");
 
 	private static final Logger logger = LoggerFactory.getLogger(ConsoleBootstrapper.class);
 
 	private ConsoleBootstrapper() {}
 
-	public static void main(final String... args) throws InterruptedException {
+	public static void main(final String... args) {
 		System.out.println("Starting AgE console...");
 		try {
 			if ((args.length > 0) && args[0].equals("standalone")) {
@@ -64,7 +80,7 @@ public final class ConsoleBootstrapper {
 			} else {
 				consoleMain(args);
 			}
-		} catch (final BeanCreationException e) {
+		} catch (final Exception e) {
 			handleException(e);
 		}
 		logger.info("Exiting");
@@ -72,12 +88,13 @@ public final class ConsoleBootstrapper {
 		System.exit(0);
 	}
 
-	private static void standaloneMain(final String... args) throws InterruptedException {
-		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring-standalone.xml")) {
+	private static void standaloneMain(final String... args) throws InterruptedException, IOException {
+		try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String [] {"spring-standalone.xml"}, false, null)) {
+			addJarsFromDir(context, LIB_PATH);
 			context.registerShutdownHook();
 
 			final NodeLifecycleService lifecycleService = context.getBean(NodeLifecycleService.class);
-			if (isNull(lifecycleService)) {
+			if (lifecycleService == null) {
 				logger.error("No node lifecycle service is defined");
 				return;
 			}
@@ -91,8 +108,9 @@ public final class ConsoleBootstrapper {
 		}
 	}
 
-	private static void consoleMain(final String... args) {
-		try (ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring-console.xml")) {
+	private static void consoleMain(final String... args) throws IOException {
+		try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String [] { "spring-console.xml" }, false, null)) {
+			addJarsFromDir(context, LIB_PATH);
 			context.registerShutdownHook();
 			consoleLoop(context, args);
 		}
@@ -101,19 +119,52 @@ public final class ConsoleBootstrapper {
 	private static void handleException(final Exception e) {
 		logger.error("Console exception", e);
 		final Throwable rootCause = Throwables.getRootCause(e);
-		System.out.println("I could not initialize the console. The cause was:");
-		System.out.println(rootCause.getLocalizedMessage());
-		System.out.println("Have you configured and started the computational cluster?");
+		System.out.println();
+		System.out.println("[!] I could not initialize the console. The cause was:");
+		System.out.println("[!] " + rootCause);
+		System.out.println("[!] Have you configured and started the computational cluster?");
+		System.out.println();
 	}
 
 	private static void consoleLoop(final ConfigurableApplicationContext context, final String[] args) {
 		logger.info("Starting console");
 		final Console console = context.getBean(Console.class);
-		if (isNull(console)) {
-			System.out.println("No console is defined. Do you have a correct spring configuration?");
-			logger.error("No console is defined.");
+		if (console == null) {
+			System.out.println("No console is defined. Do you have a correct Spring configuration?");
+			logger.error("No console is defined");
 			return;
 		}
 		console.mainLoop(args);
+	}
+
+
+	private static void addJarsFromDir(final ClassPathXmlApplicationContext context, final String libPath)
+		throws IOException {
+		context.setClassLoader(new URLClassLoader(dirToArrayOfJars(libPath)));
+		context.refresh();
+	}
+
+	/**
+	 * @throws UncheckedIOException
+	 * 		in case of any error occurring – cause will contain a detailed error
+	 */
+	private static URL[] dirToArrayOfJars(final String libPath) throws IOException {
+		logger.debug("Adding {} to context", libPath);
+		final Path path = Paths.get(libPath);
+		final File file = path.toFile();
+		if (!file.exists()) {
+			return EMPTY_URLS;
+		}
+		checkArgument(file.isDirectory(), "Passed argument exists but is not a directory");
+
+		try (Stream<Path> list = Files.list(path)) {
+			return StreamEx.of(list).filter(p -> p.getFileName().toString().endsWith(".jar")).map(p -> {
+				try {
+					return p.toUri().toURL();
+				} catch (MalformedURLException e) {
+					throw new UncheckedIOException(e);
+				}
+			}).toArray(URL.class);
+		}
 	}
 }

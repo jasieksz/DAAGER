@@ -7,6 +7,7 @@ title: AgE 3 Documentation
 ## User documentation
 
 - [Overview](user/overview.md)
+- [Running and building AgE](user/running.md)
 - [Console](user/console.md)
 - [Configuration properties](user/properties.md)
 - [Stream Agents](user/stream-agents/README.md)

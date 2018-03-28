@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -17,97 +17,7 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-plugins {
-	id 'application'
-	id 'com.github.johnrengelman.shadow' version '2.0.2'
-}
-
-mainClassName = 'pl.edu.agh.age.console.ConsoleBootstrapper'
-applicationDefaultJvmArgs = [
-	'-enableassertions',
-]
-
 dependencies {
-	compile project(':age3-core')
+	compile project(':age3-compute-api')
 	compile project(':age3-console')
-}
-
-shadowJar {
-	// Required for merging spring handler definitions (e.g. from Hazelcast)
-	mergeServiceFiles('META-INF/spring.*')
-	baseName = 'age3-examples'
-	classifier = null
-	version = null
-}
-
-shadowDistTar {
-	version = null
-	classifier = null
-	version = null
-}
-
-shadowDistZip {
-	version = null
-	classifier = null
-	version = null
-}
-
-// Use ProcessBuilder to have a correct tty on Linux
-task(shell, dependsOn: 'classes') {
-	doLast {
-		def classpath = sourceSets.main.runtimeClasspath
-		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
-		def command = [
-			'java',
-			'-cp', classpath.collect().join(java.io.File.pathSeparator),
-			systemProperties,
-			'pl.edu.agh.age.console.ConsoleBootstrapper'
-		]
-		if (project.hasProperty('appArgs')) {
-			command.addAll(Eval.me(appArgs))
-		}
-		command.removeAll("")
-		def proc = new ProcessBuilder(command)
-			.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-			.redirectInput(ProcessBuilder.Redirect.INHERIT)
-			.redirectError(ProcessBuilder.Redirect.INHERIT)
-			.start()
-		proc.waitFor()
-	}
-}
-
-task(standalone, dependsOn: 'classes') {
-	doLast {
-		def classpath = sourceSets.main.runtimeClasspath
-		def systemProperties = System.properties.grep { it.key.startsWith('age') }.collect { '-D' + it }.join ' '
-		def command = [
-			'java',
-			'-cp', classpath.collect().join(java.io.File.pathSeparator),
-			systemProperties,
-			'pl.edu.agh.age.console.ConsoleBootstrapper',
-			'standalone'
-		]
-		if (project.hasProperty('appArgs')) {
-			command.addAll(Eval.me(appArgs))
-		}
-		command.removeAll("")
-		def proc = new ProcessBuilder(command)
-			.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-			.redirectInput(ProcessBuilder.Redirect.INHERIT)
-			.redirectError(ProcessBuilder.Redirect.INHERIT)
-			.start()
-		proc.waitFor()
-	}
-}
-
-task node(type: JavaExec) {
-	systemProperties = System.properties
-	main = 'pl.edu.agh.age.node.NodeBootstrapper'
-	classpath = sourceSets.main.runtimeClasspath
-	standardOutput = System.out
-	standardInput = System.in
-	jvmArgs '-enableassertions'
-	if (project.hasProperty('appArgs') ) {
-		args Eval.me(appArgs)
-	}
 }

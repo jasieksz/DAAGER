@@ -9,8 +9,8 @@ stages:
   - deploy
 
 variables:
-  CONTAINER_TEST_IMAGE: "registry.gitlab.com/age-agh/age3:$CI_BUILD_REF_NAME"
-  CONTAINER_RELEASE_IMAGE: "registry.gitlab.com/age-agh/age3:node-latest"
+  CONTAINER_TEST_IMAGE: "registry.gitlab.com/age-agh/age3/age3-node:$CI_BUILD_REF_NAME"
+  CONTAINER_RELEASE_IMAGE: "registry.gitlab.com/age-agh/age3/age3-node:latest"
 
 cache:
   key: "$CI_BUILD_REF_NAME"
@@ -72,7 +72,7 @@ build_core_jar:
       - age3-core/build/libs/age3-core.jar
     expire_in: 1 week
 
-build_docker:
+build_docker_for_node:
   stage: deploy
   image: docker:latest
   only:
@@ -90,11 +90,11 @@ build_docker:
     - docker build --pull -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
-build_docker_release:
+build_docker_release_for_node:
   stage: deploy
   image: docker:latest
   only:
-    - /^release\/.*$/
+    - tags
   services:
     - docker:dind
   tags:
@@ -105,5 +105,7 @@ build_docker_release:
     - cp age3-core/build/libs/age3-core.jar docker/age3-core.jar
     - cd docker
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build --pull -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
     - docker build --pull -t $CONTAINER_RELEASE_IMAGE .
     - docker push $CONTAINER_RELEASE_IMAGE
