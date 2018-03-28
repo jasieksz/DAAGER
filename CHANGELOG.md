@@ -3,15 +3,15 @@
 ## 0.6 -- TBD
 
 Console:
-– ComputationCommand now supports the `jars` parameter that can be assigned with a list of paths to JAR files that
+- ComputationCommand now supports the `jars` parameter that can be assigned with a list of paths to JAR files that
   should be loaded for the compute configuration (#48).
 
 Core:
-– It is now possible to load JAR files containing compute classes to an already running node (#48).
-– Compute API was moved from the **age3-core** module to a separate one (#49).
+- It is now possible to load JAR files containing compute classes to an already running node (#48).
+- Compute API was moved from the **age3-core** module to a separate one (#49).
 
 Examples:
-– Due to #48 and #49 age3-examples no longer supports building an integrated node.
+- Due to #48 and #49 age3-examples no longer supports building an integrated node.
   To run examples, it is required to use a clean node build and pass the `jars` parameter to the **computation.load** command.
 
 Stream Agents:
@@ -22,7 +22,7 @@ Stream Agents:
   This is a preferred option due to possible performance penalties when sharing objects between threads.
 
 Other:
-– Switch from Javaslang to Vavr after the rebranding (#40).
+- Switch from Javaslang to Vavr after the rebranding (#40).
 
 ## 0.5 -- 03.06.2017
 
@@ -61,12 +61,12 @@ General compute:
   and use it in StreamAgents migrations (#30).
 - Full clean up is performed on all utilities during task clean-up (#34).
 - Configuration using `properties` files is now possible (#36):
-  properties for the compute modules can be loaded both in batch mode and in the console. 
+  properties for the compute modules can be loaded both in batch mode and in the console.
 
 Stream Agents:
 - Use topology API in migrations (#30).
 - Make `Improvement` run after evaluation of the solution when configured using `SexualReproductionBuilder` (#33).
-- Fix situations when the main runnable did not wait for workplaces (#29). 
+- Fix situations when the main runnable did not wait for workplaces (#29).
 
 Other:
 - Miscellaneous documentation and configuration fixes.

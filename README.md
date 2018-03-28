@@ -2,7 +2,7 @@
 
 AgE 3 is a new version and complete rewrite of the distributed agent-based computational platform [AgE](https://www.age.agh.edu.pl/).
 
-**This is beta software** and is still under heavy development. 
+**This is beta software** and is still under heavy development.
 Although this version is released, it is only a *snapshot* of a current development branch and there is no guarantee that future version will provide the same functionality or API.
 
 [![pipeline status](https://gitlab.com/age-agh/age3/badges/develop/pipeline.svg)](https://gitlab.com/age-agh/age3/commits/develop)
@@ -82,7 +82,7 @@ And you can now execute other examples.
 
 ## Running AgE 3
 
-You can find info on how to run AgE 3 in the [documentation](https://docs.age.agh.edu.pl/age3/user/running.html) or, alternatively, in [this repo](docs/user/running.md)
+You can find info on how to run AgE 3 in the [documentation](https://docs.age.agh.edu.pl/age3/user/running.html) or, alternatively, in [this repo](docs/user/running.md).
 
 ## Stream Agents
 
