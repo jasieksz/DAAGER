@@ -99,8 +99,7 @@ final class ComputationService {
 	private @Nullable ComputationContext computationContext = null;
 
 	ComputationService(final Map<HazelcastObjectNames.ConfigurationKey, Object> configurationMap,
-	                   final EventBus eventBus,
-	                   final IMap<String, ComputationState> nodeComputationState,
+	                   final EventBus eventBus, final IMap<String, ComputationState> nodeComputationState,
 	                   final HazelcastDistributionUtilities computeDistributionUtilities, final String nodeId,
 	                   final Set<CommunicationFacility> communicationFacilities,
 	                   final TopologyService topologyService) {

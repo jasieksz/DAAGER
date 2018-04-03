@@ -46,8 +46,7 @@ public final class FullyConnectedTopologyProcessor implements TopologyProcessor 
 		return "fully connected";
 	}
 
-	@Override
-	public Graph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
+	@Override public Graph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
 		requireNonNull(identities);
 
 		final DefaultDirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);

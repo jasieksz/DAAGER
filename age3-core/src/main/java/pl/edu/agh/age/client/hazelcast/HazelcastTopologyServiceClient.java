@@ -58,7 +58,8 @@ public final class HazelcastTopologyServiceClient implements TopologyServiceClie
 	}
 
 	@Override public Optional<Graph<String, DefaultEdge>> topologyGraph() {
-		return Optional.ofNullable((Graph<String, DefaultEdge>)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH));
+		return Optional.ofNullable(
+			(Graph<String, DefaultEdge>)runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH));
 	}
 
 	@Override public Optional<String> topologyType() {

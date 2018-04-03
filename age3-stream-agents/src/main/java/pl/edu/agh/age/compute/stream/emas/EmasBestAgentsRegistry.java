@@ -24,7 +24,7 @@ import static java.util.Objects.requireNonNull;
 
 import pl.edu.agh.age.compute.stream.AgentsRegistry;
 
-import org.checkerframework.checker.lock.qual.GuardedBy;
+import javax.annotation.concurrent.GuardedBy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

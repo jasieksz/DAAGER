@@ -21,8 +21,8 @@ package pl.edu.agh.age.client.hazelcast;
 
 import pl.edu.agh.age.client.WorkerServiceClient;
 import pl.edu.agh.age.services.worker.WorkerMessage;
-import pl.edu.agh.age.services.worker.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.worker.internal.ComputationState;
+import pl.edu.agh.age.services.worker.internal.HazelcastObjectNames;
 import pl.edu.agh.age.services.worker.internal.configuration.WorkerConfiguration;
 
 import com.google.common.collect.ImmutableSet;

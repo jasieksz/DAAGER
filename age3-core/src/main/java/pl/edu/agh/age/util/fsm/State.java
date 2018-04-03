@@ -79,10 +79,7 @@ final class State<S extends Enum<S>, E extends Enum<E>> {
 	}
 
 	@Override public String toString() {
-		return MoreObjects.toStringHelper(this)
-		                  .add("name", name)
-		                  .add("terminal", terminal)
-		                  .toString();
+		return MoreObjects.toStringHelper(this).add("name", name).add("terminal", terminal).toString();
 	}
 
 }

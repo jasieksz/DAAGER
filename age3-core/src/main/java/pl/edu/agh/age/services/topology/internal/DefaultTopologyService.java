@@ -253,8 +253,8 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 				logger.debug("Selected initial topology: {}", currentTopologyProcessor);
 				runtimeConfig.put(HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE, currentTopologyProcessor.name());
 			}
-			listenerKey = runtimeConfig.addEntryListener(new TopologyTypeChangeListener(), HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE,
-			                                             true);
+			listenerKey = runtimeConfig.addEntryListener(new TopologyTypeChangeListener(),
+			                                             HazelcastObjectNames.ConfigKeys.TOPOLOGY_TYPE, true);
 
 			service.fire(Event.TOPOLOGY_TYPE_CHANGED);
 			fsm.goTo(State.MASTER_ELECTED_MASTER);
@@ -304,7 +304,8 @@ public final class DefaultTopologyService implements SmartLifecycle, TopologySer
 	 */
 	private void topologyConfigured(final FSM<State, Event> stateEventFSM) {
 		assert !master || (currentTopologyProcessor != null) : "Current topology processor null for master";
-		assert runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH) != null : "No topology graph in config";
+		assert runtimeConfig.get(HazelcastObjectNames.ConfigKeys.TOPOLOGY_GRAPH) != null
+			: "No topology graph in config";
 
 		logger.debug("Topology has been configured. Caching the graph");
 		cachedTopology = getCurrentTopologyGraph();

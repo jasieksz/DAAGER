@@ -132,8 +132,7 @@ public final class DefaultUnicastMessenger implements UnicastMessenger, Communic
 		return ImmutableSet.of(WorkerMessage.Type.UNICAST_CONTROL, WorkerMessage.Type.UNICAST_MESSAGE);
 	}
 
-	@SuppressWarnings("FutureReturnValueIgnored")
-	@Override public void start() {
+	@SuppressWarnings("FutureReturnValueIgnored") @Override public void start() {
 		log.debug("Starting local unicast messenger.");
 		workerCommunication.scheduleAtFixedRate(this::broadcastMyAddress, 1L, 5L, TimeUnit.SECONDS);
 	}

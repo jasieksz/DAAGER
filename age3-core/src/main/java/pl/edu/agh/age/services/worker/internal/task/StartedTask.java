@@ -24,13 +24,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**

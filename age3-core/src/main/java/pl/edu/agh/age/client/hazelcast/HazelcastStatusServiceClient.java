@@ -22,7 +22,6 @@ package pl.edu.agh.age.client.hazelcast;
 import pl.edu.agh.age.client.StatusServiceClient;
 import pl.edu.agh.age.services.identity.NodeDescriptor;
 import pl.edu.agh.age.services.status.Status;
-import pl.edu.agh.age.services.status.internal.DefaultStatusService;
 import pl.edu.agh.age.services.status.internal.HazelcastObjectNames;
 
 import com.hazelcast.core.HazelcastInstance;

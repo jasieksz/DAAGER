@@ -90,7 +90,6 @@ public final class DefaultNodeLifecycleService implements SmartLifecycle, NodeLi
 	}
 
 
-
 	private static final Logger logger = LoggerFactory.getLogger(DefaultNodeLifecycleService.class);
 
 	private final EventBus eventBus;

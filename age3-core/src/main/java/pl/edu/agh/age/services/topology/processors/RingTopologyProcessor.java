@@ -52,8 +52,7 @@ public final class RingTopologyProcessor implements TopologyProcessor {
 		return "ring";
 	}
 
-	@Override
-	public Graph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
+	@Override public Graph<String, DefaultEdge> createGraphFrom(final Set<? extends NodeDescriptor> identities) {
 		requireNonNull(identities);
 
 		final DefaultDirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);

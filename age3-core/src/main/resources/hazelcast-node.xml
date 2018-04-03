@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~ Copyright (C) 2016 Intelligent Information Systems Group.
   ~
   ~ This file is part of AgE.
@@ -26,7 +25,9 @@
 		<property name="hazelcast.logging.type">slf4j</property>
 		<property name="hazelcast.shutdownhook.enabled">false</property>
 	</properties>
-	<map name="discovery/members"><max-idle-seconds>20</max-idle-seconds></map>
+	<map name="discovery/members">
+		<max-idle-seconds>20</max-idle-seconds>
+	</map>
 
 	<!-- Load additional (usually network) configuration. -->
 	<!-- This is intended to be overridden by user. -->

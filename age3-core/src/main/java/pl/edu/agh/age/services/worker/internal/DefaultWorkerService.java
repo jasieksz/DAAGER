@@ -139,14 +139,20 @@ public final class DefaultWorkerService implements SmartLifecycle, WorkerCommuni
 
 		eventBus.register(this);
 
-		final IMap<String, ComputationState> nodeComputationState = hazelcastInstance.getMap(HazelcastObjectNames.STATE_MAP_NAME);
-		final HazelcastDistributionUtilities computeDistributionUtilities = new HazelcastDistributionUtilities(hazelcastInstance);
+		final IMap<String, ComputationState> nodeComputationState = hazelcastInstance.getMap(
+			HazelcastObjectNames.STATE_MAP_NAME);
+		final HazelcastDistributionUtilities computeDistributionUtilities = new HazelcastDistributionUtilities(
+			hazelcastInstance);
 		final String nodeId = identityService.nodeId();
-		final IMap<HazelcastObjectNames.ConfigurationKey, Object> configurationMap = hazelcastInstance.getMap(HazelcastObjectNames.CONFIGURATION_MAP_NAME);
+		final IMap<HazelcastObjectNames.ConfigurationKey, Object> configurationMap = hazelcastInstance.getMap(
+			HazelcastObjectNames.CONFIGURATION_MAP_NAME);
 
-		computationService = new ComputationService(configurationMap, eventBus, nodeComputationState, computeDistributionUtilities, nodeId, communicationFacilities, topologyService);
+		computationService = new ComputationService(configurationMap, eventBus, nodeComputationState,
+		                                            computeDistributionUtilities, nodeId, communicationFacilities,
+		                                            topologyService);
 
-		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION, payload -> computationService.triggerConfigurationLoad());
+		messageHandlers.put(WorkerMessage.Type.LOAD_CONFIGURATION,
+		                    payload -> computationService.triggerConfigurationLoad());
 		messageHandlers.put(WorkerMessage.Type.START_COMPUTATION, payload -> computationService.triggerStart());
 		messageHandlers.put(WorkerMessage.Type.CANCEL_COMPUTATION, payload -> computationService.triggerCancel());
 		messageHandlers.put(WorkerMessage.Type.CLEAN_CONFIGURATION, payload -> computationService.triggerClear());

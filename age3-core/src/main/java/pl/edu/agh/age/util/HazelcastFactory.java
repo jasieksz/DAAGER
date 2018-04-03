@@ -37,8 +37,8 @@ public final class HazelcastFactory {
 	private HazelcastFactory() {}
 
 	@Bean
-	public static HazelcastInstance create(@Value("${age.node.hazelcast.config.main}")
-	                                       final String hazelcastMainConfig) {
+	public static HazelcastInstance create(
+		@Value("${age.node.hazelcast.config.main}") final String hazelcastMainConfig) {
 		System.setProperty("hazelcast.logging.type", "slf4j");
 		// Update to a default value if not provided
 		final String hazelcastConfig = NodeSystemProperties.HAZELCAST_CONFIG_USER.get();

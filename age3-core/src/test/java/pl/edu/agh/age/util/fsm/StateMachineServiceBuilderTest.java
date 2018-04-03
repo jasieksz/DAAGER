@@ -158,8 +158,7 @@ public final class StateMachineServiceBuilderTest {
 	@Test public void testAnyStateDefinition_singleEvent() {
 		builder.inAnyState().on(Event.EVENT1).execute(consumer1).goTo(State.STATE2).commit();
 
-		final Map<Event, Tuple2<Set<State>, Consumer<FSM<State, Event>>>>
-			transitions = builder.wildcardTransitions();
+		final Map<Event, Tuple2<Set<State>, Consumer<FSM<State, Event>>>> transitions = builder.wildcardTransitions();
 
 		final Tuple2<Set<State>, Consumer<FSM<State, Event>>> t2 = transitions.get(Event.EVENT1);
 

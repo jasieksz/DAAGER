@@ -72,8 +72,7 @@ public final class DefaultQueryProcessor<T extends Serializable> implements Quer
 		return replicatedMap.values().stream();
 	}
 
-	@SuppressWarnings("FutureReturnValueIgnored")
-	@Override public void schedule(final Callable<T> callable) {
+	@SuppressWarnings("FutureReturnValueIgnored") @Override public void schedule(final Callable<T> callable) {
 		workerCommunication.scheduleAtFixedRate(() -> {
 			try {
 				final T call = callable.call();

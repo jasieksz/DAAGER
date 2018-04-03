@@ -88,8 +88,8 @@ public class DefaultUnicastMessengerTest {
 		messenger.registerListener(listener);
 
 		final WorkerMessage<UnicastMessengerMessage> message = WorkerMessage.createWithPayload(
-				WorkerMessage.Type.UNICAST_MESSAGE, NEIGHBOURS,
-				new UnicastMessengerMessage(messenger.address(), ImmutableSet.of(messenger.address()), NODE_ADDRESS));
+			WorkerMessage.Type.UNICAST_MESSAGE, NEIGHBOURS,
+			new UnicastMessengerMessage(messenger.address(), ImmutableSet.of(messenger.address()), NODE_ADDRESS));
 		messenger.onMessage(message);
 
 		messenger.removeListener(listener);

@@ -27,8 +27,6 @@ import pl.edu.agh.age.services.identity.NodeType;
 import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.HazelcastInstance;
 
-import org.checkerframework.checker.initialization.qual.Initialized;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -50,10 +48,9 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 	// XXX: We can force all services to implement one interface.
 	// We are defining by a class name in order to not depend on them in compile time.
 	private static final ImmutableSet<String> SERVICES_NAMES = ImmutableSet.of(
-			"pl.edu.agh.age.services.discovery.DiscoveryService",
-			"pl.edu.agh.age.services.lifecycle.NodeLifecycleService",
-			"pl.edu.agh.age.services.topology.TopologyService", "pl.edu.agh.age.services.worker.WorkerService",
-			"pl.edu.agh.age.services.identity.NodeIdentityService");
+		"pl.edu.agh.age.services.discovery.DiscoveryService", "pl.edu.agh.age.services.lifecycle.NodeLifecycleService",
+		"pl.edu.agh.age.services.topology.TopologyService", "pl.edu.agh.age.services.worker.WorkerService",
+		"pl.edu.agh.age.services.identity.NodeIdentityService");
 
 	private final UUID nodeId;
 
@@ -63,8 +60,9 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 
 	private final ApplicationContext applicationContext;
 
-	@Inject public DefaultNodeIdentityService(final HazelcastInstance hazelcastInstance,
-	                                          final ApplicationContext applicationContext) {
+	@Inject
+	public DefaultNodeIdentityService(final HazelcastInstance hazelcastInstance,
+	                                  final ApplicationContext applicationContext) {
 		encodedNodeId = hazelcastInstance.getLocalEndpoint().getUuid();
 		nodeId = UUID.fromString(encodedNodeId);
 		this.applicationContext = applicationContext;
@@ -96,7 +94,7 @@ public final class DefaultNodeIdentityService implements NodeIdentityService {
 				log.debug("No service {} - {}.", service, e.getMessage());
 				return false;
 			}
-		}).collect(Collectors.<@Initialized @NonNull String> toSet());
+		}).collect(Collectors.toSet());
 	}
 
 	@Override public boolean isCompute() {

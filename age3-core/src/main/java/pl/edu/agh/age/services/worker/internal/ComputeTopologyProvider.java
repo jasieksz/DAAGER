@@ -36,7 +36,6 @@ import com.hazelcast.core.ItemListener;
 import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
 
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jgrapht.Graph;
 import org.slf4j.Logger;
@@ -47,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 import javax.inject.Named;

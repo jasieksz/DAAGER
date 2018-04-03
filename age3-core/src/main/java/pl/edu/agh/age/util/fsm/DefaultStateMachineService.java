@@ -36,7 +36,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Consumer;
 
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
 import io.vavr.collection.HashMap;
@@ -66,9 +66,9 @@ import io.vavr.control.Option;
  * @see StateMachineServiceBuilder
  */
 @ThreadSafe
-@SuppressWarnings("initialization")
+@SuppressWarnings({"initialization", "GuardedBy"}) // GuardedBy checker does not support StampedLock yet?
 public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<E>>
-		implements StateMachineService<S, E> {
+	implements StateMachineService<S, E> {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultStateMachineService.class);
 
@@ -100,9 +100,9 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 
 	@GuardedBy("stateLock") private State<S, E> currentState;
 
-	@Nullable @GuardedBy("stateLock") private E currentEvent;
+	@GuardedBy("stateLock") private @Nullable E currentEvent;
 
-	@Nullable @GuardedBy("stateLock") private S nextState;
+	@GuardedBy("stateLock") private @Nullable S nextState;
 
 	/**
 	 * Package-protected constructor.
@@ -130,7 +130,7 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 		} else {
 			synchronous = false;
 			service = listeningDecorator(newSingleThreadScheduledExecutor(
-					new ThreadFactoryBuilder().setNameFormat("fsm-" + serviceName + "-%d").build()));
+				new ThreadFactoryBuilder().setNameFormat("fsm-" + serviceName + "-%d").build()));
 			dispatcherFuture = service.scheduleWithFixedDelay(swallowingRunnable(new Dispatcher()), 0L, 1L,
 			                                                  TimeUnit.MILLISECONDS);
 		}
@@ -379,13 +379,13 @@ public final class DefaultStateMachineService<S extends Enum<S>, E extends Enum<
 					          transition, targetSet);
 					failed = true;
 				} else {
-					currentState = statesMap.get(((targetSet.size() != 1) && (nextState != null)) ? nextState
-					                                                                : getOnlyElement(targetSet)).get();
+					currentState = statesMap.get(
+						((targetSet.size() != 1) && (nextState != null)) ? nextState : getOnlyElement(targetSet)).get();
 					if (currentState.isTerminal()) {
 						terminated = true;
 					}
 					log.debug("{}: Transition {} was successful. Selected state: {}", serviceName, transition,
-					         currentState);
+					          currentState);
 					if (eventBus != null) {
 						eventBus.post(
 							new StateChangedEvent<>(transition.initial(), transition.event(), currentState.name()));

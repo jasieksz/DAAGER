@@ -38,7 +38,7 @@ public final class WorkerMessageTest {
 
 	@Test public void testCreateBroadcastWithoutPayload() {
 		final WorkerMessage<Serializable> message = WorkerMessage.createBroadcastWithoutPayload(
-				WorkerMessage.Type.START_COMPUTATION);
+			WorkerMessage.Type.START_COMPUTATION);
 
 		assertThat(message.isBroadcast()).isTrue();
 		assertThat(message.recipients()).isEmpty();
@@ -49,7 +49,7 @@ public final class WorkerMessageTest {
 
 	@Test public void testCreateWithoutPayload() {
 		final WorkerMessage<Serializable> message = WorkerMessage.createWithoutPayload(
-				WorkerMessage.Type.START_COMPUTATION, newHashSet(RECEIVER));
+			WorkerMessage.Type.START_COMPUTATION, newHashSet(RECEIVER));
 
 		assertThat(message.isBroadcast()).isFalse();
 		assertThat(message.recipients()).containsOnly(RECEIVER);
@@ -60,7 +60,7 @@ public final class WorkerMessageTest {
 
 	@Test public void testCreateBroadcastWithPayload() {
 		final WorkerMessage<Serializable> message = WorkerMessage.createBroadcastWithPayload(
-				WorkerMessage.Type.START_COMPUTATION, PAYLOAD);
+			WorkerMessage.Type.START_COMPUTATION, PAYLOAD);
 
 		assertThat(message.isBroadcast()).isTrue();
 		assertThat(message.recipients()).isEmpty();
@@ -71,7 +71,7 @@ public final class WorkerMessageTest {
 
 	@Test public void testCreateWithPayload() {
 		final WorkerMessage<Serializable> message = WorkerMessage.createWithPayload(
-				WorkerMessage.Type.START_COMPUTATION, newHashSet(RECEIVER), PAYLOAD);
+			WorkerMessage.Type.START_COMPUTATION, newHashSet(RECEIVER), PAYLOAD);
 
 		assertThat(message.isBroadcast()).isFalse();
 		assertThat(message.recipients()).containsOnly(RECEIVER);

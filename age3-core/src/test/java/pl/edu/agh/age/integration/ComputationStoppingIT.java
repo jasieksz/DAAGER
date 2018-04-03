@@ -59,8 +59,8 @@ public final class ComputationStoppingIT {
 	}
 
 	@Test public void testIfThreadPoolIsStopping() throws InterruptedException {
-		final SingleClassConfiguration
-			configuration = new SingleClassConfiguration("pl.edu.agh.age.runnables.SimpleTestWithThreads");
+		final SingleClassConfiguration configuration = new SingleClassConfiguration(
+			"pl.edu.agh.age.runnables.SimpleTestWithThreads");
 		workerServiceClient.prepareConfiguration(configuration);
 		TimeUnit.SECONDS.sleep(3L);
 
