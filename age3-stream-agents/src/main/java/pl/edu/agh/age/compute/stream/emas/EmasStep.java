@@ -181,7 +181,9 @@ public final class EmasStep<S extends Solution<?>> implements Step<EmasAgent> {
 
 	private Pipeline migrateIfNecessary(final Pipeline population, final long stepNumber,
 	                                    final Environment environment) {
-		if (environment.workplacesCount() > 1 && shouldMigrate(stepNumber)) {
+		if (shouldMigrate(stepNumber) && environment.workplacesCount() > 1) {
+			// [dymara] XXX environment.workplacesCount() method uses synchronization and is REALLY slow, causing the whole
+			// algorithm to become even twice slower than without calling it. Make sure it is used as rarely as possible.
 			final Predicate<EmasAgent> migrationPredicate = resolveMigrationPredicate(population);
 			final Tuple2<Pipeline, Pipeline> afterMigration = population.migrateWhen(migrationPredicate);
 			final List<EmasAgent> migrated = afterMigration._1.extract();

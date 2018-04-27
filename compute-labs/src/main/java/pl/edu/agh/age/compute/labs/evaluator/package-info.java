@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -17,13 +17,4 @@
  * along with AgE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-rootProject.name = 'age3'
-
-include 'age3-compute-api'
-include 'age3-console'
-include 'age3-core'
-include 'age3-examples'
-include 'age3-stream-agents'
-include 'compute-labs'
-include 'compute-ogr'
-
+package pl.edu.agh.age.compute.labs.evaluator;

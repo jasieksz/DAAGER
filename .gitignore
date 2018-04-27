@@ -1,5 +1,6 @@
 build/
 out/
+bin/
 *.class
 *.jar
 hs_err_pid*
