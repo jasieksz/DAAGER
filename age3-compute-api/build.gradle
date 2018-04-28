@@ -22,6 +22,6 @@ dependencies {
 		// Not needed and would introduce a lot of duplicated annotations
 		exclude group: 'net.sourceforge.findbugs'
 	}
-	compile 'org.jgrapht:jgrapht-core:+'
+	compile 'org.jgrapht:jgrapht-core:1.1.0'
 }
 

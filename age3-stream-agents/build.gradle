@@ -43,7 +43,6 @@ dependencies {
 	compile 'org.openjdk.jmh:jmh-core:default'
 	compile 'org.openjdk.jmh:jmh-generator-annprocess:default'
 	testCompile 'org.springframework:spring-test:default'
-	testCompile 'org.mockito:mockito-core:+'
 }
 
 jmh {

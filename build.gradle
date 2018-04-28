@@ -31,13 +31,13 @@ plugins {
 	id 'net.researchgate.release' version '2.6.0'
 }
 
-project.ext.hazelcastVersion = '3.9'
-project.ext.springVersion = '5.0'
+project.ext.hazelcastVersion = '3.9.4'
+project.ext.springVersion = '5.0.5.RELEASE'
 project.ext.jmhVersion = '1.19'
 
 allprojects {
 	group 'pl.edu.agh.age'
-	version '0.6-SNAPSHOT'
+	version '0.6'
 	apply plugin: 'maven-publish'
 	apply plugin: 'ch.raffael.markdown-doclet'
 
@@ -74,10 +74,10 @@ allprojects {
 		// As in: https://docs.gradle.org/current/userguide/dependency_management.html#sec:custom_versioning_scheme
 		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
 			if (details.requested.group == 'com.hazelcast' && details.requested.version == 'default') {
-				details.useVersion "${hazelcastVersion}+"
+				details.useVersion "${hazelcastVersion}"
 			}
 			if (details.requested.group == 'org.springframework' && details.requested.version == 'default') {
-				details.useVersion "${springVersion}+"
+				details.useVersion "${springVersion}"
 			}
 			// Enforce JMH version (overrides plugin defaults)
 			if (details.requested.group == 'org.openjdk.jmh') {
@@ -143,23 +143,23 @@ subprojects {
 
 	dependencies {
 		compile 'javax.inject:javax.inject:1'
-		compile 'org.slf4j:slf4j-api:1.7+'
-		compile 'org.slf4j:jcl-over-slf4j:1.7+'
-		compile 'com.google.code.findbugs:jsr305:+'
-		compile 'io.vavr:vavr:+'
-		compile 'org.apache.commons:commons-lang3:+'
-		compile 'com.google.guava:guava:+'
-		compile 'one.util:streamex:+'
+		compile 'org.slf4j:slf4j-api:1.7.25'
+		compile 'org.slf4j:jcl-over-slf4j:1.7.25'
+		compile 'com.google.code.findbugs:jsr305:3.0.2'
+		compile 'io.vavr:vavr:0.9.2'
+		compile 'org.apache.commons:commons-lang3:3.7'
+		compile 'com.google.guava:guava:25.0-jre'
+		compile 'one.util:streamex:0.6.6'
 
-		runtime 'org.codehaus.groovy:groovy:+'
-		compile 'ch.qos.logback:logback-classic:1.2+'
-		compile 'org.logback-extensions:logback-ext-spring:+'
+		runtime 'org.codehaus.groovy:groovy:3.0.0-alpha-2'
+		compile 'ch.qos.logback:logback-classic:1.2.3'
+		compile 'org.logback-extensions:logback-ext-spring:0.1.5'
 
-		testCompile 'junit:junit:+'
-		testCompile 'org.mockito:mockito-core:+'
-		testCompile 'org.assertj:assertj-core:+'
+		testCompile 'junit:junit:4.12'
+		testCompile 'org.mockito:mockito-core:2.18.3'
+		testCompile 'org.assertj:assertj-core:3.9.1'
 
-		compile 'org.checkerframework:checker-qual:+'
+		compile 'org.checkerframework:checker-qual:2.5.0'
 	}
 }
 

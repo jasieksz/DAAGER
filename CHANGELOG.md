@@ -1,6 +1,6 @@
 # AgE 3 Changelog
 
-## 0.6 -- TBD
+## 0.6 -- 28.04.2018
 
 Console:
 - ComputationCommand now supports the `jars` parameter that can be assigned with a list of paths to JAR files that
