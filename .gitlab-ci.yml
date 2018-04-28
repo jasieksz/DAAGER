@@ -56,7 +56,7 @@ deploy_age_javadocs:
 trigger_build:
     stage: deploy
     script:
-      - "curl -X POST -F token=${DOCS_TRIGGER_TOKEN} -F ref=master https://gitlab.com/api/v3/projects/2333621/trigger/builds"
+      - "curl -X POST -F token=${DOCS_TRIGGER_TOKEN} -F ref=master https://gitlab.com/api/v4/projects/2333621/trigger/pipeline"
 
 build_core_jar:
   stage: build
