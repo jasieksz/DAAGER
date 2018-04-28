@@ -14,6 +14,11 @@ Examples:
 - Due to #48 and #49 age3-examples no longer supports building an integrated node.
   To run examples, it is required to use a clean node build and pass the `jars` parameter to the **computation.load** command.
 
+New modules:
+- Evolutionary algorithms (compute-ea) – import of the module from AgE 2 (#37).
+- OGR (Optimal Golomb Ruler) (compute-ogr) (#45).
+- LABS (Low Autocorrelation Binary Sequences) (compute-labs) (#45).
+
 Stream Agents:
 - `Solution#updateFitness` was changed to `Solution#withFitness` to follow naming used in the rest of the project (#41).
 - Remove unnecessary assertion from `AsexualReproductionPipeline` (#44).

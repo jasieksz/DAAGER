@@ -28,7 +28,7 @@ applicationDefaultJvmArgs = [
 ]
 
 dependencies {
-	compile project(':age3-core')
+	compile project(':age3-compute-api')
 	compile project(':age3-stream-agents')
 }
 

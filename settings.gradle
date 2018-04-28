@@ -24,6 +24,6 @@ include 'age3-console'
 include 'age3-core'
 include 'age3-examples'
 include 'age3-stream-agents'
+include 'compute-ea'
 include 'compute-labs'
 include 'compute-ogr'
-

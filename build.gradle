@@ -104,6 +104,10 @@ subprojects {
 			mavenJava(MavenPublication) {
 				from components.java
 
+				if (artifactId.startsWith("compute")) {
+					artifactId "age3-${artifactId}"
+				}
+
 				pom.withXml {
 					// Generate map of resolved versions
 					// Taken from here: https://github.com/gradle/gradle/issues/1232
@@ -165,6 +169,9 @@ def exportedProjects = [
 	":age3-core",
 	":age3-examples",
 	":age3-stream-agents",
+	":compute-ea",
+	":compute-ogr",
+	":compute-labs",
 ]
 
 task alljavadoc(type: Javadoc, group: "Documentation") {

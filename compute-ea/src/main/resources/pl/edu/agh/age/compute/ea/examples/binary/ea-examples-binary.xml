@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright (C) 2017 Intelligent Information Systems Group.
+  ~
+  ~ This file is part of AgE.
+  ~
+  ~ AgE is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ AgE is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with AgE.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Required to process annotations -->
+	<context:annotation-config/>
+
+	<!-- Define a timed stop condition that fires after desired step count on any workplace -->
+	<bean id="stop-condition" class="pl.edu.agh.age.compute.ea.StepCountStopCondition">
+		<constructor-arg value="${steps}" type="int"/>
+	</bean>
+
+	<bean class="pl.edu.agh.age.compute.ea.rand.JavaRandomGenerator">
+		<constructor-arg value="1234567890"/>
+	</bean>
+
+	<!-- Define a list of agents for workplaces -->
+	<bean id="population" class="pl.edu.agh.age.compute.ea.Populations" factory-method="createPopulation">
+		<constructor-arg name="size" value="${population.size}"/>
+		<constructor-arg name="solutionGenerator">
+			<bean class="pl.edu.agh.age.compute.ea.examples.binary.BinarySolutionGenerator"/>
+		</constructor-arg>
+	</bean>
+
+	<util:list id="workplace-configurations"
+	           value-type="pl.edu.agh.age.compute.ea.configuration.WorkplaceConfiguration">
+		<bean id="workplace-1" class="pl.edu.agh.age.compute.ea.configuration.WorkplaceConfiguration">
+			<constructor-arg ref="population"/>
+			<constructor-arg name="step">
+				<bean class="pl.edu.agh.age.compute.ea.examples.binary.BinaryStep"/>
+			</constructor-arg>
+			<constructor-arg name="afterStep">
+				<bean class="pl.edu.agh.age.compute.ea.BestSolutionAfterStepAction"/>
+			</constructor-arg>
+		</bean>
+	</util:list>
+
+	<!-- Initialize configuration -->
+	<bean id="configuration" class="pl.edu.agh.age.compute.ea.configuration.Configuration">
+		<constructor-arg name="workplaceConfigurations" ref="workplace-configurations"/>
+		<constructor-arg name="stopCondition" ref="stop-condition"/>
+	</bean>
+
+	<!-- Define main class -->
+	<bean id="runnable" class="pl.edu.agh.age.compute.ea.EvolutionaryAlgorithms"/>
+
+</beans>

@@ -104,8 +104,13 @@ Currently, this repository contains four Gradle modules (besides root):
 - **age3-compute-api** – API for compute modules,
 - **age3-console** – implementation of the console,
 - **age3-core** – implementation of the computational node,
-- **age3-examples** – compute examples,
-- **age3-stream-agents** – stream-processing-based multi-agent-system.
+- **age3-examples** – compute examples.
+
+And the following compute modules:
+- **age3-stream-agents** – stream-processing-based multi-agent-system,
+- **compute-ea** – (plain) Evolutionary Algorithms,
+- **compute-labs** – Low Autocorrelation Binary Sequences,
+- **compute-ogr** – Optimal Golomb Ruler.
 
 Other directories include:
 
