@@ -16,17 +16,17 @@ You can find info on how to run AgE 3 in the [documentation](https://docs.age.ag
 *Compute modules* are implementations of various algorithms that can be run using AgE.
 
 Currently, AgE provides following modules:
-- **Evolutionary Algorithms** – classical evolutionary algorithms implemented in streaming (data-flow) fashion.
-- **Stream Agents** – multi-agent system based on streaming (data-flow) implementation.
-  This also contains EMAS (Evolutionary Multi-Agent System) implementation.
-  
-  Documentation for this module is available int `docs/user/stream-agents` directory and on <https://docs.age.agh.edu.pl/age3/user/stream-agents/>.
-- **LABS** (Low Autocorrelation Binary Sequences) – LABS-related operators for Stream Agents.
+-  **Evolutionary Algorithms** – classical evolutionary algorithms implemented in streaming (data-flow) fashion.
+-  **Stream Agents** – multi-agent system based on streaming (data-flow) implementation.
+   This also contains EMAS (Evolutionary Multi-Agent System) implementation.
 
-  Documentation for this module is available int `docs/user/ogr-labs` directory and on <https://docs.age.agh.edu.pl/age3/user/ogr-labs/>.
-- **OGR** (Optimal Golomb Ruler) – OGR-related operators for Stream Agents.
+   Documentation for this module is available in `docs/user/stream-agents` directory and on <https://docs.age.agh.edu.pl/age3/user/stream-agents/>.
+-  **LABS** (Low Autocorrelation Binary Sequences) – LABS-related operators for Stream Agents.
 
-  Documentation for this module is available int `docs/user/ogr-labs` directory and on <https://docs.age.agh.edu.pl/age3/user/ogr-labs/>.
+   Documentation for this module is available in `docs/user/ogr-labs` directory and on <https://docs.age.agh.edu.pl/age3/user/ogr-labs/>.
+-  **OGR** (Optimal Golomb Ruler) – OGR-related operators for Stream Agents.
+
+   Documentation for this module is available in `docs/user/ogr-labs` directory and on <https://docs.age.agh.edu.pl/age3/user/ogr-labs/>.
 
 ## More documentation
 

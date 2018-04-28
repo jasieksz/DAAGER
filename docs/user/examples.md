@@ -1,3 +1,7 @@
+---
+title: Examples
+---
+
 # Examples
 
 Examples are located in the `age3-examples` module.

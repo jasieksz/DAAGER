@@ -1,3 +1,7 @@
+---
+title: AgE3 Implementation of OGR and LABS problems
+---
+
 # AgE3 Implementation of OGR and LABS problems
 
 This module provides an implementation of OGR (Optimal Golomb Ruler) and LABS (Low Autocorrelation Binary Sequences) problems.
