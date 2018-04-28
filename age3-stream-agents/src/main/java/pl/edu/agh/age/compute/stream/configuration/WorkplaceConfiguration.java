@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
@@ -54,7 +54,7 @@ public final class WorkplaceConfiguration<T extends Agent> {
 	                              final AfterStepAction<T, ?> afterStep) {
 		this(generator.createPopulation(), step, afterStep, BeforeStepAction.simpleMerge());
 	}
-	
+
 	public WorkplaceConfiguration(final PopulationGenerator<T> generator, final Step<T> step,
 	                              final AfterStepAction<T, ?> afterStep, final BeforeStepAction<T> beforeStep) {
 		this(generator.createPopulation(), step, afterStep, beforeStep);

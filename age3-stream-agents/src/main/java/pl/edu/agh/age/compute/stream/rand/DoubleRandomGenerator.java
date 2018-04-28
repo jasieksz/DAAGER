@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2016 Intelligent Information Systems Group.
+ * Copyright (C) 2016-2018 Intelligent Information Systems Group.
  *
  * This file is part of AgE.
  *
