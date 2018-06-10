@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import registerServiceWorker from './registerServiceWorker';
-import MainPage from "./MainPage";
+import { App } from "./App";
 
 ReactDOM.render(
-    <MainPage/>,
+    <App/>,
     document.getElementById('root')
 );
 
