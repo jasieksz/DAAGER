@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
-import { Input, Jumbotron, Container, Row} from 'reactstrap';
+import React, {Component} from 'react';
+import {Input, Jumbotron, Container, Row} from 'reactstrap';
 import ProgressButton from 'react-progress-button'
-import axios from 'axios';
 import "../node_modules/react-progress-button/react-progress-button.css";
 import "../node_modules/bootstrap/dist/css/bootstrap.css"
+import EntryScreenService from "./EntryScreenService"
 
 
 class EntryScreen extends Component {
@@ -16,21 +16,17 @@ class EntryScreen extends Component {
             isLogged: false,
             buttonState: ''
         };
-        this.api = axios.create({
-            timeout: 2000,
-            withCredentials: true,
-            xsrfCookieName:  "DAAGER-TOKEN",
-            xsrfHeaderName:  "Csrf-Token",
-        });
+        this.service = new EntryScreenService();
+        this.inputPlaceholder = "localhost:1234";
     }
 
     componentDidMount() {
-        this.api.get("api/hello").then(response => console.log(response));
+        this.service.hello().then(response => console.log(response));
     }
 
     verify = () => {
         this.setState({buttonState: 'loading'});
-        this.api.post("api/pull/verify", {value: this.input.value}, {timeout: 10000}).then(() => {
+        this.service.verify({value: this.input.value}).then(() => {
             this.setState({isLogged: true});
             this.setState({buttonState: 'success'})
         }).catch(() => {
@@ -40,7 +36,7 @@ class EntryScreen extends Component {
     };
 
     start = () => {
-        this.api.post("api/pull/start", {value: this.input.value}, {timeout: 10000}).then(() => {
+        this.service.startPulling({value: this.input.value}).then(() => {
             if (this.props.onSuccess) this.props.onSuccess();
         })
     };
@@ -61,7 +57,7 @@ class EntryScreen extends Component {
                                 name="address"
                                 id="ageIp"
                                 onChange={this.blockStart}
-                                placeholder="localhost:1234"
+                                placeholder={this.inputPlaceholder}
                                 innerRef={(input) => this.input = input}
                             />
                         </Row>
@@ -69,8 +65,8 @@ class EntryScreen extends Component {
                         <Row>
                             {
                                 !this.state.isLogged ?
-                                <ProgressButton onClick={this.verify} state={this.state.buttonState}>Test</ProgressButton> :
-                                <ProgressButton onClick={this.start} state='success'>Start pulling</ProgressButton>
+                                    <ProgressButton onClick={this.verify} state={this.state.buttonState}>Test</ProgressButton> :
+                                    <ProgressButton onClick={this.start} state='success'>Start pulling</ProgressButton>
                             }
                         </Row>
                     </Container>
