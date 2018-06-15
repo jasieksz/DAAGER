@@ -1,5 +1,11 @@
+# Serve index page from public directory
+GET         /                    controllers.UiController.index()
 
-GET     /                           controllers.HomeController.index
+GET         /api/hello           controllers.PullingController.hello()
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+POST        /api/pull/verify        controllers.PullingController.verify()
+
+POST        /api/pull/start        controllers.PullingController.startPulling()
+
+# Serve static assets under public directory
+GET         /*file               controllers.UiController.assetOrDefault(file)
