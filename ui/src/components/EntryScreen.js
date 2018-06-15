@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Input, Jumbotron, Container, Row} from 'reactstrap';
 import ProgressButton from 'react-progress-button'
-import "../node_modules/react-progress-button/react-progress-button.css";
+import "../../node_modules/react-progress-button/react-progress-button.css";
 import "../node_modules/bootstrap/dist/css/bootstrap.css"
 import EntryScreenService from "./EntryScreenService"
 

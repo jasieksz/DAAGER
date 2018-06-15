@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Row , Container, Col} from 'reactstrap';
-import './CenterView.css';
+import '../styles/CenterView.css';
 
 class CenterView extends Component {
     render() {

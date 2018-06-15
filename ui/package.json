@@ -13,6 +13,7 @@
     "react-progress-button": "^5.1.0",
     "react-router": "^4.2.0",
     "react-scripts": "1.1.4",
+    "react-tabs": "^2.2.2",
     "reactstrap": "^6.0.1"
   },
   "scripts": {
