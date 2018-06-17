@@ -17,6 +17,8 @@ class EntryScreenService {
 
     startPulling = (obj) => this.api.post("api/pull/start", obj, {timeout: 10000});
 
+    getGraph = () => this.api.get("/api/graph", {timeout: 10000});
+
 }
 
 export default EntryScreenService;

@@ -17,8 +17,16 @@ class MainPage extends Component {
         this.handleSelect = this.handleSelect.bind(this);
         this.state = {
             showLogin: true,
-            key: 2
+            key: 2,
+            pullingAddress: ''
         };
+        this.handleSetPullingAddress = this.handleSetPullingAddress.bind(this);
+    }
+
+    handleSetPullingAddress(pullAddr) {
+        this.setState({
+            pullingAddress: pullAddr
+        })
     }
 
     handleSelect(key) {
@@ -49,10 +57,14 @@ class MainPage extends Component {
                     </TabList>
 
                     <TabPanel>
-                        <HomeComponent/>
+                        <HomeComponent
+                            pullingAddress={this.state.pullingAddress}/>
                     </TabPanel>
                     <TabPanel>
-                        <ManageComponent/>
+                        <ManageComponent
+                            pullingAddress={this.state.pullingAddress}
+                            savePullingAddress={this.handleSetPullingAddress}
+                        />
                     </TabPanel>
                     <TabPanel>
                         <GrafanaComponent/>

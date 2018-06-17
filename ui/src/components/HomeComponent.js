@@ -4,8 +4,10 @@ import '../styles/HomeComponent.css';
 import Sigma from 'react-sigma/lib/Sigma'
 import {RelativeSize} from "react-sigma";
 import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
-import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
+import { Button } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Alert } from 'reactstrap';
+import EntryScreenService from "../services/EntryScreenService";
 
 class HomeComponent extends Component {
 
@@ -13,38 +15,14 @@ class HomeComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            nodes: [{id: "n1", label: "Alice"}, {id: "n2", label: "Rabbit"}],
-            edges: [{id: "e1", source: "n1", target: "n2"}],
+            nodes: [], //[{id: "n1", label: "Alice"}, {id: "n2", label: "Rabbit"}],
+            edges: [], //[{id: "e1", source: "n1", target: "n2"}],
             isModalOpen: false
-            // popOversOpen: new Map()
         };
+        this.service = new EntryScreenService();
         this.toggleModal = this.toggleModal.bind(this);
-        // this.setPopOvers();
+        this.getGraphData();
     }
-
-    // setPopOvers() {
-    //     this.state.nodes.forEach( node => this.state.popOversOpen.set({"id": node.id,"isOpen": true}));
-    //     console.log(this.state.popOversOpen);
-    // }
-    //
-    // togglePopover(id) {
-    //     console.log("id: " + id);
-    //     var prevState = this.state.popOversOpen.get(id);
-    //     console.log(prevState);
-    //     this.state.popOversOpen.set(id, !prevState);
-    // }
-    //
-    // renderPopOvers() {
-    //     return (
-    //         this.state.nodes.map( i =>
-    //             <Popover placement="auto" isOpen={this.state.popOversOpen.get(i.id)} toggle={this.togglePopover(i.id)}>
-    //                 <PopoverHeader>Popover Title</PopoverHeader>
-    //                 <PopoverBody>Sed posuere consectetur est at lobortis. Aenean eu leo quam. Pellentesque ornare sem
-    //                     lacinia quam venenatis vestibulum.</PopoverBody>
-    //             </Popover>
-    //         )
-    //     );
-    // }
 
     toggleModal() {
         console.log(this.state.isModalOpen);
@@ -52,7 +30,6 @@ class HomeComponent extends Component {
         this.setState({
             isModalOpen: !prev
         });
-        console.log(this.state.isModalOpen);
     }
 
     renderModal() {
@@ -71,19 +48,25 @@ class HomeComponent extends Component {
     }
 
     getGraph() {
-        return (
+        if (this.state.nodes !== []) {
+            return (
                 <Sigma graph={{
                     nodes: this.state.nodes,
                     edges: this.state.edges
-                    }}
-                   style={{maxWidth: "inherit", height: "inherit"}}
-                   onClickNode={e => { this.toggleModal();} }
-                   onOverNode={e => console.log("Mouse over node: " + e.data.node.label)}
-                   settings={{drawEdges: true, defaultNodeColor: '#0073e6'}}>
-                <RelativeSize initialSize={8}/>
-                <RandomizeNodePositions/>
-            </Sigma>
-        );
+                }}
+                       style={{maxWidth: "inherit", height: "inherit"}}
+                       onClickNode={e => {
+                           this.toggleModal();
+                       }}
+                       onOverNode={e => console.log("Mouse over node: " + e.data.node.label)}
+                       settings={{drawEdges: true, defaultNodeColor: '#0073e6'}}>
+                    <RelativeSize initialSize={8}/>
+                    <RandomizeNodePositions/>
+                </Sigma>
+            );
+        } else {
+            return <div/>
+        }
     }
 
     renderGraph() {
@@ -105,16 +88,38 @@ class HomeComponent extends Component {
         );
     }
 
+    getGraphData = () => {
+        if (this.props.pullingAddress !== '') {
+            this.service.getGraph().then(data => {
+                this.setState({
+                    nodes: data.nodes,
+                    edges: data.edges
+                });
+            }).catch(() => {
+                console.log('error during getting graph data');
+            });
+        }
+    };
+
+
     render() {
-        return (
-            <div>
-                <h2 className={'tabTitle'}>HOME COMPONENT </h2>
-                <div className={'homeComponents'}>
-                    {this.renderInfo()}
-                    {this.renderGraph()}
+        if (this.props.pullingAddress !== '') {
+            return (
+                <div>
+                    <h2 className={'tabTitle'}>HOME COMPONENT </h2>
+                    <div className={'homeComponents'}>
+                        {this.renderInfo()}
+                        {this.renderGraph()}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        } else {
+            return (
+                <Alert color={"danger"} className={'tabTitle'}>
+                    Go to Manage Tab and set pulling address
+                </Alert>
+            )
+        }
     }
 }
 
