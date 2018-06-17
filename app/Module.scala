@@ -7,5 +7,4 @@ class Module extends AbstractModule {
     bind(classOf[AgeConnectionService])
   }
 
-
 }

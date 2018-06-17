@@ -1,26 +1,91 @@
-# Serve index page from public directory
-GET         /                          controllers.UiController.index()
+GET         /                             controllers.UiController.index()
 
-GET         /api/hello                 controllers.PullingController.hello()
+###
+#  summary: get cookie with token
+#  responses:
+#    200:
+#      description: success
+###
+GET         /api/hello                    controllers.PullingController.hello()
 
-POST        /api/pull/verify           controllers.PullingController.verify()
+###
+#  summary: get graph of current age cluster
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.nodeGraph.Graph'
+###
+GET         /api/graph                    controllers.GraphController.getGraph()
 
-POST        /api/pull/start            controllers.PullingController.startPulling()
+
+###
+#  summary: get statuses of pulling workers
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/Seq[model.domain.PullerInfo]'
+###
+GET         /api/pull/statuses            controllers.MetricsController.getStatuses()
+
+###
+#  summary: start pulling
+#  responses:
+#    200:
+#      description: success
+#      schema:
+POST        /api/pull/start               controllers.MetricsController.startPulling()
+
+
+###
+#  summary: stop pulling of a worker identified by address
+#  responses:
+#    200:
+#      description: success
+###
+POST        /api/pull/stop                controllers.MetricsController.getStatuses()
+
+###
+#  summary: update pulling interval of a given worker
+#  responses:
+#    200:
+#      description: success
+###
+POST        /api/pull/update              controllers.MetricsController.getStatuses()
+
+###
+#  summary: check if given adress is valid
+#  responses:
+#    200:
+#      description: success
+#    400:
+#      description: bad adress
+###
+POST        /api/pull/verify              controllers.PullingController.verify()
 
 
 # MOCKS
-GET         /api/mock/network              controllers.MetricsMockController.getNetworkInfo()
 
-GET         /api/mock/os                   controllers.MetricsMockController.getOSInfo()
+### NoDocs ###
+GET         /api/mock/network             controllers.MetricsMockController.getNetworkInfo()
 
-GET         /api/mock/runtime              controllers.MetricsMockController.getRuntimeInfo()
+### NoDocs ###
+GET         /api/mock/os                  controllers.MetricsMockController.getOSInfo()
 
-GET         /api/mock/thread               controllers.MetricsMockController.getThreadInfo()
+### NoDocs ###
+GET         /api/mock/runtime             controllers.MetricsMockController.getRuntimeInfo()
 
-POST         /api/start                     controllers.MetricsController.startPulling()
+### NoDocs ###
+GET         /api/mock/thread              controllers.MetricsMockController.getThreadInfo()
 
-# Serve static assets under public directory
-GET         /*file                     controllers.UiController.assetOrDefault(file)
+
+
+### NoDocs ###
+GET         /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+
+### NoDocs ###
+GET         /*file                        controllers.UiController.assetOrDefault(file)
 
 
 

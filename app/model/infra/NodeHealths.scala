@@ -5,8 +5,7 @@ import org.joda.time.DateTime
 import slick.jdbc.PostgresProfile.api._
 import utils.DateTimeUtils._
 
-
-class NodeHealths(tag: Tag) extends Table[NodeHealth](tag, "node_healths")  {
+class NodeHealths(tag: Tag) extends Table[NodeHealth](tag, "node_healths") {
 
   def nodeState = column[String]("node_state")
 
@@ -29,6 +28,6 @@ class NodeHealths(tag: Tag) extends Table[NodeHealth](tag, "node_healths")  {
 
 }
 
-object NodeHealths{
+object NodeHealths {
   lazy val query = TableQuery[NodeHealths]
 }

@@ -1,4 +1,5 @@
 package utils
+
 import java.sql.Timestamp
 
 import org.joda.time.DateTime
@@ -6,7 +7,6 @@ import play.api.libs.json._
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
-
 
 object DateTimeUtils {
 
@@ -18,6 +18,7 @@ object DateTimeUtils {
 
   implicit val dateTimeFormat = new Format[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
+
     override def writes(o: DateTime): JsValue = JodaWrites.JodaDateTimeWrites.writes(o)
   }
 

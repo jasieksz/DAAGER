@@ -22,7 +22,7 @@ object FrontendRunHook {
       var npmRun: String = FrontendCommands.serve
 
       // Windows requires npm commands prefixed with cmd /c
-      if (System.getProperty("os.name").toLowerCase().contains("win")){
+      if (System.getProperty("os.name").toLowerCase().contains("win")) {
         npmInstall = "cmd /c" + npmInstall
         npmRun = "cmd /c" + npmRun
       }

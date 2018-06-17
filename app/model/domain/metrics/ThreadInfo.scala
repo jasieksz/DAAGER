@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 import utils.DateTimeUtils.dateTimeFormat
 
-
 case class ThreadInfo(
   timestamp: DateTime,
   address: String,

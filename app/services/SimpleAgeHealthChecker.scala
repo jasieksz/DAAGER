@@ -26,7 +26,7 @@ class SimpleAgeHealthChecker @Inject()(
 
   def run(address: String, interval: FiniteDuration): Unit = {
     val updatedAddress = if (address.startsWith("http")) address else "http://" + address
-    system.scheduler.schedule(5 seconds, interval){
+    system.scheduler.schedule(5 seconds, interval) {
       Await.result(pullData(updatedAddress), Duration.Inf)
     }
   }
@@ -43,11 +43,11 @@ class SimpleAgeHealthChecker @Inject()(
   private def getNodeHealth(response: WSResponse, ageAddress: String): Option[NodeHealth] = {
     Try {
       val Array(
-        nodeState,
-        clusterState,
-        clusterSafe,
-        migrationQueueSize,
-        clusterSize
+      nodeState,
+      clusterState,
+      clusterSafe,
+      migrationQueueSize,
+      clusterSize
       ) = response.body.split("\n")
         .map(_.stripPrefix(hazelcastPrefix).dropWhile(_ != '=').drop(1))
       NodeHealth(

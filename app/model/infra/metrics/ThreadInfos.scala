@@ -22,6 +22,6 @@ class ThreadInfos(tag: Tag) extends Table[ThreadInfo](tag, "thread_infos") {
 
 }
 
-object ThreadInfos{
+object ThreadInfos {
   lazy val query = TableQuery[ThreadInfos]
 }

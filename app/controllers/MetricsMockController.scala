@@ -18,22 +18,22 @@ class MetricsMockController @Inject()(
   def now: DateTime = DateTime.now()
 
   def getNetworkInfo(): Action[AnyContent] = Action { _ =>
-    val info = NetworkInfo( now, mockAdress, 1, 1, 1)
+    val info = NetworkInfo(now, mockAdress, 1, 1, 1)
     Ok(Json.toJson(Seq(info)))
   }
 
-  def getThreadInfo(): Action[AnyContent] = Action { _=>
-    val info = ThreadInfo(now, mockAdress,4,4)
+  def getThreadInfo(): Action[AnyContent] = Action { _ =>
+    val info = ThreadInfo(now, mockAdress, 4, 4)
     Ok(Json.toJson(Seq(info)))
   }
 
   def getOSInfo(): Action[AnyContent] = Action { _ =>
-    val info = OSInfo(now, mockAdress, 0.8,0.8,0.8,123,123,1231,123)
+    val info = OSInfo(now, mockAdress, 0.8, 0.8, 0.8, 123, 123, 1231, 123)
     Ok(Json.toJson(Seq(info)))
   }
 
   def getRuntimeInfo(): Action[AnyContent] = Action { _ =>
-    val info = RuntimeInfo(now, mockAdress, 4,23123123,123123123,123123123,123123123)
+    val info = RuntimeInfo(now, mockAdress, 4, 23123123, 123123123, 123123123, 123123123)
     Ok(Json.toJson(Seq(info)))
   }
 

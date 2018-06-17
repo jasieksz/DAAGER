@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import slick.jdbc.PostgresProfile.api._
 import utils.DateTimeUtils._
 
-class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos"){
+class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
@@ -21,7 +21,6 @@ class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos"){
   def runtimeFreeMemory = column[Long]("runtime_free_memory")
 
   def runtimeUsedMemory = column[Long]("runtime_used_memory")
-
 
   def * = (timestamp, address, runtimeAvailableProcessors, runtimeTotalMemory, runtimeMaxMemory, runtimeFreeMemory,
     runtimeUsedMemory) <> ((RuntimeInfo.apply _).tupled, RuntimeInfo.unapply)

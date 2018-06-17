@@ -10,7 +10,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import PullingRequest._
 
-case class PullingRequest (value: String)
+case class PullingRequest(value: String)
+
 object PullingRequest {
   implicit val format = Json.format[PullingRequest]
 }
@@ -22,13 +23,13 @@ class PullingController @Inject()(
   simpleAgeHealthChecker: SimpleAgeHealthChecker
 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
-  private def validateJson[A : Reads]: BodyParser[A] = parse.json.validate(
+  private def validateJson[A: Reads]: BodyParser[A] = parse.json.validate(
     _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
   )
 
-  def verify(): Action[PullingRequest] = Action(validateJson[PullingRequest]).async  { request =>
+  def verify(): Action[PullingRequest] = Action(validateJson[PullingRequest]).async { request =>
     val address = request.body.value
-    ageConnectionService.isReachable(address).map( reachable =>
+    ageConnectionService.isReachable(address).map(reachable =>
       if (reachable) Ok("") else BadRequest
     )
   }
@@ -40,6 +41,6 @@ class PullingController @Inject()(
   }
 
   @AddCSRFToken
-  def hello(): Action[AnyContent] = Action { _ => Ok("")}
+  def hello(): Action[AnyContent] = Action { _ => Ok("") }
 
 }

@@ -5,8 +5,7 @@ import org.joda.time.DateTime
 import slick.jdbc.PostgresProfile.api._
 import utils.DateTimeUtils._
 
-
-class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos"){
+class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
@@ -27,7 +26,7 @@ class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos"){
   def osTotalSwapSpaceSize = column[Long]("os_total_swap_space_size")
 
   def * = (timestamp, address, osProcessCpuLoad, osSystemLoadAverage, osSystemCpuLoad,
-    osTotalPhysicalMemorySize, osFreePhysicalMemorySize,  osFreeSwapSpaceSize,
+    osTotalPhysicalMemorySize, osFreePhysicalMemorySize, osFreeSwapSpaceSize,
     osTotalSwapSpaceSize) <> ((OSInfo.apply _).tupled, OSInfo.unapply)
 
 }
