@@ -26,7 +26,7 @@ class MainPage extends Component {
     handleSetPullingAddress(pullAddr) {
         this.setState({
             pullingAddress: pullAddr
-        })
+        });
     }
 
     handleSelect(key) {

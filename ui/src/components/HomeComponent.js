@@ -91,14 +91,18 @@ class HomeComponent extends Component {
     getGraphData = () => {
         if (this.props.pullingAddress !== '') {
             this.service.getGraph().then(data => {
+                console.log(data);
+                console.log(data.data[0]);
                 this.setState({
-                    nodes: data.nodes,
-                    edges: data.edges
+                    nodes: data.data[0].nodes,
+                    edges: data.data[0].edges
                 });
+                console.log(this.state.nodes);
             }).catch(() => {
                 console.log('error during getting graph data');
             });
         }
+
     };
 
 

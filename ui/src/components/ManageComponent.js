@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
 import '../styles/ManageComponent.css';
 import { Button } from 'reactstrap';
-import { Table } from 'reactstrap';
 import ProgressButton from 'react-progress-button'
 import "../../node_modules/react-progress-button/react-progress-button.css";
 import EntryScreenService from "../services/EntryScreenService"
+import { PullingArgumentsComponent } from "./PullingArgumentsComponent";
 class ManageComponent extends Component {
 
     constructor(props, context) {
         super(props, context);
         this.state = {
-            network: '',
-            os: '',
-            runtime: '',
-            thread: '',
             pullingAddress: this.props.pullingAddress,
             isPulling: false,
             getPullingAddress: true,
@@ -78,103 +74,20 @@ class ManageComponent extends Component {
         console.log('change pulling address');
         this.setState({
             pullingAddress: '',
-            getPullingAddress: true
+            getPullingAddress: true,
+            buttonState: ''
         });
+        this.props.savePullingAddress('');
     }
 
-    renderTableWithIntervals() {
-        return (
-            <div className={'inputForm'}>
-                <Table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Value</th>
-                            <th>Stop</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">Network</th>
-                                <td>
-                                    <input type="number"
-                                           className="form-control"
-                                           id="network"
-                                           placeholder={this.state.network}
-                                    />
-                                </td>
-                            <td>
-                                <Button type="primary"
-                                        className="btn btn-default"
-                                        onClick={this.handleStopPullingData()}
-                                >Stop
-                                </Button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Operating system</th>
-                                <td>
-                                    <input type="number"
-                                           className="form-control"
-                                           id="os"
-                                           value={this.state.os}
-                                    />
-                                </td>
-                            <td>
-                            <Button type="primary"
-                                    className="btn btn-default"
-                                    onClick={this.handleStopPullingData}
-                            >Stop
-                            </Button>
-                        </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Runtime</th>
-                                <td>
-                                    <input type="text"
-                                           id="runtime"
-                                           className="form-control"
-                                           placeholder={this.state.runtime}
-                                    />
-                                </td>
-                            <td>
-                            <Button type="StopPullingData"
-                                    className="btn btn-default"
-                                    onClick={this.handleStopPullingData}
-                            >Stop
-                            </Button>
-                        </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Thread</th>
-                                <td>
-                                    <input type="text"
-                                           className="form-control"
-                                           id="thread"
-                                           placeholder={this.state.thread}
-                                    />
-                                </td>
-                            <td>
-                            <Button type="StopPullingData"
-                                    className="btn btn-default"
-                                    onClick={this.handleStopPullingData}
-                            >Stop
-                            </Button>
-                        </td>
-                        </tr>
-                    </tbody>
-                </Table>
-            </div>
-        );
-    }
 
     showPullingAddress() {
         return (
             <div>
-            <div className={'inputForm'}>
-                <div className="form-group row">
+            <div className={'pullingDataInfo'}>
+                <div className="row pullingAddr">
                     <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Pulling data address</label>
-                    <div className="col-sm-8">
+                    <div className="col-sm-6">
                         <input type="text"
                                className="form-control"
                                value={this.state.pullingAddress}
@@ -183,12 +96,12 @@ class ManageComponent extends Component {
                 </div>
                 <div className={'manageButtons'}>
                     <Button color="warning"
-                            className="btn btn-default"
+                            className="btn btn-default manageButton"
                             onClick={this.handleClearPullingAddress}
                     >Clear Pulling Address
                     </Button>
                     <Button color="warning"
-                            className="btn btn-default"
+                            className="btn btn-default manageButton"
                             onClick={this.handleChangePullingAddress}
                     >Change Pulling Address
                     </Button>
@@ -199,7 +112,7 @@ class ManageComponent extends Component {
                     </Button>
                 </div>
             </div>
-                {this.renderTableWithIntervals()}
+                <PullingArgumentsComponent/>
             </div>
         )
     }
@@ -237,7 +150,7 @@ class ManageComponent extends Component {
     }
 
     renderPullingAddress() {
-        if (this.props.pullingAddress === '') {
+        if (this.state.pullingAddress === '') {
             return this.getPullingAddress();
         } else {
             return this.showPullingAddress();

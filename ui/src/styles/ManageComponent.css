@@ -8,10 +8,8 @@
     margin: 10% 15%;
 }
 
-.singleTab {
-}
-
 .manageButtons {
+    margin-top: 5%;
     float: right;
     display: inline-flex;
 }
@@ -28,4 +26,20 @@
     color: #1c7430;
     text-align: center;
     margin-left: 45%;
+}
+
+.pullingDataInfo {
+    margin: 1% 25%;
+    background-color: #e6e6e6;
+    width: 50%;
+    height: 15%;
+    border-radius: 10px;
+    text-align: center;
+    display: inherit;
+}
+
+.pullingAddr {
+    margin-left: 1%;
+    margin-right: 1%;
+    text-align: center;
 }
