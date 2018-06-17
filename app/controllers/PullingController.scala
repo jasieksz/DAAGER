@@ -1,15 +1,14 @@
 package controllers
 
 import javax.inject.{ Inject, Singleton }
-import play.api.Configuration
-import play.api.http.HttpErrorHandler
 import play.api.libs.json.{ JsError, Json, Reads }
 import play.api.mvc._
 import play.filters.csrf.AddCSRFToken
 import services.{ AgeConnectionService, SimpleAgeHealthChecker }
-import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+import PullingRequest._
 
 case class PullingRequest (value: String)
 object PullingRequest {
@@ -18,9 +17,6 @@ object PullingRequest {
 
 @Singleton
 class PullingController @Inject()(
-  assets: Assets,
-  errorHandler: HttpErrorHandler,
-  config: Configuration,
   cc: ControllerComponents,
   ageConnectionService: AgeConnectionService,
   simpleAgeHealthChecker: SimpleAgeHealthChecker

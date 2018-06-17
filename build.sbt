@@ -17,6 +17,7 @@ libraryDependencies += "org.typelevel" %% "cats-core" % "1.1.0"
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "3.0.3",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
+  "com.typesafe.play" %% "play-json-joda" % "2.6.9",
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
   "org.postgresql" % "postgresql" % "42.2.2",

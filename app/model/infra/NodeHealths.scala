@@ -3,7 +3,7 @@ package model.infra
 import model.domain.NodeHealth
 import org.joda.time.DateTime
 import slick.jdbc.PostgresProfile.api._
-import utils.DateTime._
+import utils.DateTimeUtils._
 
 
 class NodeHealths(tag: Tag) extends Table[NodeHealth](tag, "node_healths")  {

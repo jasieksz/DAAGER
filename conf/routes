@@ -1,11 +1,26 @@
 # Serve index page from public directory
-GET         /                    controllers.UiController.index()
+GET         /                          controllers.UiController.index()
 
-GET         /api/hello           controllers.PullingController.hello()
+GET         /api/hello                 controllers.PullingController.hello()
 
-POST        /api/pull/verify        controllers.PullingController.verify()
+POST        /api/pull/verify           controllers.PullingController.verify()
 
-POST        /api/pull/start        controllers.PullingController.startPulling()
+POST        /api/pull/start            controllers.PullingController.startPulling()
+
+
+# MOCKS
+GET         /api/mock/network              controllers.MetricsMockController.getNetworkInfo()
+
+GET         /api/mock/os                   controllers.MetricsMockController.getOSInfo()
+
+GET         /api/mock/runtime              controllers.MetricsMockController.getRuntimeInfo()
+
+GET         /api/mock/thread               controllers.MetricsMockController.getThreadInfo()
+
+POST         /api/start                     controllers.MetricsController.startPulling()
 
 # Serve static assets under public directory
-GET         /*file               controllers.UiController.assetOrDefault(file)
+GET         /*file                     controllers.UiController.assetOrDefault(file)
+
+
+
