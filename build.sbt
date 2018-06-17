@@ -6,7 +6,7 @@ lazy val `daager` = (project in file(".")).enablePlugins(PlayScala, SwaggerPlugi
   watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
 )
 
-swaggerDomainNameSpaces := Seq("model")
+swaggerDomainNameSpaces := Seq("model", "actors","controllers")
 
 
 resolvers += Resolver.sonatypeRepo("snapshots")

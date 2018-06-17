@@ -18,13 +18,13 @@ object MetricsSupervisor {
 
   final case object GetStatus
 
-  final case class UpdateInterval(address: String, newInterval: Int)
+  final case class UpdateInterval(workerAddress: String, newInterval: Int)
 
   object UpdateInterval {
     implicit val format = Json.format[UpdateInterval]
   }
 
-  final case class Stop(address: String)
+  final case class Stop(workerAddress: String)
 
   object Stop {
     implicit val format = Json.format[Stop]

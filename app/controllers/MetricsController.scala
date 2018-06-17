@@ -16,7 +16,7 @@ import repositories.metrics.{ NetworkInfoRepository, OsInfoRepository, RuntimeIn
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 
-case class StartRequest(address: String, interval: Int)
+case class StartRequest(baseAddress: String, interval: Int)
 
 object StartRequest {
   implicit val format = Json.format[StartRequest]
@@ -48,7 +48,7 @@ class MetricsController @Inject()(
   )
 
   def startPulling(): Action[StartRequest] = Action(validateJson[StartRequest]) { request =>
-    supervisor ! Start(request.body.address, request.body.interval)
+    supervisor ! Start(request.body.baseAddress, request.body.interval)
     Ok("")
   }
 
