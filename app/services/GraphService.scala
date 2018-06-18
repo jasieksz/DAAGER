@@ -29,7 +29,6 @@ class GraphService @Inject()(
       Node(idx.toString, address)
     }.toList
     val edges = (nodes |@| nodes).tupled
-      .filter { case (node1, node2) => node1 != node2 }
       .zipWithIndex
       .map { case ((node1, node2), idx) => Edge(idx.toString, node1.id, node2.id) }
     Graph(nodes, edges)

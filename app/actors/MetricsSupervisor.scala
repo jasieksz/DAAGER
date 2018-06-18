@@ -55,6 +55,13 @@ class MetricsSupervisor(
     threadInfoPuller -> "/api/mock/thread"
   )
 
+  private val labels = Map(
+    networkInfoPuller -> "Network Info",
+    osInfoPuller -> "OS Info",
+    runtimeInfoPuller -> "Runtime Info",
+    threadInfoPuller -> "Thread Info"
+  )
+
   private val addressToWorker = pullingAdresses.map(_.swap)
 
   private val intervals = Map.empty[ActorRef, Int].withDefault(_ => 0)
@@ -92,6 +99,7 @@ class MetricsSupervisor(
   private def prepareStatuses(pullers: Seq[ActorRef], statusMap: Map[ActorRef, String], intervalMap: Map[ActorRef, Int]): Seq[PullerInfo] = {
     workers.map { worker =>
       PullerInfo(
+        labels(worker),
         pullingAdresses(worker),
         intervalMap(worker),
         statusMap(worker)

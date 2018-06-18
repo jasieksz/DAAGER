@@ -19,6 +19,32 @@ GET         /api/hello                    controllers.PullingController.hello()
 ###
 GET         /api/graph                    controllers.GraphController.getGraph()
 
+###
+#  summary: get state of cluster
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.GlobalState'
+#
+###
+GET         /api/global-state              controllers.GraphController.getGlobalState()
+
+###
+#  summary: get graph of current age cluster
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/controllers.GraphController.NodeDetailsRequest'
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.NodeDetails'
+#
+###
+POST         /api/node-details                 controllers.GraphController.getNodeDetails()
+
 
 ###
 #  summary: get statuses of pulling workers

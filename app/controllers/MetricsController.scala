@@ -48,7 +48,9 @@ class MetricsController @Inject()(
   )
 
   def startPulling(): Action[StartRequest] = Action(validateJson[StartRequest]) { request =>
-    supervisor ! Start(request.body.baseAddress, request.body.interval)
+    val address = request.body.baseAddress
+    val updatedAddress = if (address.startsWith("http://")) address else "http://" + address
+    supervisor ! Start(updatedAddress, request.body.interval)
     Ok("")
   }
 
