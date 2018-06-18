@@ -15,58 +15,60 @@ class HomeComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            nodes: [], //[{id: "n1", label: "Alice"}, {id: "n2", label: "Rabbit"}],
-            edges: [], //[{id: "e1", source: "n1", target: "n2"}],
-            isModalOpen: false
+            nodes: [],
+            edges: [],
+            isModalOpen: false,
+            modalData: ''
         };
         this.service = new EntryScreenService();
-        this.toggleModal = this.toggleModal.bind(this);
         this.getGraphData();
     }
 
-    toggleModal() {
-        console.log(this.state.isModalOpen);
+    toggleModal = () => {
         var prev = this.state.isModalOpen;
         this.setState({
             isModalOpen: !prev
         });
-    }
+    };
+
+    getNodeInfo = (node) => {
+        // ok -> toggle modal
+    };
 
     renderModal() {
         return (
-                <Modal isOpen={this.state.isModalOpen}>
-                    <ModalHeader>Modal title  </ModalHeader>
+            <Modal isOpen={this.state.isModalOpen}>
+                    <ModalHeader>Info for node {this.state.modalData} </ModalHeader>
                     <ModalBody>
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.toggleModal}>Do Something</Button>{' '}
-                        <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+                        <Button color="secondary" onClick={this.toggleModal}>Close</Button>
                     </ModalFooter>
                 </Modal>
         );
     }
 
     getGraph() {
-        if (this.state.nodes !== []) {
-            return (
+        console.log('getting graph');
+        console.log(this.state.nodes);
+        console.log(this.state.edges);
+        return (
                 <Sigma graph={{
-                    nodes: this.state.nodes,
-                    edges: this.state.edges
+                    nodes: [{id: "0", label: "127.0.0.1:12345"}], //this.state.nodes,
+                    edges: [{id: "0", source: "0", target: "0"}] //this.state.edges
                 }}
                        style={{maxWidth: "inherit", height: "inherit"}}
                        onClickNode={e => {
                            this.toggleModal();
+                           this.getNodeInfo(e.data.node)
                        }}
                        onOverNode={e => console.log("Mouse over node: " + e.data.node.label)}
                        settings={{drawEdges: true, defaultNodeColor: '#0073e6'}}>
-                    <RelativeSize initialSize={8}/>
+                    <RelativeSize initialSize={15}/>
                     <RandomizeNodePositions/>
                 </Sigma>
             );
-        } else {
-            return <div/>
-        }
     }
 
     renderGraph() {
@@ -90,21 +92,19 @@ class HomeComponent extends Component {
 
     getGraphData = () => {
         if (this.props.pullingAddress !== '') {
-            this.service.getGraph().then(data => {
-                console.log(data);
-                console.log(data.data[0]);
+            this.service.getGraph().then(response => {
+                console.log('response from get response method');
+                console.log(response);
+                console.log(response.data[0]);
                 this.setState({
-                    nodes: data.data[0].nodes,
-                    edges: data.data[0].edges
+                    nodes: response.data[0].nodes,
+                    edges: response.data[0].edges
                 });
-                console.log(this.state.nodes);
             }).catch(() => {
                 console.log('error during getting graph data');
             });
         }
-
     };
-
 
     render() {
         if (this.props.pullingAddress !== '') {
@@ -113,7 +113,7 @@ class HomeComponent extends Component {
                     <h2 className={'tabTitle'}>HOME COMPONENT </h2>
                     <div className={'homeComponents'}>
                         {this.renderInfo()}
-                        {this.renderGraph()}
+                        {(this.state.nodes !== []) ? this.renderGraph() : <div/>}
                     </div>
                 </div>
             );

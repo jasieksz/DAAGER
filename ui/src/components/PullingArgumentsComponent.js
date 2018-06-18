@@ -1,37 +1,126 @@
 import React, { Component } from 'react';
 import { Table } from 'reactstrap';
 import { Button } from 'reactstrap';
-
+import EntryScreenService from "../services/EntryScreenService";
+import _ from 'lodash';
 export class PullingArgumentsComponent extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            network: '',
-            os: '',
-            runtime: '',
-            thread: '',
+            statuses: []
         };
-
-        this.saveIntervalInputs = this.saveIntervalInputs.bind(this);
+        this.service = new EntryScreenService();
+        this.getStatuses();
     }
 
-    handleStopPullingData(id) {
-        console.log(id);
+    handleStopPullingData = (id) => {
+        this.service.stopPullingParam(this.createStopPullingData(id.address)).then(response => {
+            this.getStatuses();
+        }).catch((err) => {
+            console.log('error during updating statuses data, address:' + id.address);
+            console.log(err);
+        });
+    };
+
+    // handleContinuePullingData = (id) => {
+    //     const a = _.filter(this.state.statuses, i => i.address === id.address);
+    //     console.log('hangle continue');
+    //     this.service.startPullingParam(this.createIntervalContinue(a.address, parseInt( a.interval))).then(response => {
+    //         console.log('start interval status succesfull');
+    //         this.getStatuses();
+    //     }).catch((err) => {
+    //         console.log('error during updating statuses data' + a.address);
+    //         console.log(err);
+    //     });
+    // };
+
+
+    saveIntervalInputs = (id) =>{
+        const value = document.getElementById(id.address).value;
+        if (value === '') {
+            alert('enter interval value');
+            return;
+        }
+        this.handleUpdateInterval(id.address, value);
+    };
+
+    handleUpdateInterval = (address, value) => {
+        this.service.updateInterval(this.createIntervalUpdate(address, parseInt(value))).then(() => {
+            this.getStatuses();
+        }).catch((err) => {
+            console.log('error during updating statuses data' + address);
+            console.log(err);
+        });
+    };
+
+    createIntervalUpdate(address, interval) {
+        return {
+            "workerAddress": address,
+            "newInterval": interval
+        }
     }
 
+    createStopPullingData(address) {
+        return {
+            "workerAddress": address
+        }
+    }
 
-    saveIntervalInputs(id) {
-        console.log('save interval inputs');
-        const network = document.getElementById("network").value;
-        const os = document.getElementById("os").value;
-        const runtime = document.getElementById("runtime").value;
-        const thread = document.getElementById("thread").value;
+    getStatuses = () => {
+        this.service.getStatuses().then(response => {
+            this.setState({
+                statuses: response.data
+            });
+            this.createTable();
+        }).catch(() => {
+            console.log('error durig getting statuses data');
+        });
+    };
 
-        console.log(network);
-        console.log(os);
-        console.log(runtime);
-        console.log(thread);
+    createTable = () => {
+      return _.map(this.state.statuses,  i =>
+          <tr>
+              <th scope="row">{i.label}</th>
+              <td> {i.status} </td>
+              <td>
+                  <input type="number"
+                         className="form-control"
+                         id={i.address}
+                         placeholder={i.interval}
+                  />
+              </td>
+              <td>
+                  <Button color={"success"}
+                          className="btn btn-default"
+                          onClick={ () => this.saveIntervalInputs(i) }
+                  >Save Interval
+                  </Button>
+              </td>
+              <td>
+                  {this.getStatusButton(i)}
+              </td>
+          </tr>);
+    };
+
+    getStatusButton(id) {
+        if (id.status === 'Pulling') {
+            return (
+                <Button type="danger"
+                    className="btn btn-default"
+                    onClick={ () => this.handleStopPullingData(id) }
+                >Stop
+                </Button>
+            );
+        } else {
+            return (
+                <Button type="success"
+                    className="btn btn-default"
+                    onClick={ () => this.handleContinuePullingData(id) }
+                >Start
+                </Button>
+            );
+        }
     }
 
     renderTableWithIntervals() {
@@ -41,96 +130,29 @@ export class PullingArgumentsComponent extends Component {
                     <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th>Value</th>
+                        <th>Status</th>
+                        <th>Interval</th>
+                        <th>Save</th>
                         <th>Stop</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <th scope="row">Network</th>
-                        <td>
-                            <input type="number"
-                                   className="form-control"
-                                   id="network"
-                                   placeholder={this.state.network}
-                            />
-                        </td>
-                        <td>
-                            <Button type="primary"
-                                    className="btn btn-default"
-                                    onClick={(e) => this.handleStopPullingData(e)}
-                            >Stop
-                            </Button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Operating system</th>
-                        <td>
-                            <input type="number"
-                                   className="form-control"
-                                   id="os"
-                                   placeholder={this.state.os}
-                            />
-                        </td>
-                        <td>
-                            <Button type="primary"
-                                    className="btn btn-default"
-                                    onClick={(e) => this.handleStopPullingData(e)}
-                            >Stop
-                            </Button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Runtime</th>
-                        <td>
-                            <input type="text"
-                                   id="runtime"
-                                   className="form-control"
-                                   placeholder={this.state.runtime}
-                            />
-                        </td>
-                        <td>
-                            <Button type="StopPullingData"
-                                    className="btn btn-default"
-                                    onClick={(e) => this.handleStopPullingData(e)}
-                            >Stop
-                            </Button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Thread</th>
-                        <td>
-                            <input type="text"
-                                   className="form-control"
-                                   id="thread"
-                                   placeholder={this.state.thread}
-                            />
-                        </td>
-                        <td>
-                            <Button type="StopPullingData"
-                                    className="btn btn-default"
-                                    onClick={(e) => this.handleStopPullingData(e)}
-                            >Stop
-                            </Button>
-                        </td>
-                    </tr>
+                        {this.createTable()}
                     </tbody>
                 </Table>
-                <Button color={"success"}
-                        type="saveIntervalInputs"
-                        className="btn btn-default"
-                        onClick={(e) => this.saveIntervalInputs(e)}
-                >Save Intervals
-                </Button>
             </div>
         );
     }
 
     render() {
-        return (
-            <div>
-                {this.renderTableWithIntervals()}
-            </div>
-    );
+        if (this.state.statuses !== []) {
+            return (
+                <div>
+                    {this.renderTableWithIntervals()}
+                </div>
+            );
+        } else {
+            return <div/>;
+        }
     }
 }

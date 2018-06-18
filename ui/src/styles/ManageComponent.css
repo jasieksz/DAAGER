@@ -19,8 +19,9 @@
 }
 
 .progressButton {
+    margin-top: 2%;
     height: 5%;
-    width: 10%;
+    width: 20%;
     size: 10px;
     font-size: 10px;
     color: #1c7430;

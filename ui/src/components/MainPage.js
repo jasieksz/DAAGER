@@ -16,16 +16,15 @@ class MainPage extends Component {
         super(props, context);
         this.handleSelect = this.handleSelect.bind(this);
         this.state = {
-            showLogin: true,
             key: 2,
-            pullingAddress: ''
+            pullingAddress: '',
         };
-        this.handleSetPullingAddress = this.handleSetPullingAddress.bind(this);
+        this.handleSetInitPullingData = this.handleSetInitPullingData.bind(this);
     }
 
-    handleSetPullingAddress(pullAddr) {
+    handleSetInitPullingData(pullAddr) {
         this.setState({
-            pullingAddress: pullAddr
+            pullingAddress: pullAddr,
         });
     }
 
@@ -63,11 +62,13 @@ class MainPage extends Component {
                     <TabPanel>
                         <ManageComponent
                             pullingAddress={this.state.pullingAddress}
-                            savePullingAddress={this.handleSetPullingAddress}
+                            savePullingInitData={this.handleSetInitPullingData}
                         />
                     </TabPanel>
                     <TabPanel>
-                        <GrafanaComponent/>
+                        <GrafanaComponent
+                            pullingAddress={this.state.pullingAddress}
+                        />
                     </TabPanel>
                 </Tabs>
             </div>

@@ -13,10 +13,11 @@ class ManageComponent extends Component {
             pullingAddress: this.props.pullingAddress,
             isPulling: false,
             getPullingAddress: true,
-            buttonState: ''
+            buttonState: '',
         };
+
         this.service = new EntryScreenService();
-        this.savePullingAddress = this.savePullingAddress.bind(this);
+        this.saveInitPullingData = this.saveInitPullingData.bind(this);
         this.handleClearPullingAddress = this.handleClearPullingAddress.bind(this);
 
         this.handleChangePullingAddress = this.handleChangePullingAddress.bind(this);
@@ -25,11 +26,6 @@ class ManageComponent extends Component {
 
     componentDidMount() {
         this.service.hello().then(response => console.log(response));
-    }
-
-
-    handleSubmitManageInputs(event) {
-        console.log(event);
     }
 
     handleStopPullingData() {
@@ -41,19 +37,19 @@ class ManageComponent extends Component {
     }
 
     verifyPullingAddress = () => {
-        //const  = document.getElementById("pullingInterval").value;
+        const  pullingInterval = document.getElementById("pullingInterval").value;
         const pullingAddressValue = document.getElementById("pullingAddress").value;
         console.log(pullingAddressValue);
-        // if (pullingInterval === ''){
-        //     alert('pulling interval cannot be empty');
-        //     return;
-        // }
+        if (pullingInterval === ''){
+            alert('pulling interval cannot be empty');
+            return;
+        }
         this.setState({
             buttonState: 'loading'
         });
         this.service.verify({value: pullingAddressValue}).then(() => {
             this.setState({buttonState: 'success'});
-            this.savePullingAddress(pullingAddressValue)
+            this.saveInitPullingData(pullingAddressValue, pullingInterval)
         }).catch((er) => {
             console.log(er);
             alert("Something is wrong with the address");
@@ -61,13 +57,18 @@ class ManageComponent extends Component {
         });
     };
 
-    savePullingAddress(pullingAddress) {
-        this.setState({
-            pullingAddress: pullingAddress,
-            getPullingAddress: false
+    saveInitPullingData(pullingAddress, pullingInterval) {
+        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval) }).then(() => {
+            this.setState({
+                pullingAddress: pullingAddress,
+                getPullingAddress: false
+            });
+            this.props.savePullingInitData(pullingAddress);
+        }).catch((er) => {
+            this.setState({buttonState: 'error'});
+            console.log('error during startuing pulling data ' + er);
         });
-        this.props.savePullingAddress(pullingAddress);
-    }
+    };
 
     handleChangePullingAddress() {
         alert('changing pulling address');
@@ -77,7 +78,7 @@ class ManageComponent extends Component {
             getPullingAddress: true,
             buttonState: ''
         });
-        this.props.savePullingAddress('');
+        this.props.saveInitPullingData('', '');
     }
 
 
@@ -129,7 +130,9 @@ class ManageComponent extends Component {
                                placeholder="enter pulling address"
                         />
                     </div>
-                    <label htmlFor="pullingInterval" className="col-sm-4 col-form-label">Pulling data interval</label>
+                </div>
+                <div className="form-group row">
+                <label htmlFor="pullingInterval" className="col-sm-4 col-form-label">Pulling data interval</label>
                     <div className="col-sm-8">
                         <input type="number"
                                className="form-control"
