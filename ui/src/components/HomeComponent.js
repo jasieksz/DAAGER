@@ -88,14 +88,9 @@ class HomeComponent extends Component {
 
     getGraph = ()  => {
         console.log('getting graph');
-        console.log(this.state.nodes);
-        console.log(this.state.edges);
-        // const nodes = _.map(this.state.nodes, i => return {{"id": i.id, "label": i.label}});
+        const graph = {nodes: this.state.nodes, edges: this.state.edges};
         return (
-                <Sigma graph={{
-                    nodes: [{"id": "0", "label": "127.0.0.1:12345"}],
-                    edges: [{id: "0", source: "0", target: "0"}] //this.state.edges
-                }}
+                <Sigma graph={graph}
                        style={{maxWidth: "inherit", height: "inherit"}}
                        onClickNode={e => {
                            this.getNodeDetailInfo(e.data.node)
@@ -165,7 +160,6 @@ class HomeComponent extends Component {
     getGraphData = () => {
         if (this.props.pullingAddress !== '') {
             this.service.getGraph().then(response => {
-                console.log(response.data[0]);
                 this.setState({
                     nodes: response.data[0].nodes,
                     edges: response.data[0].edges
@@ -183,7 +177,7 @@ class HomeComponent extends Component {
                     <h2 className={'tabTitle'}>Home</h2>
                     <div className={'homeComponents'}>
                         {this.renderInfo()}
-                        {(this.state.nodes !== []) ? this.renderGraph() : <div/>}
+                        {(this.state.nodes.length) ? this.renderGraph() : <div/>}
                     </div>
                 </div>
             );
