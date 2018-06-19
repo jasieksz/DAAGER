@@ -71,6 +71,9 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     case Event(Pull, s: Stat) =>
       pullAgainAfter(1 second)
       goto(Pulling) using s
+    case Event(ChangeInterval(newInterval), s: Stat) =>
+      pullAgainAfter(1 second)
+      goto(Pulling) using s.copy(interval = newInterval)
   }
 
   when(Testing) {
@@ -103,6 +106,9 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
       goto(Idle) using s
     case Event(ChangeInterval(newInterval), s: Stat) =>
       stay using s.copy(interval = newInterval)
+    case Event(StartPulling(address, interval), _) =>
+      log.warning("Received start pulling request but already pulling")
+      stay()
   }
 
   when(ErrorOccured) {
