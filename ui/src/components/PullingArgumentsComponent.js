@@ -23,17 +23,10 @@ export class PullingArgumentsComponent extends Component {
         });
     };
 
-    // handleContinuePullingData = (id) => {
-    //     const a = _.filter(this.state.statuses, i => i.address === id.address);
-    //     console.log('hangle continue');
-    //     this.service.startPullingParam(this.createIntervalContinue(a.address, parseInt( a.interval))).then(response => {
-    //         console.log('start interval status succesfull');
-    //         this.getStatuses();
-    //     }).catch((err) => {
-    //         console.log('error during updating statuses data' + a.address);
-    //         console.log(err);
-    //     });
-    // };
+    handleContinuePullingData = (id) => {
+        const a = _.filter(this.state.statuses, i => i.address === id.address);
+        this.handleUpdateInterval(a[0].address, a[0].interval);
+    };
 
 
     saveIntervalInputs = (id) =>{

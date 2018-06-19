@@ -27,7 +27,9 @@ class EntryScreenService {
 
     stopPullingParam = (obj) => this.api.post("/api/pull/stop", obj);
 
-    startPullingParam = (obj) => this.api.post("/api/pull/start", (obj));
+    getNodeDetailInfo = (obj) => this.api.post("/api/node-details", (obj));
+
+    getGloalState = () => this.api.get("api/global-state");
 }
 
 export default EntryScreenService;

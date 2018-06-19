@@ -8,9 +8,10 @@ import { Button } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Alert } from 'reactstrap';
 import EntryScreenService from "../services/EntryScreenService";
+import { Table } from 'reactstrap';
+import _ from "lodash";
 
 class HomeComponent extends Component {
-
 
     constructor(props, context) {
         super(props, context);
@@ -18,29 +19,65 @@ class HomeComponent extends Component {
             nodes: [],
             edges: [],
             isModalOpen: false,
-            modalData: ''
+            modalData: {},
+            globalStateData: {},
         };
+
         this.service = new EntryScreenService();
-        this.getGraphData();
+        if (this.props.pullingAddress !== '') {
+            this.getGraphData();
+            this.getGlobalData();
+        }
     }
 
     toggleModal = () => {
-        var prev = this.state.isModalOpen;
+        const prev = this.state.isModalOpen;
         this.setState({
             isModalOpen: !prev
         });
     };
 
-    getNodeInfo = (node) => {
-        // ok -> toggle modal
+    getNodeDetailInfo = (node) => {
+        this.service.getNodeDetailInfo(this.createNodeInfoRequest(node.label)).then(response => {
+            this.setState({
+                modalData: response.data
+            });
+            this.toggleModal();
+        }).catch((err) => {
+            console.log('error during getting node detail data');
+            console.log(err);
+        });
     };
+
+    createNodeInfoRequest(address) {
+        return {
+            "address": address
+        }
+    }
 
     renderModal() {
         return (
             <Modal isOpen={this.state.isModalOpen}>
-                    <ModalHeader>Info for node {this.state.modalData} </ModalHeader>
+                <ModalHeader>Info for node {this.state.modalData.address} </ModalHeader>
                     <ModalBody>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        <Table>
+                            <tr>
+                                <th scope="row">Address</th>
+                                <td> {this.state.modalData.address} </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Last Message</th>
+                                <td> {this.state.modalData.lastMsg} </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Cpu</th>
+                                <td> {this.state.modalData.cpu} </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Memory</th>
+                                <td> {this.state.modalData.memory} </td>
+                            </tr>
+                        </Table>
                     </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.toggleModal}>Close</Button>
@@ -49,27 +86,27 @@ class HomeComponent extends Component {
         );
     }
 
-    getGraph() {
+    getGraph = ()  => {
         console.log('getting graph');
         console.log(this.state.nodes);
         console.log(this.state.edges);
+        // const nodes = _.map(this.state.nodes, i => return {{"id": i.id, "label": i.label}});
         return (
                 <Sigma graph={{
-                    nodes: [{id: "0", label: "127.0.0.1:12345"}], //this.state.nodes,
+                    nodes: [{"id": "0", "label": "127.0.0.1:12345"}],
                     edges: [{id: "0", source: "0", target: "0"}] //this.state.edges
                 }}
                        style={{maxWidth: "inherit", height: "inherit"}}
                        onClickNode={e => {
-                           this.toggleModal();
-                           this.getNodeInfo(e.data.node)
+                           this.getNodeDetailInfo(e.data.node)
                        }}
                        onOverNode={e => console.log("Mouse over node: " + e.data.node.label)}
                        settings={{drawEdges: true, defaultNodeColor: '#0073e6'}}>
-                    <RelativeSize initialSize={15}/>
+                    <RelativeSize initialSize={20}/>
                     <RandomizeNodePositions/>
                 </Sigma>
             );
-    }
+    };
 
     renderGraph() {
         return (
@@ -80,11 +117,46 @@ class HomeComponent extends Component {
         );
     }
 
+    getGlobalData = () => {
+        this.service.getGloalState().then( response => {
+            this.setState({
+                globalStateData: response.data
+            });
+        }).catch(() => {
+            console.log('error during getting global state data');
+        });
+    };
+
+    renderGobalStateData() {
+        if (this.state.globalStateData !== {}) {
+            return (
+                <Table>
+                    <tr>
+                        <th scope="row">Number of nodes</th>
+                        <td> {this.state.globalStateData.nodesCount} </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Base Address</th>
+                        <td> {this.state.globalStateData.baseAddress} </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Status</th>
+                        <td> {this.state.globalStateData.status} </td>
+                    </tr>
+                </Table>
+            );
+        } else {
+            this.getGlobalData();
+            return <div/>;
+        }
+    }
+
     renderInfo() {
         return (
             <div className={'homeInfo'}>
                 <div className={'homeInfoText'}>
-                    GRAPH INFO
+                    <h5> Graph Info </h5>
+                    {this.renderGobalStateData()}
                 </div>
             </div>
         );
@@ -93,8 +165,6 @@ class HomeComponent extends Component {
     getGraphData = () => {
         if (this.props.pullingAddress !== '') {
             this.service.getGraph().then(response => {
-                console.log('response from get response method');
-                console.log(response);
                 console.log(response.data[0]);
                 this.setState({
                     nodes: response.data[0].nodes,
@@ -110,7 +180,7 @@ class HomeComponent extends Component {
         if (this.props.pullingAddress !== '') {
             return (
                 <div>
-                    <h2 className={'tabTitle'}>HOME COMPONENT </h2>
+                    <h2 className={'tabTitle'}>Home</h2>
                     <div className={'homeComponents'}>
                         {this.renderInfo()}
                         {(this.state.nodes !== []) ? this.renderGraph() : <div/>}
