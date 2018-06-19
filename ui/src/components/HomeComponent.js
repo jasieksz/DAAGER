@@ -3,13 +3,12 @@ import 'react-tabs/style/react-tabs.css';
 import '../styles/HomeComponent.css';
 import Sigma from 'react-sigma/lib/Sigma'
 import {RelativeSize} from "react-sigma";
-import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
 import { Button } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Alert } from 'reactstrap';
-import EntryScreenService from "../services/EntryScreenService";
 import { Table } from 'reactstrap';
-import _ from "lodash";
+import EntryScreenService from "../services/EntryScreenService";
+import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
 
 class HomeComponent extends Component {
 
@@ -87,7 +86,6 @@ class HomeComponent extends Component {
     }
 
     getGraph = ()  => {
-        console.log('getting graph');
         const graph = {nodes: this.state.nodes, edges: this.state.edges};
         return (
                 <Sigma graph={graph}

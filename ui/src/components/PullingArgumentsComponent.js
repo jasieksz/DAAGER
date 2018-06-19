@@ -39,7 +39,7 @@ export class PullingArgumentsComponent extends Component {
     };
 
     handleUpdateInterval = (address, value) => {
-        this.service.updateInterval(this.createIntervalUpdate(address, parseInt(value))).then(() => {
+        this.service.updateInterval(this.createIntervalUpdate(address, parseInt(value))).then( () =>  {
             this.getStatuses();
         }).catch((err) => {
             console.log('error during updating statuses data' + address);

@@ -17,12 +17,27 @@ class ManageComponent extends Component {
         };
 
         this.service = new EntryScreenService();
+        this.checkIfAlreadyPulling();
         this.saveInitPullingData = this.saveInitPullingData.bind(this);
         this.handleClearPullingAddress = this.handleClearPullingAddress.bind(this);
 
         this.handleChangePullingAddress = this.handleChangePullingAddress.bind(this);
         this.showPullingAddress = this.showPullingAddress.bind(this);
     }
+
+    checkIfAlreadyPulling = ()  => {
+        this.service.getGloalState().then( (response) => {
+            if (response.data.status === 'OK') {
+                this.setState({
+                    pullingAddress: response.data.baseAddress,
+                    getPullingAddress: false
+                });
+                this.props.savePullingInitData(response.data.baseAddress);
+            }
+        }).catch((er) => {
+            console.log('not set ' + er);
+        });
+    };
 
     componentDidMount() {
         this.service.hello().then(response => console.log(response));
@@ -39,7 +54,6 @@ class ManageComponent extends Component {
     verifyPullingAddress = () => {
         const  pullingInterval = document.getElementById("pullingInterval").value;
         const pullingAddressValue = document.getElementById("pullingAddress").value;
-        console.log(pullingAddressValue);
         if (pullingInterval === ''){
             alert('pulling interval cannot be empty');
             return;
@@ -72,13 +86,12 @@ class ManageComponent extends Component {
 
     handleChangePullingAddress() {
         alert('changing pulling address');
-        console.log('change pulling address');
         this.setState({
             pullingAddress: '',
             getPullingAddress: true,
             buttonState: ''
         });
-        this.props.saveInitPullingData('', '');
+        // this.props.savePullingInitData('');
     }
 
 

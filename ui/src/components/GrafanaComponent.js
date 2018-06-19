@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import 'react-tabs/style/react-tabs.css';
 import '../styles/GrafanaComponent.css';
-import {Alert} from 'reactstrap';
 
 class GrafanaComponent extends Component {
 
