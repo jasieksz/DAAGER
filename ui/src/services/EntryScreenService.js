@@ -17,6 +17,19 @@ class EntryScreenService {
 
     startPulling = (obj) => this.api.post("api/pull/start", obj, {timeout: 10000});
 
+    getGraph = () => this.api.get("/api/graph", {timeout: 10000});
+
+    start = (obj) => this.api.post("/api/pull/start", obj);
+
+    getStatuses = () => this.api.get("api/pull/statuses");
+
+    updateInterval = (obj) => this.api.post("api/pull/update", obj);
+
+    stopPullingParam = (obj) => this.api.post("/api/pull/stop", obj);
+
+    getNodeDetailInfo = (obj) => this.api.post("/api/node-details", (obj));
+
+    getGloalState = () => this.api.get("api/global-state");
 }
 
 export default EntryScreenService;
