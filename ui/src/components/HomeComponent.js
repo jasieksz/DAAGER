@@ -7,7 +7,7 @@ import { Button } from 'reactstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Alert } from 'reactstrap';
 import { Table } from 'reactstrap';
-import EntryScreenService from "../services/EntryScreenService";
+import ApiService from "../services/ApiService";
 import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
 
 class HomeComponent extends Component {
@@ -22,7 +22,7 @@ class HomeComponent extends Component {
             globalStateData: {},
         };
 
-        this.service = new EntryScreenService();
+        this.service = new ApiService();
         if (this.props.pullingAddress !== '') {
             this.getGraphData();
             this.getGlobalData();

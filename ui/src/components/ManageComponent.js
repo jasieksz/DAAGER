@@ -3,7 +3,7 @@ import '../styles/ManageComponent.css';
 import { Button } from 'reactstrap';
 import ProgressButton from 'react-progress-button'
 import "../../node_modules/react-progress-button/react-progress-button.css";
-import EntryScreenService from "../services/EntryScreenService"
+import ApiService from "../services/ApiService"
 import { PullingArgumentsComponent } from "./PullingArgumentsComponent";
 class ManageComponent extends Component {
 
@@ -16,7 +16,7 @@ class ManageComponent extends Component {
             buttonState: '',
         };
 
-        this.service = new EntryScreenService();
+        this.service = new ApiService();
         this.checkIfAlreadyPulling();
         this.saveInitPullingData = this.saveInitPullingData.bind(this);
         this.handleClearPullingAddress = this.handleClearPullingAddress.bind(this);

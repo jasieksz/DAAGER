@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-class EntryScreenService {
+class ApiService {
 
     constructor() {
         this.api = axios.create({
@@ -32,4 +32,4 @@ class EntryScreenService {
     getGloalState = () => this.api.get("api/global-state");
 }
 
-export default EntryScreenService;
+export default ApiService;

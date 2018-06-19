@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Table } from 'reactstrap';
 import { Button } from 'reactstrap';
-import EntryScreenService from "../services/EntryScreenService";
+import ApiService from "../services/ApiService";
 import _ from 'lodash';
 export class PullingArgumentsComponent extends Component {
 
@@ -10,7 +10,7 @@ export class PullingArgumentsComponent extends Component {
         this.state = {
             statuses: []
         };
-        this.service = new EntryScreenService();
+        this.service = new ApiService();
         this.getStatuses();
     }
 
