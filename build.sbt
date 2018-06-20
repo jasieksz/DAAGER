@@ -1,10 +1,13 @@
 name := "daager"
 
 version := "0.1=SNAPSHOT"
-      
-lazy val `daager` = (project in file(".")).enablePlugins(PlayScala).settings(
+
+lazy val `daager` = (project in file(".")).enablePlugins(PlayScala, SwaggerPlugin).settings(
   watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
 )
+
+swaggerDomainNameSpaces := Seq("model", "actors","controllers")
+
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -12,11 +15,12 @@ scalaVersion := "2.12.6"
 scalacOptions += "-Ypartial-unification"
 
 
-libraryDependencies ++= Seq(ehcache , ws , specs2 % Test , guice, filters)
+libraryDependencies ++= Seq(ehcache, ws, specs2 % Test, guice, filters)
 libraryDependencies += "org.typelevel" %% "cats-core" % "1.1.0"
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "3.0.3",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
+  "com.typesafe.play" %% "play-json-joda" % "2.6.9",
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
   "org.postgresql" % "postgresql" % "42.2.2",
@@ -32,3 +36,4 @@ libraryDependencies ++= Seq(
   "org.glassfish" % "javax.el" % "3.0.0",
 )
 
+libraryDependencies += "org.webjars" % "swagger-ui" % "2.2.0"

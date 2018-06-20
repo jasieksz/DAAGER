@@ -1,6 +1,6 @@
 package utils.instances
 
-import cats.{Monad, Semigroup}
+import cats.{ Monad, Semigroup }
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext
@@ -21,7 +21,7 @@ object DbioInstances {
 
     override def tailRecM[A, B](a: A)(f: (A) => DBIO[Either[A, B]]): DBIO[B] = f(a).flatMap {
       case Left(nextA) => tailRecM(nextA)(f)
-      case Right(b)    => pure(b)
+      case Right(b) => pure(b)
     }(ec)
   }
 

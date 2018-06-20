@@ -14,7 +14,10 @@ class AgeConnectionService @Inject()(
   def isReachable(address: String)(implicit ec: ExecutionContext): Future[Boolean] = {
     val updatedAddress = if (address.startsWith("http")) address else "http://" + address
     println(updatedAddress)
-    Try(wsClient.url(updatedAddress).get.map(response => {println(response);response}).map(_.status == 200)) // TODO change to some kind of verification
+    Try(wsClient.url(updatedAddress).get.map(response => {
+      println(response);
+      response
+    }).map(_.status == 200)) // TODO change to some kind of verification
       .toOption
       .sequence[Future, Boolean].map(_.getOrElse(false))
   }

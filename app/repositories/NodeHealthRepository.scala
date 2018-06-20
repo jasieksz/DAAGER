@@ -19,5 +19,4 @@ class NodeHealthRepository {
     query.result
   }
 
-
 }

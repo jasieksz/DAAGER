@@ -1,11 +1,130 @@
-# Serve index page from public directory
-GET         /                    controllers.UiController.index()
+GET         /                             controllers.UiController.index()
 
-GET         /api/hello           controllers.PullingController.hello()
+###
+#  summary: get cookie with token
+#  responses:
+#    200:
+#      description: success
+###
+GET         /api/hello                    controllers.PullingController.hello()
 
-POST        /api/pull/verify        controllers.PullingController.verify()
+###
+#  summary: get graph of current age cluster
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.nodeGraph.Graph'
+#
+###
+GET         /api/graph                    controllers.GraphController.getGraph()
 
-POST        /api/pull/start        controllers.PullingController.startPulling()
+###
+#  summary: get state of cluster
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.GlobalState'
+#
+###
+GET         /api/global-state              controllers.GraphController.getGlobalState()
 
-# Serve static assets under public directory
-GET         /*file               controllers.UiController.assetOrDefault(file)
+###
+#  summary: get graph of current age cluster
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/controllers.GraphController.NodeDetailsRequest'
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/model.domain.NodeDetails'
+#
+###
+POST         /api/node-details                 controllers.GraphController.getNodeDetails()
+
+
+###
+#  summary: get statuses of pulling workers
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/Seq[model.domain.PullerInfo]'
+###
+GET         /api/pull/statuses            controllers.MetricsController.getStatuses()
+
+###
+#  summary: start pulling
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/controllers.StartRequest'
+#  responses:
+#    200:
+#      description: success
+###
+POST        /api/pull/start               controllers.MetricsController.startPulling()
+
+
+###
+#  summary: stop pulling of a worker identified by address
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/actors.MetricsSupervisor.Stop'
+#  responses:
+#    200:
+#      description: success
+###
+POST        /api/pull/stop                controllers.MetricsController.stopPuller()
+
+###
+#  summary: update pulling interval of a given worker
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/actors.MetricsSupervisor.UpdateInterval'
+#  responses:
+#    200:
+#      description: success
+###
+POST        /api/pull/update              controllers.MetricsController.changeInterval()
+
+###
+#  summary: check if given adress is valid
+#  responses:
+#    200:
+#      description: success
+#    400:
+#      description: bad adress
+###
+POST        /api/pull/verify              controllers.PullingController.verify()
+
+
+# MOCKS
+
+### NoDocs ###
+GET         /api/mock/network             controllers.MetricsMockController.getNetworkInfo()
+
+### NoDocs ###
+GET         /api/mock/os                  controllers.MetricsMockController.getOSInfo()
+
+### NoDocs ###
+GET         /api/mock/runtime             controllers.MetricsMockController.getRuntimeInfo()
+
+### NoDocs ###
+GET         /api/mock/thread              controllers.MetricsMockController.getThreadInfo()
+
+
+
+### NoDocs ###
+GET         /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+
+### NoDocs ###
+GET         /*file                        controllers.UiController.assetOrDefault(file)
+
+
+
