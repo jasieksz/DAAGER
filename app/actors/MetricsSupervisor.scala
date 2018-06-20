@@ -49,10 +49,10 @@ class MetricsSupervisor(
   //  TODO move to config
   //  TODO make what to pull configurable
   private val pullingAdresses = Map(
-    networkInfoPuller -> "/api/mock/network",
-    osInfoPuller -> "/api/mock/os",
-    runtimeInfoPuller -> "/api/mock/runtime",
-    threadInfoPuller -> "/api/mock/thread"
+    networkInfoPuller -> "/health/network",
+    osInfoPuller -> "/health/os",
+    runtimeInfoPuller -> "/health/runtime",
+    threadInfoPuller -> "/health/thread"
   )
 
   private val labels = Map(

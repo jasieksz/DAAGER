@@ -5,7 +5,7 @@ import play.api.libs.json._
 import utils.DateTimeUtils.dateTimeFormat
 
 case class NetworkInfo(
-  timestamp: DateTime,
+  date: DateTime,
   address: String,
   tcpConnectionActiveCount: Long,
   tcpConnectionCount: Long,

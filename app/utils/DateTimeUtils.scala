@@ -17,7 +17,7 @@ object DateTimeUtils {
     )
 
   implicit val dateTimeFormat = new Format[DateTime] {
-    override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
+    override def reads(json: JsValue): JsResult[DateTime] = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss").reads(json)
 
     override def writes(o: DateTime): JsValue = JodaWrites.JodaDateTimeWrites.writes(o)
   }

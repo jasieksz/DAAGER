@@ -3,7 +3,7 @@ package actors
 import actors.MetricsPuller._
 import akka.actor.{ ActorRef, FSM }
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
-import play.api.libs.json.Reads
+import play.api.libs.json.{ Json, Reads }
 import play.api.libs.ws.WSClient
 import repositories.metrics.MetricsRepository
 import slick.dbio.DBIO
@@ -47,6 +47,10 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
   nodesKeeper: ActorRef,
   protected val dbConfigProvider: DatabaseConfigProvider
 )(implicit reads: Reads[M]) extends FSM[Status.Value, Data] with HasDatabaseConfigProvider[PostgresProfile] {
+
+  private case class ValuesList(list: Seq[M])(implicit reads: Reads[M])
+  private implicit val listReads = Json.reads[ValuesList]
+
 
   import Status._
 
@@ -137,10 +141,10 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     val data = wSClient.url(address)
       .addHttpHeaders("Accept" -> "application/json")
       .withRequestTimeout(2 seconds)
-      .get().map(res => res.json.validate[List[M]].fold(err => {
-      log.error(err.toString);
+      .get().map(res => res.json.validate[ValuesList].fold(err => {
+      log.error(err.toString)
       Seq.empty
-    }, identity))
+    }, list => list.list))
     val dbAction = DBIO.from(data).flatMap(values => {
       nodesKeeper ! NodesKeeper.CurrentClients(values.map(_.address))
       values.toList.traverse(repository.save)

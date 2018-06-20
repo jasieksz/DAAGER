@@ -5,7 +5,7 @@ import play.api.libs.json._
 import utils.DateTimeUtils.dateTimeFormat
 
 case class RuntimeInfo(
-  timestamp: DateTime, //ISO Format
+  date: DateTime, //ISO Format
   address: String,
   runtimeAvailableProcessors: Long,
   runtimeTotalMemory: Long,

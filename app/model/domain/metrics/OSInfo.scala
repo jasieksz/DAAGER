@@ -5,7 +5,7 @@ import play.api.libs.json._
 import utils.DateTimeUtils.dateTimeFormat
 
 case class OSInfo(
-  timestamp: DateTime,
+  date: DateTime,
   address: String,
   osProcessCpuLoad: Double,
   osSystemLoadAverage: Double,

@@ -33,14 +33,14 @@ class NodesInfoService @Inject()(
   }
 
   def getNodeDetails(nodeAddress: String)(implicit ec: ExecutionContext): Future[NodeDetails] = {
-    db.run(osInfoRepository.findLastByAddress(nodeAddress)).map(osinfo =>
+    db.run(osInfoRepository.findLastByAddress(nodeAddress)).map(osinfo => {
       NodeDetails(
         nodeAddress,
-        osinfo.map(_.timestamp),
+        osinfo.map(_.date),
         osinfo.map(_.osSystemCpuLoad).getOrElse(0.0),
-        osinfo.map(inf => inf.osFreePhysicalMemorySize.toDouble / inf.osTotalPhysicalMemorySize.toDouble).getOrElse(0.0)
+        osinfo.map(_.osTotalPhysicalMemorySize.toDouble).getOrElse(0.0)
       )
-    )
+    })
   }
 
 }
