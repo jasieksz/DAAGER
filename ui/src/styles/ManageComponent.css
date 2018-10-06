@@ -1,0 +1,46 @@
+.tabTitle {
+    text-align: center;
+    margin-top: 3%;
+    margin-bottom: 3%;
+}
+
+.inputForm {
+    margin: 10% 15%;
+}
+
+.manageButtons {
+    margin-top: 5%;
+    float: right;
+    display: inline-flex;
+}
+
+.manageButton {
+    margin-right: 2%;
+}
+
+.progressButton {
+    margin-top: 2%;
+    height: 5%;
+    width: 20%;
+    size: 10px;
+    font-size: 10px;
+    color: #1c7430;
+    text-align: center;
+    margin-left: 45%;
+}
+
+.pullingDataInfo {
+    margin: 1% 25%;
+    background-color: #e6e6e6;
+    width: 50%;
+    height: 15%;
+    border-radius: 10px;
+    text-align: center;
+    display: inherit;
+}
+
+.pullingAddr {
+    margin-left: 1%;
+    margin-right: 1%;
+    text-align: center;
+}
