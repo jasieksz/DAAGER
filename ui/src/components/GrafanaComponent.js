@@ -4,13 +4,9 @@ import '../styles/GrafanaComponent.css';
 
 class GrafanaComponent extends Component {
 
-    constructor(props, context) {
-        super(props, context);
-    }
-
     render() {
         return (
-                <iframe height={'100%'} width={'100%'} src="http://localhost:3001"/>
+                <iframe title="grafana" height={'100%'} width={'100%'} src="http://localhost:3001"/>
         );
     }
 }

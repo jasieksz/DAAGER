@@ -1,0 +1,27 @@
+# Docker compose that spins up all dependencies for Daager in develop environment
+version: '3'
+services:
+  vis:
+    build: ./grafana
+    networks:
+    - daager
+    ports:
+    - "3001:3000"
+    depends_on:
+    - db
+
+  db:
+    build: ./timescaledb
+    command: postgres -c shared_preload_libraries=timescaledb
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    networks:
+    - daager
+    volumes:
+    - ./timescale:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
+networks:
+  daager:
