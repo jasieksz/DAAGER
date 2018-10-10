@@ -141,10 +141,10 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     val data = wSClient.url(address)
       .addHttpHeaders("Accept" -> "application/json")
       .withRequestTimeout(2 seconds)
-      .get().map(res => res.json.validate[ValuesList].fold(err => {
-      log.error(err.toString)
+      .get().map(res => res.json.validate[Seq[M]].fold(err => {
+      log.error(s"Error in $address puller actor }" +  err.toString + "\n" + res.body)
       Seq.empty
-    }, list => list.list))
+    }, list => list.toList))
     val dbAction = DBIO.from(data).flatMap(values => {
       nodesKeeper ! NodesKeeper.CurrentClients(values.map(_.address))
       values.toList.traverse(repository.save)
@@ -152,8 +152,8 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     db.run(dbAction).void
   }
 
-  private def isReachable(adrress: String): Future[Boolean] = {
-    wSClient.url(adrress).get().map(_.status == 200)
+  private def isReachable(address: String): Future[Boolean] = {
+    wSClient.url(address).get().map(_.status == 200)
   }
 
 }

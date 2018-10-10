@@ -5,7 +5,7 @@ import play.api.libs.json._
 import utils.DateTimeUtils.dateTimeFormat
 
 case class OSInfo(
-  date: DateTime,
+  timestamp: DateTime,
   address: String,
   osProcessCpuLoad: Double,
   osSystemLoadAverage: Double,
@@ -14,7 +14,9 @@ case class OSInfo(
   osFreePhysicalMemorySize: Long,
   osFreeSwapSpaceSize: Long,
   osTotalSwapSpaceSize: Long
-) extends Metric
+) extends Metric {
+  override def date: DateTime = timestamp
+}
 
 object OSInfo {
   implicit val format = Json.format[OSInfo]
