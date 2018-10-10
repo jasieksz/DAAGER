@@ -1,8 +1,11 @@
+import scala.language.postfixOps
 import scala.sys.process.Process
 
-/*
+/**
+ *
  * UI Build hook Scripts
- */
+ *
+ **/
 
 // Execution status success.
 val Success = 0
@@ -50,14 +53,14 @@ def executeProdBuild(implicit dir: File): Int = ifNodeModulesInstalled(runOnComm
 lazy val `ui-test` = taskKey[Unit]("Run UI tests when testing application.")
 
 `ui-test` := {
-  implicit val userInterfaceRoot = baseDirectory.value / "ui"
+  implicit val userInterfaceRoot: File = baseDirectory.value / "ui"
   if (executeUiTests != Success) throw new Exception("UI tests failed!")
 }
 
 lazy val `ui-prod-build` = taskKey[Unit]("Run UI build when packaging the application.")
 
 `ui-prod-build` := {
-  implicit val userInterfaceRoot = baseDirectory.value / "ui"
+  implicit val userInterfaceRoot: File = baseDirectory.value / "ui"
   if (executeProdBuild != Success) throw new Exception("Oops! UI Build crashed.")
 }
 
@@ -67,5 +70,46 @@ dist := (dist dependsOn `ui-prod-build`).value
 // Execute frontend prod build task prior to play stage execution.
 stage := (stage dependsOn `ui-prod-build`).value
 
+(stage in Docker) := ((stage in Docker) dependsOn `ui-prod-build`).value
+
 // Execute frontend test task prior to play test execution.
 test := ((test in Test) dependsOn `ui-test`).value
+
+
+/**
+ *
+ * Docker tasks definitions and configs
+ *
+ **/
+
+lazy val `docker-compose-up`  = taskKey[Unit]("Spin up application in prod mode")
+
+`docker-compose-up` := {
+  implicit val userInterfaceRoot: File = baseDirectory.value
+  if (runOnCommandline("docker-compose up -d") != Success) throw new Exception("Unable to run docker-compose")
+  else println("Daager started")
+}
+
+`docker-compose-up` := (`docker-compose-up` dependsOn (publishLocal in Docker)).value
+
+lazy val `docker-compose-stop`  = taskKey[Unit]("Stop daager")
+`docker-compose-stop` := {
+  implicit val userInterfaceRoot: File = baseDirectory.value
+  if (runOnCommandline("docker-compose stop") != Success) throw new Exception("Unable to stop docker-compose")
+  else println("Daager stopped")
+}
+
+lazy val `docker-dependencies-up` = taskKey[Unit]("Spin up daager dependencies for development")
+
+`docker-dependencies-up` := {
+  implicit val userInterfaceRoot: File = baseDirectory.value / "dependencies"
+  if (runOnCommandline("docker-compose up -d") != Success) throw new Exception("Unable to run docker-compose")
+  else println("Dependencies started")
+}
+
+lazy val `docker-dependencies-stop` = taskKey[Unit]("Stop daager")
+`docker-dependencies-stop` := {
+  implicit val userInterfaceRoot: File = baseDirectory.value / "dependencies"
+  if (runOnCommandline("docker-compose stop") != Success) throw new Exception("Unable to stop docker-compose")
+  else println("Dependencies stopped")
+}

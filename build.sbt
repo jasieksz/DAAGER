@@ -1,18 +1,21 @@
 name := "daager"
 
-version := "0.1=SNAPSHOT"
+version := "0.2"
 
-lazy val `daager` = (project in file(".")).enablePlugins(PlayScala, SwaggerPlugin).settings(
+lazy val `daager` = (project in file(".")).enablePlugins(
+  PlayScala, SwaggerPlugin, JavaAppPackaging, DockerPlugin
+).settings(
   watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
 )
 
 swaggerDomainNameSpaces := Seq("model", "actors","controllers")
 
-
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.7"
 scalacOptions += "-Ypartial-unification"
+
+fork := true
 
 
 libraryDependencies ++= Seq(ehcache, ws, specs2 % Test, guice, filters)
@@ -37,3 +40,14 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.2.0"
+
+libraryDependencies += "com.appnexus.grafana-client" % "grafana-api-java-client" % "1.0.5"
+
+// task settings
+dockerExposedPorts := Seq(9000)
+
+// stage settings
+javaOptions in Universal ++= Seq(
+  "-Dplay.evolutions.db.default.autoApply=true",
+  "-Dslick.dbs.default.db.url=\"jdbc:postgresql://localhost:5432/daager\""
+)
