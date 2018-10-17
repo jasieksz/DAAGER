@@ -6,6 +6,6 @@ trait Metric {
 
   def address: String
 
-  def date: DateTime
+  def timestamp: DateTime
 
 }

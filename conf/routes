@@ -104,22 +104,6 @@ POST        /api/pull/update              controllers.MetricsController.changeIn
 POST        /api/pull/verify              controllers.PullingController.verify()
 
 
-# MOCKS
-
-### NoDocs ###
-GET         /api/mock/network             controllers.MetricsMockController.getNetworkInfo()
-
-### NoDocs ###
-GET         /api/mock/os                  controllers.MetricsMockController.getOSInfo()
-
-### NoDocs ###
-GET         /api/mock/runtime             controllers.MetricsMockController.getRuntimeInfo()
-
-### NoDocs ###
-GET         /api/mock/thread              controllers.MetricsMockController.getThreadInfo()
-
-
-
 ### NoDocs ###
 GET         /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
 

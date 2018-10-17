@@ -14,9 +14,7 @@ case class OSInfo(
   osFreePhysicalMemorySize: Long,
   osFreeSwapSpaceSize: Long,
   osTotalSwapSpaceSize: Long
-) extends Metric {
-  override def date: DateTime = timestamp
-}
+) extends Metric
 
 object OSInfo {
   implicit val format = Json.format[OSInfo]

@@ -5,7 +5,7 @@ import play.api.libs.json.Json
 import utils.DateTimeUtils.dateTimeFormat
 
 case class ThreadInfo(
-  date: DateTime,
+  timestamp: DateTime,
   address: String,
   threadPeakThreadCount: Long,
   threadThreadCount: Long

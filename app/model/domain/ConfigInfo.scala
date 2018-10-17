@@ -7,7 +7,7 @@ case class ConfigInfo(
   runtimeInterval: Int,
   threadInterval: Int,
   tcpInterval: Int
- )
+)
 
 object ConfigInfo {
   implicit val format = Json.format[ConfigInfo]

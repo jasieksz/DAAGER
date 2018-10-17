@@ -2,7 +2,7 @@ package repositories.metrics
 
 import model.domain.metrics.RuntimeInfo
 import model.infra.metrics.RuntimeInfos
-import slick.jdbc.PostgresProfile.api._
+import utils.DaagerPostgresProfile.api._
 
 sealed trait RuntimeInfoQueries {
 
@@ -12,10 +12,14 @@ sealed trait RuntimeInfoQueries {
 
 }
 
-class RuntimeInfoRepository extends MetricsRepository[RuntimeInfo, RuntimeInfos](RuntimeInfos.query) with RuntimeInfoQueries {
+class RuntimeInfoRepository
+  extends MetricsRepository[RuntimeInfo, RuntimeInfos](RuntimeInfos.query)
+  with RuntimeInfoQueries {
 
-  def findByAddress(address: String, maxResults: Int = 100): DBIO[Seq[RuntimeInfo]] = {
+  def findByAddress(
+    address: String,
+    maxResults: Int = 100
+  ): DBIO[Seq[RuntimeInfo]] =
     byAddress((address, maxResults)).result
-  }
 
 }
