@@ -99,6 +99,12 @@ lazy val `docker-compose-stop`  = taskKey[Unit]("Stop daager")
   else println("Daager stopped")
 }
 
+lazy val `docker-compose-down`  = taskKey[Unit]("Stop daager")
+`docker-compose-down` := {
+  implicit val userInterfaceRoot: File = baseDirectory.value
+  if (runOnCommandline("docker-compose down") != Success) throw new Exception("Unable to stop docker-compose")
+}
+
 lazy val `docker-dependencies-up` = taskKey[Unit]("Spin up daager dependencies for development")
 
 `docker-dependencies-up` := {
@@ -113,3 +119,4 @@ lazy val `docker-dependencies-stop` = taskKey[Unit]("Stop daager")
   if (runOnCommandline("docker-compose stop") != Success) throw new Exception("Unable to stop docker-compose")
   else println("Dependencies stopped")
 }
+

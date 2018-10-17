@@ -49,5 +49,5 @@ dockerExposedPorts := Seq(9000)
 // stage settings
 javaOptions in Universal ++= Seq(
   "-Dplay.evolutions.db.default.autoApply=true",
-  "-Dslick.dbs.default.db.url=\"jdbc:postgresql://localhost:5432/daager\""
+  "-Dslick.dbs.default.db.url=jdbc:postgresql://db:5432/daager"
 )
