@@ -2,19 +2,20 @@ package controllers
 
 import actors.MetricsSupervisor
 import actors.MetricsSupervisor.Start
-import play.api.mvc._
 import akka.actor._
 import akka.pattern.Patterns
 import akka.util.Timeout
 import javax.inject._
 import model.domain.PullerInfo
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.{ JsError, Json, Reads }
+import play.api.libs.json.{JsError, Json, Reads}
 import play.api.libs.ws.WSClient
-import repositories.metrics.{ NetworkInfoRepository, OsInfoRepository, RuntimeInfoRepository, ThreadInfoRepository }
+import play.api.mvc._
+import repositories.metrics.{NetworkInfoRepository, OsInfoRepository, RuntimeInfoRepository, ThreadInfoRepository}
+import services.ConfigInfoService
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 case class StartRequest(baseAddress: String, interval: Int)
 
@@ -24,14 +25,15 @@ object StartRequest {
 
 @Singleton
 class MetricsController @Inject()(
-  system: ActorSystem,
-  cc: ControllerComponents,
-  networkInfoRepository: NetworkInfoRepository,
-  osInfoRepository: OsInfoRepository,
-  runtimeInfoRepository: RuntimeInfoRepository,
-  threadInfoRepository: ThreadInfoRepository,
-  wSClient: WSClient,
-  protected val dbConfigProvider: DatabaseConfigProvider
+   system: ActorSystem,
+   cc: ControllerComponents,
+   networkInfoRepository: NetworkInfoRepository,
+   osInfoRepository: OsInfoRepository,
+   runtimeInfoRepository: RuntimeInfoRepository,
+   threadInfoRepository: ThreadInfoRepository,
+   wSClient: WSClient,
+   protected val dbConfigProvider: DatabaseConfigProvider,
+   configInfoService: ConfigInfoService
 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   private val timeout: Timeout = 4 seconds
@@ -51,6 +53,7 @@ class MetricsController @Inject()(
     val address = request.body.baseAddress
     val updatedAddress = if (address.startsWith("http://")) address else "http://" + address
     supervisor ! Start(updatedAddress, request.body.interval)
+    configInfoService.sendInitialConfigInfo(request.body.interval)
     Ok("")
   }
 
@@ -61,6 +64,7 @@ class MetricsController @Inject()(
 
   def changeInterval(): Action[MetricsSupervisor.UpdateInterval] = Action(validateJson[MetricsSupervisor.UpdateInterval]) { request =>
     supervisor ! request.body
+    configInfoService.sendUpdateConfigInfo(request.body.newInterval, request.body.workerAddress)
     Ok("")
   }
 
