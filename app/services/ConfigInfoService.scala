@@ -3,6 +3,7 @@ package services
 import akka.util.Timeout
 import javax.inject.Inject
 import model.domain.ConfigInfo
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
@@ -12,8 +13,9 @@ import scala.concurrent.duration._
 
 class ConfigInfoService @Inject()(wsClient: WSClient) {
 
-  var intervals: mutable.HashMap[String, Int] = new mutable.HashMap[String, Int]()
+  private val intervals: mutable.HashMap[String, Int] = new mutable.HashMap[String, Int]()
   private val timeout: Timeout = 10 seconds
+  var logger = Logger.getClass
 
   def sendInitialConfigInfo(intervalValue: Int)(implicit ec: ExecutionContext): Unit = {
     intervals.put("osInterval", intervalValue)
@@ -24,7 +26,7 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
     wsClient.url("/config").post(Json.toJson(ConfigInfo(intervalValue, intervalValue, intervalValue, intervalValue)))
       .map { response =>
         val statusText: String = response.statusText
-        println(response.body)
+        logger(response.body)
       }
   }
 

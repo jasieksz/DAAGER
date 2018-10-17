@@ -25,16 +25,16 @@ object StartRequest {
 
 @Singleton
 class MetricsController @Inject()(
-                                   system: ActorSystem,
-                                   cc: ControllerComponents,
-                                   networkInfoRepository: NetworkInfoRepository,
-                                   osInfoRepository: OsInfoRepository,
-                                   runtimeInfoRepository: RuntimeInfoRepository,
-                                   threadInfoRepository: ThreadInfoRepository,
-                                   wSClient: WSClient,
-                                   protected val dbConfigProvider: DatabaseConfigProvider,
-                                   configInfoService: ConfigInfoService
-                                 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
+   system: ActorSystem,
+   cc: ControllerComponents,
+   networkInfoRepository: NetworkInfoRepository,
+   osInfoRepository: OsInfoRepository,
+   runtimeInfoRepository: RuntimeInfoRepository,
+   threadInfoRepository: ThreadInfoRepository,
+   wSClient: WSClient,
+   protected val dbConfigProvider: DatabaseConfigProvider,
+   configInfoService: ConfigInfoService
+)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   private val timeout: Timeout = 4 seconds
 
