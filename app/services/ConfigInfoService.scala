@@ -15,7 +15,7 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
 
   private val intervals: mutable.HashMap[String, Int] = new mutable.HashMap[String, Int]()
   private val timeout: Timeout = 10 seconds
-  var logger = Logger.getClass
+  var logger = Logger(getClass)
 
   def sendInitialConfigInfo(intervalValue: Int)(implicit ec: ExecutionContext): Unit = {
     intervals.put("osInterval", intervalValue)
@@ -26,7 +26,7 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
     wsClient.url("/config").post(Json.toJson(ConfigInfo(intervalValue, intervalValue, intervalValue, intervalValue)))
       .map { response =>
         val statusText: String = response.statusText
-        logger(response.body)
+        logger.info(response.body)
       }
   }
 
@@ -38,7 +38,10 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
         intervals("runtimeInterval"),
         intervals("threadInterval"),
         intervals("tcpInterval")
-      )))
+      ))).map { response =>
+      val statusText: String = response.statusText
+      logger.info(response.body)
+    }
   }
 
 }
