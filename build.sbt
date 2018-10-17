@@ -2,13 +2,18 @@ name := "daager"
 
 version := "0.2"
 
-lazy val `daager` = (project in file(".")).enablePlugins(
-  PlayScala, SwaggerPlugin, JavaAppPackaging, DockerPlugin
-).settings(
-  watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
-)
+lazy val `daager` = (project in file("."))
+  .enablePlugins(
+    PlayScala,
+    SwaggerPlugin,
+    JavaAppPackaging,
+    DockerPlugin
+  )
+  .settings(
+    watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
+  )
 
-swaggerDomainNameSpaces := Seq("model", "actors","controllers")
+swaggerDomainNameSpaces := Seq("model", "actors", "controllers")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -16,7 +21,6 @@ scalaVersion := "2.12.7"
 scalacOptions += "-Ypartial-unification"
 
 fork := true
-
 
 libraryDependencies ++= Seq(ehcache, ws, specs2 % Test, guice, filters)
 libraryDependencies += "org.typelevel" %% "cats-core" % "1.1.0"
@@ -28,8 +32,10 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
   "org.postgresql" % "postgresql" % "42.2.2",
   "com.google.inject" % "guice" % "4.2.0"
-
 )
+
+libraryDependencies += "com.github.tminglei" %% "slick-pg" % "0.16.3"
+libraryDependencies += "com.github.tminglei" %% "slick-pg_joda-time" % "0.16.3"
 
 // JAVA 9 Fixes
 libraryDependencies ++= Seq(
@@ -51,3 +57,6 @@ javaOptions in Universal ++= Seq(
   "-Dplay.evolutions.db.default.autoApply=true",
   "-Dslick.dbs.default.db.url=jdbc:postgresql://db:5432/daager"
 )
+
+// scalaFmt
+scalafmtOnCompile := true

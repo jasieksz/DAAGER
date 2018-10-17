@@ -1,7 +1,7 @@
 # --- !Ups
 
 create table "network_infos" (
-"timestamp" TIMESTAMP NOT NULL,
+"timestamp" TIMESTAMP with time zone NOT NULL,
 "address" VARCHAR NOT NULL,
 "tcp_connection_active_count" BIGINT NOT NULL,
 "tcp_connection_client_count" BIGINT NOT NULL,
@@ -9,7 +9,7 @@ create table "network_infos" (
 );
 
 create table "os_infos" (
-"timestamp" TIMESTAMP NOT NULL,
+"timestamp" TIMESTAMP with time zone NOT NULL,
 "address" VARCHAR NOT NULL,
 "os_process_cpu_load" DOUBLE PRECISION NOT NULL,
 "os_system_load_average" DOUBLE PRECISION NOT NULL,
@@ -21,14 +21,14 @@ create table "os_infos" (
 );
 
 create table "thread_infos" (
-"timestamp" TIMESTAMP NOT NULL,
+"timestamp" TIMESTAMP with time zone NOT NULL,
 "address" VARCHAR NOT NULL,
 "thread_peak_count" BIGINT NOT NULL,
 "thread_thread_count" BIGINT NOT NULL
 );
 
 create table "runtime_infos" (
-"timestamp" TIMESTAMP NOT NULL,
+"timestamp" TIMESTAMP with time zone NOT NULL,
 "address" VARCHAR NOT NULL,
 "runtime_available_processors" BIGINT NOT NULL,
 "runtime_total_memory" BIGINT NOT NULL,

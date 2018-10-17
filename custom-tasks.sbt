@@ -2,11 +2,10 @@ import scala.language.postfixOps
 import scala.sys.process.Process
 
 /**
- *
- * UI Build hook Scripts
- *
+  *
+  * UI Build hook Scripts
+  *
  **/
-
 // Execution status success.
 val Success = 0
 
@@ -30,11 +29,13 @@ def runOnCommandline(script: String)(implicit dir: File): Int = {
 } !
 
 // Check of node_modules directory exist in given directory.
-def isNodeModulesInstalled(implicit dir: File): Boolean = (dir / "node_modules").exists()
+def isNodeModulesInstalled(implicit dir: File): Boolean =
+  (dir / "node_modules").exists()
 
 // Execute `npm install` command to install all node module dependencies. Return Success if already installed.
 def runNpmInstall(implicit dir: File): Int =
-  if (isNodeModulesInstalled) Success else runOnCommandline(FrontendCommands.dependencyInstall)
+  if (isNodeModulesInstalled) Success
+  else runOnCommandline(FrontendCommands.dependencyInstall)
 
 // Execute task if node modules are installed, else return Error status.
 def ifNodeModulesInstalled(task: => Int)(implicit dir: File): Int =
@@ -42,11 +43,12 @@ def ifNodeModulesInstalled(task: => Int)(implicit dir: File): Int =
   else Error
 
 // Execute frontend test task. Update to change the frontend test task.
-def executeUiTests(implicit dir: File): Int = ifNodeModulesInstalled(runOnCommandline(FrontendCommands.test))
+def executeUiTests(implicit dir: File): Int =
+  ifNodeModulesInstalled(runOnCommandline(FrontendCommands.test))
 
 // Execute frontend prod build task. Update to change the frontend prod build task.
-def executeProdBuild(implicit dir: File): Int = ifNodeModulesInstalled(runOnCommandline(FrontendCommands.build))
-
+def executeProdBuild(implicit dir: File): Int =
+  ifNodeModulesInstalled(runOnCommandline(FrontendCommands.build))
 
 // Create frontend build tasks for prod, dev and test execution.
 
@@ -57,11 +59,13 @@ lazy val `ui-test` = taskKey[Unit]("Run UI tests when testing application.")
   if (executeUiTests != Success) throw new Exception("UI tests failed!")
 }
 
-lazy val `ui-prod-build` = taskKey[Unit]("Run UI build when packaging the application.")
+lazy val `ui-prod-build` =
+  taskKey[Unit]("Run UI build when packaging the application.")
 
 `ui-prod-build` := {
   implicit val userInterfaceRoot: File = baseDirectory.value / "ui"
-  if (executeProdBuild != Success) throw new Exception("Oops! UI Build crashed.")
+  if (executeProdBuild != Success)
+    throw new Exception("Oops! UI Build crashed.")
 }
 
 // Execute frontend prod build task prior to play dist execution.
@@ -75,48 +79,51 @@ stage := (stage dependsOn `ui-prod-build`).value
 // Execute frontend test task prior to play test execution.
 test := ((test in Test) dependsOn `ui-test`).value
 
-
 /**
- *
- * Docker tasks definitions and configs
- *
+  *
+  * Docker tasks definitions and configs
+  *
  **/
-
-lazy val `docker-compose-up`  = taskKey[Unit]("Spin up application in prod mode")
+lazy val `docker-compose-up` = taskKey[Unit]("Spin up application in prod mode")
 
 `docker-compose-up` := {
   implicit val userInterfaceRoot: File = baseDirectory.value
-  if (runOnCommandline("docker-compose up -d") != Success) throw new Exception("Unable to run docker-compose")
+  if (runOnCommandline("docker-compose up -d") != Success)
+    throw new Exception("Unable to run docker-compose")
   else println("Daager started")
 }
 
 `docker-compose-up` := (`docker-compose-up` dependsOn (publishLocal in Docker)).value
 
-lazy val `docker-compose-stop`  = taskKey[Unit]("Stop daager")
+lazy val `docker-compose-stop` = taskKey[Unit]("Stop daager")
 `docker-compose-stop` := {
   implicit val userInterfaceRoot: File = baseDirectory.value
-  if (runOnCommandline("docker-compose stop") != Success) throw new Exception("Unable to stop docker-compose")
+  if (runOnCommandline("docker-compose stop") != Success)
+    throw new Exception("Unable to stop docker-compose")
   else println("Daager stopped")
 }
 
-lazy val `docker-compose-down`  = taskKey[Unit]("Stop daager")
+lazy val `docker-compose-down` = taskKey[Unit]("Stop daager")
 `docker-compose-down` := {
   implicit val userInterfaceRoot: File = baseDirectory.value
-  if (runOnCommandline("docker-compose down") != Success) throw new Exception("Unable to stop docker-compose")
+  if (runOnCommandline("docker-compose down") != Success)
+    throw new Exception("Unable to stop docker-compose")
 }
 
-lazy val `docker-dependencies-up` = taskKey[Unit]("Spin up daager dependencies for development")
+lazy val `docker-dependencies-up` =
+  taskKey[Unit]("Spin up daager dependencies for development")
 
 `docker-dependencies-up` := {
   implicit val userInterfaceRoot: File = baseDirectory.value / "dependencies"
-  if (runOnCommandline("docker-compose up -d") != Success) throw new Exception("Unable to run docker-compose")
+  if (runOnCommandline("docker-compose up -d") != Success)
+    throw new Exception("Unable to run docker-compose")
   else println("Dependencies started")
 }
 
 lazy val `docker-dependencies-stop` = taskKey[Unit]("Stop daager")
 `docker-dependencies-stop` := {
   implicit val userInterfaceRoot: File = baseDirectory.value / "dependencies"
-  if (runOnCommandline("docker-compose stop") != Success) throw new Exception("Unable to stop docker-compose")
+  if (runOnCommandline("docker-compose stop") != Success)
+    throw new Exception("Unable to stop docker-compose")
   else println("Dependencies stopped")
 }
-

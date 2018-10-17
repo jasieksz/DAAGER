@@ -1,9 +1,8 @@
 package model.infra.metrics
 
 import model.domain.metrics.ThreadInfo
-import model.infra.metrics.NetworkInfos.query
 import org.joda.time.DateTime
-import slick.jdbc.PostgresProfile.api._
+import utils.DaagerPostgresProfile.api._
 import utils.DateTimeUtils._
 
 class ThreadInfos(tag: Tag) extends Table[ThreadInfo](tag, "thread_infos") {

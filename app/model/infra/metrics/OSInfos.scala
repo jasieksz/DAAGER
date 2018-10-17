@@ -2,7 +2,7 @@ package model.infra.metrics
 
 import model.domain.metrics.OSInfo
 import org.joda.time.DateTime
-import slick.jdbc.PostgresProfile.api._
+import utils.DaagerPostgresProfile.api._
 import utils.DateTimeUtils._
 
 class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos") {
@@ -25,9 +25,18 @@ class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos") {
 
   def osTotalSwapSpaceSize = column[Long]("os_total_swap_space_size")
 
-  def * = (timestamp, address, osProcessCpuLoad, osSystemLoadAverage, osSystemCpuLoad,
-    osTotalPhysicalMemorySize, osFreePhysicalMemorySize, osFreeSwapSpaceSize,
-    osTotalSwapSpaceSize) <> ((OSInfo.apply _).tupled, OSInfo.unapply)
+  def * =
+    (
+      timestamp,
+      address,
+      osProcessCpuLoad,
+      osSystemLoadAverage,
+      osSystemCpuLoad,
+      osTotalPhysicalMemorySize,
+      osFreePhysicalMemorySize,
+      osFreeSwapSpaceSize,
+      osTotalSwapSpaceSize
+    ) <> ((OSInfo.apply _).tupled, OSInfo.unapply)
 
 }
 

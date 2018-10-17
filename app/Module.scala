@@ -3,8 +3,7 @@ import services.AgeConnectionService
 
 class Module extends AbstractModule {
 
-  override def configure() = {
+  override def configure() =
     bind(classOf[AgeConnectionService])
-  }
 
 }
