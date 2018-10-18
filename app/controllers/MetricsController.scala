@@ -58,7 +58,7 @@ class MetricsController @Inject()(
       val updatedAddress =
         if (address.startsWith("http://")) address else "http://" + address
       supervisor ! Start(updatedAddress, request.body.interval)
-//      configInfoService.sendInitialConfigInfo(request.body.interval)
+      configInfoService.sendInitialConfigInfo(updatedAddress, request.body.interval)
       Ok("")
     }
 
@@ -71,10 +71,10 @@ class MetricsController @Inject()(
   def changeInterval(): Action[MetricsSupervisor.UpdateInterval] =
     Action(validateJson[MetricsSupervisor.UpdateInterval]) { request =>
       supervisor ! request.body
-//      configInfoService.sendUpdateConfigInfo(
-//        request.body.newInterval,
-//        request.body.workerAddress
-//      )
+      configInfoService.sendUpdateConfigInfo(
+        request.body.newInterval,
+        request.body.workerAddress
+      )
       Ok("")
     }
 
