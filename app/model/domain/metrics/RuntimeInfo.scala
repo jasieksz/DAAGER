@@ -6,6 +6,7 @@ import utils.DateTimeUtils.dateTimeFormat
 
 case class RuntimeInfo(
   timestamp: DateTime,
+  clusterId: String,
   address: String,
   runtimeAvailableProcessors: Long,
   runtimeTotalMemory: Long,

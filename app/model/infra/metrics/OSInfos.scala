@@ -9,6 +9,8 @@ class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
+  def clusterId = column[String]("cluster_id")
+
   def address = column[String]("address")
 
   def osProcessCpuLoad = column[Double]("os_process_cpu_load")
@@ -28,6 +30,7 @@ class OSInfos(tag: Tag) extends Table[OSInfo](tag, "os_infos") {
   def * =
     (
       timestamp,
+      clusterId,
       address,
       osProcessCpuLoad,
       osSystemLoadAverage,

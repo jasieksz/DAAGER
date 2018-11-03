@@ -6,6 +6,7 @@ import utils.DateTimeUtils.dateTimeFormat
 
 case class OSInfo(
   timestamp: DateTime,
+  clusterId: String,
   address: String,
   osProcessCpuLoad: Double,
   osSystemLoadAverage: Double,

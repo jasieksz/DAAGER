@@ -9,6 +9,8 @@ class NetworkInfos(tag: Tag) extends Table[NetworkInfo](tag, "network_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
+  def clusterId = column[String]("cluster_id")
+
   def address = column[String]("address")
 
   def tcpConnectionActiveCount = column[Long]("tcp_connection_active_count")
@@ -18,7 +20,7 @@ class NetworkInfos(tag: Tag) extends Table[NetworkInfo](tag, "network_infos") {
   def tcpConnectionClientCount = column[Long]("tcp_connection_client_count")
 
   def * =
-    (timestamp, address, tcpConnectionActiveCount, tcpConnectionClientCount, tcpConnectionCount) <> (
+    (timestamp, clusterId, address, tcpConnectionActiveCount, tcpConnectionClientCount, tcpConnectionCount) <> (
       (NetworkInfo.apply _).tupled, NetworkInfo.unapply
     )
 
