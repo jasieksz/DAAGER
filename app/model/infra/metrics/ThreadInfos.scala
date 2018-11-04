@@ -9,13 +9,15 @@ class ThreadInfos(tag: Tag) extends Table[ThreadInfo](tag, "thread_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
+  def clusterId = column[String]("cluster_id")
+
   def address = column[String]("address")
 
   def threadPeakThreadCount = column[Long]("thread_peak_count")
 
   def threadThreadCount = column[Long]("thread_thread_count")
 
-  def * = (timestamp, address, threadPeakThreadCount, threadThreadCount) <> (
+  def * = (timestamp, clusterId, address, threadPeakThreadCount, threadThreadCount) <> (
     (ThreadInfo.apply _).tupled, ThreadInfo.unapply
   )
 

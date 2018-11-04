@@ -6,6 +6,7 @@ import utils.DateTimeUtils.dateTimeFormat
 
 case class NetworkInfo(
   timestamp: DateTime,
+  clusterId: String,
   address: String,
   tcpConnectionActiveCount: Long,
   tcpConnectionCount: Long,

@@ -6,6 +6,7 @@ import utils.DateTimeUtils.dateTimeFormat
 
 case class ThreadInfo(
   timestamp: DateTime,
+  clusterId: String,
   address: String,
   threadPeakThreadCount: Long,
   threadThreadCount: Long

@@ -9,6 +9,8 @@ class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos") {
 
   def timestamp = column[DateTime]("timestamp")
 
+  def clusterId = column[String]("cluster_id")
+
   def address = column[String]("address")
 
   def runtimeAvailableProcessors = column[Long]("runtime_available_processors")
@@ -24,6 +26,7 @@ class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos") {
   def * =
     (
       timestamp,
+      clusterId,
       address,
       runtimeAvailableProcessors,
       runtimeTotalMemory,
