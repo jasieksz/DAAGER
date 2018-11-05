@@ -35,32 +35,29 @@ class MainPage extends Component {
     render() {
         return (
             <div>
-                <div className={'daagerTitle'}>Daager</div>
+                <div className={'daagerTitle'}>
+                    <img src={'logo.png'}/>
+                </div>
                 <Tabs>
                     <TabList className={'tabs'}>
-                        <Tab eventKey={2} title="manage">
-                            <i className={"fas fa-cog fa-fw"}/>
-                            {fontawesome.library.add(faCog)}
-                            Manage
-                        </Tab>
                         <Tab eventKey={1} title="home" >
                             <i className={"fas fa-home fa-fw"}/>
                             {fontawesome.library.add(faHome)}
                             Home
                         </Tab>
-                        <Tab eventKey={3} title="grafana">
+                        <Tab eventKey={2} title="grafana">
                             <i className={"fas fa-chart-bar fa-fw"}/>
                             {fontawesome.library.add(faChartBar)}
                             Grafana
                         </Tab>
+                        <Tab eventKey={3} title="manage">
+                            <i className={"fas fa-cog fa-fw"}/>
+                            {fontawesome.library.add(faCog)}
+                            Manage
+                        </Tab>
+
                     </TabList>
 
-                    <TabPanel>
-                        <ManageComponent
-                            pullingAddress={this.state.pullingAddress}
-                            savePullingInitData={this.handleSetInitPullingData}
-                        />
-                    </TabPanel>
                     <TabPanel>
                         <HomeComponent
                             pullingAddress={this.state.pullingAddress}/>
@@ -68,6 +65,12 @@ class MainPage extends Component {
                     <TabPanel>
                         <GrafanaComponent
                             pullingAddress={this.state.pullingAddress}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <ManageComponent
+                            pullingAddress={this.state.pullingAddress}
+                            savePullingInitData={this.handleSetInitPullingData}
                         />
                     </TabPanel>
                 </Tabs>

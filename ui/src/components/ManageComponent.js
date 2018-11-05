@@ -176,7 +176,6 @@ class ManageComponent extends Component {
     render() {
         return (
             <div>
-                <h2 className={'tabTitle'}>Manage Component </h2>
                 {this.renderPullingAddress()}
             </div>
         );
