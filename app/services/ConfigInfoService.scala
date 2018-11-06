@@ -13,20 +13,19 @@ import scala.concurrent.duration._
 
 class ConfigInfoService @Inject()(wsClient: WSClient) {
 
-  private val intervals: mutable.HashMap[String, Int] = new mutable.HashMap[String, Int]()
-  private val timeout: Timeout                        = 10 seconds
-  var logger                                          = Logger(getClass)
+  private val intervals: mutable.HashMap[String, Int] =
+    new mutable.HashMap[String, Int]()
+  private val timeout: Timeout = 10 seconds
+  var logger                   = Logger(getClass)
 
-  def sendInitialConfigInfo(
-    intervalValue: Int
-  )(implicit ec: ExecutionContext): Unit = {
+  def sendInitialConfigInfo(address: String, intervalValue: Int)(implicit ec: ExecutionContext): Unit = {
     intervals.put("osInterval", intervalValue)
     intervals.put("runtimeInterval", intervalValue)
     intervals.put("threadInterval", intervalValue)
     intervals.put("tcpInterval", intervalValue)
 
     wsClient
-      .url("/config")
+      .url(address + "/configure")
       .post(Json.toJson(ConfigInfo(intervalValue, intervalValue, intervalValue, intervalValue)))
       .map { response =>
         val statusText: String = response.statusText
@@ -34,13 +33,11 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
       }
   }
 
-  def sendUpdateConfigInfo(
-    intervalValue: Int,
-    intervalName: String
-  )(implicit ec: ExecutionContext): Unit = {
+  def sendUpdateConfigInfo(intervalValue: Int, address: String)(implicit ec: ExecutionContext): Unit = {
+    val intervalName: String = address.split('/').last + "Interval"
     intervals.put(intervalName, intervalValue)
     wsClient
-      .url("/config")
+      .url(address.split("/").head + "/configure")
       .post(
         Json.toJson(
           ConfigInfo(
@@ -56,5 +53,4 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
         logger.info(response.body)
       }
   }
-
 }
