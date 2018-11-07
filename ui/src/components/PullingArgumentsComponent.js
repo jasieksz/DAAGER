@@ -17,6 +17,7 @@ export class PullingArgumentsComponent extends Component {
     }
 
     handleStopPullingData = (id) => {
+        console.log('stop pulling data: ' + id.address);
         this.service.stopPullingParam(this.createStopPullingData(id.address)).then(response => {
             this.getStatuses();
         }).catch((err) => {
@@ -119,7 +120,7 @@ export class PullingArgumentsComponent extends Component {
     }
 
     handleAllStopPullingData = () => {
-        this.state.statuses.forEach(i => this.createStopPullingData(i));
+        this.state.statuses.forEach(i => this.handleStopPullingData(i));
         this.changeHealthPullingButton();
     };
 
@@ -139,18 +140,18 @@ export class PullingArgumentsComponent extends Component {
     getHealthStatusButton =() =>  {
         if (this.state.isPulling) {
             return (
-                <Button type="danger"
+                <Button color={"danger"}
                         className="btn btn-default"
                         onClick={ () => this.handleAllStopPullingData() }
-                >Stop
+                >Stop All
                 </Button>
             );
         } else {
             return (
-                <Button type="success"
+                <Button color={"success"}
                         className="btn btn-default"
                         onClick={ () => this.handleAllStartPullingData() }
-                >Start
+                >Start All
                 </Button>
             );
         }
