@@ -102,7 +102,7 @@ class ManageComponent extends Component {
     showPullingAddress() {
         return (
             <div>
-                <div className={'pullingDataInfo'}>
+                <div className={'pullingDataAddressBox'}>
                     <div className="row pullingAddr">
                         <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Pulling data address</label>
                         <div className="col-sm-6">
@@ -125,7 +125,7 @@ class ManageComponent extends Component {
                         </Button>
                     </div>
                 </div>
-                <div className={'pullingDataInfo'}>
+                <div className={'clusterAliasBox'}>
                     <div className="row clusterAlias">
                         <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Cluster alias: </label>
                         <div className="col-sm-6">
@@ -134,14 +134,16 @@ class ManageComponent extends Component {
                                    id={'clusterAliasValue'}
                                    placeholder={this.state.clusterAlias}
                             />
-                            <Button type="SaveClusterAlias"
-                                    className="btn btn-default"
-                                    onClick={this.saveClusterAlias}
-                            >Save Cluster alias
-                            </Button>
                         </div>
                     </div>
-                </div>
+                    <div className={'manageButtons'}>
+                    <Button type="SaveClusterAlias"
+                            className="btn btn-default"
+                            onClick={this.saveClusterAlias}
+                    >Save Cluster alias
+                    </Button>
+                    </div>
+                        </div>
                 <PullingArgumentsComponent/>
             </div>
         )

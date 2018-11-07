@@ -29,7 +29,7 @@
     margin-left: 45%;
 }
 
-.pullingDataInfo {
+.pullingDataAddressBox {
     margin: 1% 25%;
     background-color: #e6e6e6;
     width: 50%;
@@ -46,9 +46,20 @@
 }
 
 .clusterAlias {
-    margin-top: 15%;
     margin-left: 1%;
     margin-right: 1%;
     text-align: center;
-    display: inline;
+}
+
+.clusterAliasBox {
+    margin-top: 10%;
+    margin-left: 25%;
+    maring-right: 25%;
+    margin-bottom: 3%;
+    background-color: #e6e6e6;
+    width: 50%;
+    height: 15%;
+    border-radius: 10px;
+    text-align: center;
+    display: inherit;
 }
