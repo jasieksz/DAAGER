@@ -75,9 +75,7 @@ class NodesInfoService @Inject()(
       .map(osinfo => {
         NodeDetails(
           nodeAddress,
-          osinfo.map(_.timestamp),
-          osinfo.map(_.osSystemCpuLoad).getOrElse(0.0),
-          osinfo.map(_.osTotalPhysicalMemorySize.toDouble).getOrElse(0.0)
+          osinfo.map(_.timestamp)
         )
       })
   }
