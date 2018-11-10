@@ -17,9 +17,22 @@ class ThreadInfos(tag: Tag) extends Table[ThreadInfo](tag, "thread_infos") {
 
   def threadThreadCount = column[Long]("thread_thread_count")
 
-  def * = (timestamp, clusterId, address, threadPeakThreadCount, threadThreadCount) <> (
-    (ThreadInfo.apply _).tupled, ThreadInfo.unapply
-  )
+  def threadDaemonThreadCount: Rep[Long] = column[Long]("thread_daemon_thread_count")
+
+  def threadTotalStartedThreadCount: Rep[Long] = column[Long]("thread_total_started_thread_count")
+
+  def * =
+    (
+      timestamp,
+      clusterId,
+      address,
+      threadPeakThreadCount,
+      threadThreadCount,
+      threadDaemonThreadCount,
+      threadTotalStartedThreadCount
+    ) <> (
+      (ThreadInfo.apply _).tupled, ThreadInfo.unapply
+    )
 
 }
 
