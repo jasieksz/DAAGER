@@ -62,14 +62,14 @@ class MetricsSupervisor(
     networkInfoPuller -> "/health/tcp",
     osInfoPuller      -> "/health/os",
     runtimeInfoPuller -> "/health/runtime",
-    threadInfoPuller  -> "/health/thread"
+    threadInfoPuller  -> "/health/thread",
   )
 
   private val labels = Map(
     networkInfoPuller -> "Network Info",
     osInfoPuller      -> "OS Info",
     runtimeInfoPuller -> "Runtime Info",
-    threadInfoPuller  -> "Thread Info"
+    threadInfoPuller  -> "Thread Info",
   )
 
   private val addressToWorker = pullingAdresses.map(_.swap)
