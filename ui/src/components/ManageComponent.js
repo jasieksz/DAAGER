@@ -14,15 +14,16 @@ class ManageComponent extends Component {
             isPulling: false,
             getPullingAddress: true,
             buttonState: '',
+            clusterAlias: '',
         };
 
         this.service = new ApiService();
         this.checkIfAlreadyPulling();
         this.saveInitPullingData = this.saveInitPullingData.bind(this);
-        this.handleClearPullingAddress = this.handleClearPullingAddress.bind(this);
 
         this.handleChangePullingAddress = this.handleChangePullingAddress.bind(this);
         this.showPullingAddress = this.showPullingAddress.bind(this);
+        this.saveClusterAlias = this.saveClusterAlias.bind(this);
     }
 
     checkIfAlreadyPulling = ()  => {
@@ -41,14 +42,6 @@ class ManageComponent extends Component {
 
     componentDidMount() {
         this.service.hello().then(response => console.log(response));
-    }
-
-    handleStopPullingData() {
-        console.log('start/stop pulling data');
-    }
-
-    handleClearPullingAddress() {
-        console.log('clean');
     }
 
     verifyPullingAddress = () => {
@@ -91,41 +84,56 @@ class ManageComponent extends Component {
             getPullingAddress: true,
             buttonState: ''
         });
-        // this.props.savePullingInitData('');
     }
 
+    saveClusterAlias() {
+        const clusterAliasValue = document.getElementById("clusterAliasValue").value;
+        this.setState ({
+            clusterAlias: clusterAliasValue
+        });
+        // send the alias value to backend
+    }
 
     showPullingAddress() {
         return (
             <div>
-            <div className={'pullingDataInfo'}>
-                <div className="row pullingAddr">
-                    <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Pulling data address</label>
-                    <div className="col-sm-6">
-                        <input type="text"
-                               className="form-control"
-                               value={this.state.pullingAddress}
-                        />
+                <div className={'pullingDataAddressBox'}>
+                    <div className="row pullingAddr">
+                        <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Pulling data address</label>
+                        <div className="col-sm-6">
+                            <input type="text"
+                                   className="form-control"
+                                   value={this.state.pullingAddress}
+                            />
+                        </div>
+                    </div>
+                    <div className={'manageButtons'}>
+                        <Button color="warning"
+                                className="btn btn-default manageButton"
+                                onClick={this.handleChangePullingAddress}
+                        >Change Pulling Address
+                        </Button>
                     </div>
                 </div>
-                <div className={'manageButtons'}>
-                    <Button color="warning"
-                            className="btn btn-default manageButton"
-                            onClick={this.handleClearPullingAddress}
-                    >Clear Pulling Address
-                    </Button>
-                    <Button color="warning"
-                            className="btn btn-default manageButton"
-                            onClick={this.handleChangePullingAddress}
-                    >Change Pulling Address
-                    </Button>
-                    <Button type="StopPullingData"
+                <div className={'clusterAliasBox'}>
+                    <div className="row clusterAlias">
+                        <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Cluster alias: </label>
+                        <div className="col-sm-6">
+                            <input type="text"
+                                   className="form-control"
+                                   id={'clusterAliasValue'}
+                                   placeholder={this.state.clusterAlias}
+                            />
+                        </div>
+                    </div>
+                    <div className={'manageButtons'}>
+                    <Button type="SaveClusterAlias"
                             className="btn btn-default"
-                            onClick={this.handleStopPullingData}
-                    >Stop
+                            onClick={this.saveClusterAlias}
+                    >Save Cluster alias
                     </Button>
-                </div>
-            </div>
+                    </div>
+                        </div>
                 <PullingArgumentsComponent/>
             </div>
         )

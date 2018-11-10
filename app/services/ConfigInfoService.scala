@@ -15,14 +15,16 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
 
   private val intervals: mutable.HashMap[String, Int] =
     new mutable.HashMap[String, Int]()
-  private val timeout: Timeout = 10 seconds
-  var logger                   = Logger(getClass)
+  private val timeout: Timeout    = 10 seconds
+  var logger                      = Logger(getClass)
+  private var baseAddress: String = new String
 
   def sendInitialConfigInfo(address: String, intervalValue: Int)(implicit ec: ExecutionContext): Unit = {
     intervals.put("osInterval", intervalValue)
     intervals.put("runtimeInterval", intervalValue)
     intervals.put("threadInterval", intervalValue)
     intervals.put("tcpInterval", intervalValue)
+    baseAddress = address
 
     wsClient
       .url(address + "/configure")
@@ -37,7 +39,7 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
     val intervalName: String = address.split('/').last + "Interval"
     intervals.put(intervalName, intervalValue)
     wsClient
-      .url(address.split("/").head + "/configure")
+      .url(baseAddress + address.split("/").head + "/configure")
       .post(
         Json.toJson(
           ConfigInfo(
