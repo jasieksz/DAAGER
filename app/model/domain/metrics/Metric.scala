@@ -8,4 +8,6 @@ trait Metric {
 
   def timestamp: DateTime
 
+  def clusterId: String
+
 }

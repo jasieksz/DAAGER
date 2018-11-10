@@ -45,6 +45,7 @@ class MetricsSupervisor(
   osInfoRepository: OsInfoRepository,
   runtimeInfoRepository: RuntimeInfoRepository,
   threadInfoRepository: ThreadInfoRepository,
+  logEventRepository: LogEventRepository,
   wSClient: WSClient,
   protected val dbConfigProvider: DatabaseConfigProvider
 ) extends Actor {
@@ -53,7 +54,8 @@ class MetricsSupervisor(
     networkInfoPuller,
     osInfoPuller,
     runtimeInfoPuller,
-    threadInfoPuller
+    threadInfoPuller,
+    logsPuller
   ) = createWorkers()
 
   //  TODO move to config
@@ -63,6 +65,7 @@ class MetricsSupervisor(
     osInfoPuller      -> "/health/os",
     runtimeInfoPuller -> "/health/runtime",
     threadInfoPuller  -> "/health/thread",
+    logsPuller        -> "/logs"
   )
 
   private val labels = Map(
@@ -70,6 +73,7 @@ class MetricsSupervisor(
     osInfoPuller      -> "OS Info",
     runtimeInfoPuller -> "Runtime Info",
     threadInfoPuller  -> "Thread Info",
+    logsPuller        -> "Logs"
   )
 
   private val addressToWorker = pullingAdresses.map(_.swap)
@@ -100,6 +104,10 @@ class MetricsSupervisor(
       )
       threadInfoPuller ! StartPulling(
         baseAddress + pullingAdresses(threadInfoPuller),
+        interval
+      )
+      logsPuller ! StartPulling(
+        baseAddress + pullingAdresses(logsPuller),
         interval
       )
       context.become(
@@ -219,6 +227,19 @@ class MetricsSupervisor(
       )
     threadInfoPuller ! SubscribeTransitionCallBack(self)
 
-    Seq(networkInfoPuller, osInfoPuller, runtimeInfoPuller, threadInfoPuller)
+    val logPuller = context.system
+      .actorOf(
+        Props(
+          new MetricsPuller[LogEvent, LogEventRepository](
+            logEventRepository,
+            wSClient,
+            dbConfigProvider
+          )
+        ),
+        "logPuller"
+      )
+    logPuller ! SubscribeTransitionCallBack(self)
+
+    Seq(networkInfoPuller, osInfoPuller, runtimeInfoPuller, threadInfoPuller, logPuller)
   }
 }

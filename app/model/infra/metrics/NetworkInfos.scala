@@ -3,7 +3,6 @@ package model.infra.metrics
 import model.domain.metrics.NetworkInfo
 import org.joda.time.DateTime
 import utils.DaagerPostgresProfile.api._
-import utils.DateTimeUtils._
 
 class NetworkInfos(tag: Tag) extends Table[NetworkInfo](tag, "network_infos") {
 
