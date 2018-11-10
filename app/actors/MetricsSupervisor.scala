@@ -53,7 +53,7 @@ class MetricsSupervisor(
     networkInfoPuller,
     osInfoPuller,
     runtimeInfoPuller,
-    threadInfoPuller,
+    threadInfoPuller
   ) = createWorkers()
 
   //  TODO move to config
