@@ -37,13 +37,6 @@ class GraphController @Inject()(
     nodesInfoService.getGlobalState.map(res => Ok(Json.toJson(res)))
   }
 
-  def getNodeDetails(): Action[NodeDetailsRequest] =
-    Action(validateJson[NodeDetailsRequest]).async { request =>
-      nodesInfoService
-        .getNodeDetails(request.body.address)
-        .map(res => Ok(Json.toJson(res)))
-    }
-
   private def validateJson[A : Reads]: BodyParser[A] = parse.json.validate(
     _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
   )

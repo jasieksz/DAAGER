@@ -26,8 +26,9 @@ class NodesInfoService @Inject()(
 
   private val metricsSupervisor =
     system.actorSelection("user/" + MetricsSupervisor.name)
-  private val timeout: Timeout     = 10 seconds
-  private val clusterInfoParameter = "/cluster"
+  private val timeout: Timeout      = 10 seconds
+  private val clusterInfoParameter  = "/cluster"
+  private val clusterStateParameter = "/cluster/details"
 
   def getGlobalState(implicit ec: ExecutionContext): Future[GlobalState] = {
     for {
@@ -49,15 +50,22 @@ class NodesInfoService @Inject()(
     } yield addresses
   }
 
+  def getNodesDetails(implicit ec: ExecutionContext): Future[Seq[NodeDetails]] = {
+    for {
+      address      <- getBaseAddress
+      nodesDetails <- getNodeDetails(address)
+    } yield {
+      nodesDetails
+    }
+  }
+
   private def getBaseAddress(implicit ec: ExecutionContext): Future[String] = {
     Patterns
       .ask(metricsSupervisor, MetricsSupervisor.GetConfig, timeout)
       .map(_.toString)
   }
 
-  private def getNodesAddresses(
-    baseAddress: String
-  )(implicit ec: ExecutionContext): Future[Seq[String]] = {
+  private def getNodesAddresses(baseAddress: String)(implicit ec: ExecutionContext): Future[Seq[String]] = {
     if (Try(new URL(baseAddress).toURI).isSuccess) {
       WSClient
         .url(baseAddress + clusterInfoParameter)
@@ -68,18 +76,17 @@ class NodesInfoService @Inject()(
     }
   }
 
-  def getNodeDetails(
-    nodeAddress: String
-  )(implicit ec: ExecutionContext): Future[NodeDetails] = {
-    db.run(osInfoRepository.findLastByAddress(nodeAddress))
-      .map(osinfo => {
-        NodeDetails(
-          nodeAddress,
-          osinfo.map(_.timestamp),
-          osinfo.map(_.osSystemCpuLoad).getOrElse(0.0),
-          osinfo.map(_.osTotalPhysicalMemorySize.toDouble).getOrElse(0.0)
-        )
-      })
+  private def getNodeDetails(baseAddress: String)(implicit ec: ExecutionContext): Future[Seq[NodeDetails]] = {
+    if (Try(new URL(baseAddress).toURI).isSuccess) {
+      WSClient
+        .url(baseAddress + clusterStateParameter)
+        .addHttpHeaders("Accept" -> "application/json")
+        .withRequestTimeout(2 seconds)
+        .get()
+        .map(_.json.validate[Seq[NodeDetails]].getOrElse(Seq.empty))
+    } else {
+      Future.successful(Seq.empty)
+    }
   }
 
 }
