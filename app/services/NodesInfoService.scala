@@ -83,7 +83,6 @@ class NodesInfoService @Inject()(
         .addHttpHeaders("Accept" -> "application/json")
         .withRequestTimeout(2 seconds)
         .get()
-        .map(asd => { println(asd); asd })
         .map(_.json.validate[Seq[NodeDetails]].getOrElse(Seq.empty))
     } else {
       Future.successful(Seq.empty)
