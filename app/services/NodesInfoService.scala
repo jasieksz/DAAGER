@@ -28,7 +28,7 @@ class NodesInfoService @Inject()(
     system.actorSelection("user/" + MetricsSupervisor.name)
   private val timeout: Timeout      = 10 seconds
   private val clusterInfoParameter  = "/cluster"
-  private val clusterStateParameter = "/cluster/details"
+  private val clusterStateParameter = "/cluster/detail"
 
   def getGlobalState(implicit ec: ExecutionContext): Future[GlobalState] = {
     for {
@@ -83,6 +83,7 @@ class NodesInfoService @Inject()(
         .addHttpHeaders("Accept" -> "application/json")
         .withRequestTimeout(2 seconds)
         .get()
+        .map(asd => { println(asd); asd })
         .map(_.json.validate[Seq[NodeDetails]].getOrElse(Seq.empty))
     } else {
       Future.successful(Seq.empty)

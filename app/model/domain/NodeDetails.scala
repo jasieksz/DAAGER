@@ -12,5 +12,5 @@ case class NodeDetails(
 object NodeDetails {
   implicit val format = Json.format[NodeDetails]
 
-  val default = NodeDetails("","","", List[String]())
+  val default = NodeDetails("", "", "", List[String]())
 }
