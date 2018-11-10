@@ -12,7 +12,7 @@ class GraphService @Inject()(nodesInfoService: NodesInfoService) {
   def getGraph()(implicit ec: ExecutionContext): Future[Graph] = {
     for {
       addresses <- nodesInfoService.getNodesAddresses
-      details <- nodesInfoService.getNodesDetails
+      details   <- nodesInfoService.getNodesDetails
     } yield {
       createGraph(addresses, details)
     }
