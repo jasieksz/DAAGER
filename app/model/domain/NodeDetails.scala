@@ -7,8 +7,6 @@ import utils.DateTimeUtils.dateTimeFormat
 case class NodeDetails(
   address: String,
   lastMsg: Option[DateTime],
-  cpu: Double,
-  memory: Double
 )
 
 object NodeDetails {
