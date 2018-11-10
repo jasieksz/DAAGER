@@ -31,6 +31,7 @@ class MetricsController @Inject()(
   osInfoRepository: OsInfoRepository,
   runtimeInfoRepository: RuntimeInfoRepository,
   threadInfoRepository: ThreadInfoRepository,
+  logEventRepository: LogEventRepository,
   wSClient: WSClient,
   protected val dbConfigProvider: DatabaseConfigProvider,
   configInfoService: ConfigInfoService
@@ -46,6 +47,7 @@ class MetricsController @Inject()(
       osInfoRepository,
       runtimeInfoRepository,
       threadInfoRepository,
+      logEventRepository,
       wSClient,
       dbConfigProvider
     ),
