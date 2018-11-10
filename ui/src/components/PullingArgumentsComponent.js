@@ -13,11 +13,9 @@ export class PullingArgumentsComponent extends Component {
         };
         this.service = new ApiService();
         this.getStatuses();
-        console.log(this.state.statuses);
     }
 
     handleStopPullingData = (id) => {
-        console.log('stop pulling data: ' + id.address);
         this.service.stopPullingParam(this.createStopPullingData(id.address)).then(response => {
             this.getStatuses();
         }).catch((err) => {
@@ -134,7 +132,6 @@ export class PullingArgumentsComponent extends Component {
         this.setState({
             isPulling: !this.state.isPulling
         });
-        console.log('pulling: ' + this.state.isPulling);
     };
 
     getHealthStatusButton =() =>  {

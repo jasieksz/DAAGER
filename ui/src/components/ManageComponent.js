@@ -44,10 +44,6 @@ class ManageComponent extends Component {
         this.service.hello().then(response => console.log(response));
     }
 
-    handleStopPullingData() {
-        console.log('start/stop pulling data');
-    }
-
     verifyPullingAddress = () => {
         const  pullingInterval = document.getElementById("pullingInterval").value;
         const pullingAddressValue = document.getElementById("pullingAddress").value;
@@ -92,7 +88,6 @@ class ManageComponent extends Component {
 
     saveClusterAlias() {
         const clusterAliasValue = document.getElementById("clusterAliasValue").value;
-        console.log('save cluster alias: ' + clusterAliasValue);
         this.setState ({
             clusterAlias: clusterAliasValue
         });
@@ -117,11 +112,6 @@ class ManageComponent extends Component {
                                 className="btn btn-default manageButton"
                                 onClick={this.handleChangePullingAddress}
                         >Change Pulling Address
-                        </Button>
-                        <Button type="StopPullingData"
-                                className="btn btn-default"
-                                onClick={this.handleStopPullingData}
-                        >Stop
                         </Button>
                     </div>
                 </div>
