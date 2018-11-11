@@ -11,6 +11,7 @@
     "chart.js": "^2.7.2",
     "lodash": "^4.17.10",
     "react": "^16.3.2",
+    "react-bootstrap-table": "^4.3.1",
     "react-cookie": "^2.1.5",
     "react-dom": "^16.3.2",
     "react-progress-button": "^5.1.0",
