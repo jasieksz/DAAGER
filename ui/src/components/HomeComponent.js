@@ -38,16 +38,11 @@ class HomeComponent extends Component {
     };
 
     getNodeDetailInfo = (node) => {
-        console.log('this.state.nodesDetails: ' + this.state.nodesDetails[0].address);
-
-        console.log('node label: ' + node.label);
         const details = this.state.nodesDetails.filter(i => i.address === node.label);
-        if (details.length !== 0) {
-            this.setState({
-                modalData: details[0],
-                isModalOpen: true
-            });
-        }
+        this.setState({
+            modalData: details[0],
+            isModalOpen: true
+        });
     };
 
     createNodeInfoRequest = (address) => {
@@ -89,24 +84,17 @@ class HomeComponent extends Component {
     };
 
     getGraph = ()  => {
-        console.log('get graph ' + this.state.nodes);
-        console.log(this.state.edges);
         const graph = {nodes: this.state.nodes, edges: this.state.edges};
         graph.nodes.forEach( node => {
             const graphNode = this.state.nodesDetails.filter(i => i.address === node.label);
-            console.log('graph node' + graphNode);
-            console.log('graph node' + graphNode.nodeType);
-
-            if (graphNode.length !== 0) {
-                if (graphNode[0].nodeType === 'UNKNOWN') {
-                    node.color = '#d14578';
-                }
-                if (graphNode[0].nodeType === 'SATELLITE') {
-                    node.color = '#0A8A0A';
-                }
-                if (graphNode[0].nodeType === 'COMPUTE') {
-                    node.color = '#7931b7';
-                }
+            if (graphNode[0].nodeType === 'UNKNOWN') {
+                node.color = '#d14578';
+            }
+            if (graphNode[0].nodeType === 'SATELLITE') {
+                node.color = '#0A8A0A';
+            }
+            if (graphNode[0].nodeType === 'COMPUTE') {
+                node.color = '#7931b7';
             }
         });
 
