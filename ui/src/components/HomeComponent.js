@@ -20,6 +20,7 @@ class HomeComponent extends Component {
             isModalOpen: false,
             modalData: {},
             globalStateData: {},
+            nodesDetails: [],
         };
 
         this.service = new ApiService();
@@ -37,28 +38,28 @@ class HomeComponent extends Component {
     };
 
     getNodeDetailInfo = (node) => {
-        this.service.getNodeDetailInfo(this.createNodeInfoRequest(node.label)).then(response => {
+        console.log('this.state.nodesDetails: ' + this.state.nodesDetails[0].address);
+
+        console.log('node label: ' + node.label);
+        const details = this.state.nodesDetails.filter(i => i.address === node.label);
+        if (details.length !== 0) {
             this.setState({
-                modalData: response.data
+                modalData: details[0],
+                isModalOpen: true
             });
-            this.toggleModal();
-        }).catch((err) => {
-            console.log('error during getting node detail data');
-            console.log(err);
-        });
+        }
     };
 
-    // TODO add cluster management
-    createNodeInfoRequest(address) {
-        return {
+    createNodeInfoRequest = (address) => {
+    return {
             "address": address,
             "clusterAlias": "default"
         }
-    }
+    };
 
-    renderModal() {
+    renderModal = () => {
         return (
-            <Modal isOpen={this.state.isModalOpen}>
+            <Modal isOpen={this.state.isModalOpen} className={'modal-lg'}>
                 <ModalHeader>Info for node {this.state.modalData.address} </ModalHeader>
                     <ModalBody>
                         <Table>
@@ -67,16 +68,16 @@ class HomeComponent extends Component {
                                 <td> {this.state.modalData.address} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Last Message</th>
-                                <td> {this.state.modalData.lastMsg} </td>
+                                <th scope="row">Id</th>
+                                <td> {this.state.modalData.id} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Cpu</th>
-                                <td> {this.state.modalData.cpu} </td>
+                                <th scope="row">Node type</th>
+                                <td> {this.state.modalData.nodeType} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Memory</th>
-                                <td> {this.state.modalData.memory} </td>
+                                <th scope="row">Services</th>
+                                <td> {(this.state.modalData.services || []).join("\n")} </td>
                             </tr>
                         </Table>
                     </ModalBody>
@@ -85,10 +86,30 @@ class HomeComponent extends Component {
                     </ModalFooter>
                 </Modal>
         );
-    }
+    };
 
     getGraph = ()  => {
+        console.log('get graph ' + this.state.nodes);
+        console.log(this.state.edges);
         const graph = {nodes: this.state.nodes, edges: this.state.edges};
+        graph.nodes.forEach( node => {
+            const graphNode = this.state.nodesDetails.filter(i => i.address === node.label);
+            console.log('graph node' + graphNode);
+            console.log('graph node' + graphNode.nodeType);
+
+            if (graphNode.length !== 0) {
+                if (graphNode[0].nodeType === 'UNKNOWN') {
+                    node.color = '#d14578';
+                }
+                if (graphNode[0].nodeType === 'SATELLITE') {
+                    node.color = '#0A8A0A';
+                }
+                if (graphNode[0].nodeType === 'COMPUTE') {
+                    node.color = '#7931b7';
+                }
+            }
+        });
+
         return (
                 <Sigma graph={graph}
                        style={{maxWidth: "inherit", height: "inherit"}}
@@ -164,7 +185,8 @@ class HomeComponent extends Component {
             this.service.getGraph("default").then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
-                    edges: response.data[0].edges
+                    edges: response.data[0].edges,
+                    nodesDetails: response.data[0].nodesDetails
                 });
             }).catch(() => {
                 console.log('error during getting graph data');
