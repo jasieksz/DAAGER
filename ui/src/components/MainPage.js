@@ -79,7 +79,10 @@ class MainPage extends Component {
                         />
                     </TabPanel>
                     <TabPanel>
-                        <ClustersComponent/>
+                        <ClustersComponent
+                            pullingAddress={this.state.pullingAddress}
+                            savePullingInitData={this.handleSetInitPullingData}
+                        />
                     </TabPanel>
                 </Tabs>
             </div>
