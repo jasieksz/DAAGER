@@ -17,26 +17,3 @@
 .addNewClusterButton {
     float: right;
 }
-
-.inputForm {
-    margin: 5% 5% 10%;
-}
-
-.modalCloseButton {
-    display: block;
-}
-
-.progressButton {
-    margin-top: 5%;
-    height: 5%;
-    width: 20%;
-    size: 10px;
-    font-size: 10px;
-    color: #1c7430;
-    text-align: center;
-    margin-left: 45%;
-}
-
-.modalHeader {
-    display: block;
-}

@@ -92,6 +92,9 @@ class MainPage extends Component {
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
+                    <TabPanel>
+                        <ClustersComponent/>
+                    </TabPanel>
                 </Tabs>
             </div>
         );
