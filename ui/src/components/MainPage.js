@@ -3,6 +3,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import HomeComponent from "./HomeComponent";
 import ManageComponent from "./ManageComponent";
+import ClustersComponent from "./ClustersComponent";
 import GrafanaComponent from "./GrafanaComponent";
 import "../styles/MainPageComponent.css";
 import fontawesome from '@fortawesome/fontawesome'
@@ -55,7 +56,11 @@ class MainPage extends Component {
                             {fontawesome.library.add(faCog)}
                             Manage
                         </Tab>
-
+                        <Tab eventKey={4} title="clusters">
+                            <i className={"fas fa-cog fa-fw"}/>
+                            {fontawesome.library.add(faCog)}
+                            Clusters
+                        </Tab>
                     </TabList>
 
                     <TabPanel>
@@ -72,6 +77,9 @@ class MainPage extends Component {
                             pullingAddress={this.state.pullingAddress}
                             savePullingInitData={this.handleSetInitPullingData}
                         />
+                    </TabPanel>
+                    <TabPanel>
+                        <ClustersComponent/>
                     </TabPanel>
                 </Tabs>
             </div>
