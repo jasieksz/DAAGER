@@ -29,16 +29,12 @@ class GraphController @Inject()(
 )(implicit ec: ExecutionContext)
   extends AbstractController(cc) {
 
-  def getGraph(): Action[AnyContent] = Action.async { _ =>
-    graphService.getGraph.map(result => Ok(Json.toJson(Seq(result))))
+  def getGraph(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
+    graphService.getGraph(clusterAlias).map(result => Ok(Json.toJson(Seq(result))))
   }
 
-  def getGlobalState(): Action[AnyContent] = Action.async { _ =>
-    nodesInfoService.getGlobalState.map(res => Ok(Json.toJson(res)))
+  def getGlobalState(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
+    nodesInfoService.getGlobalState(clusterAlias).map(res => Ok(Json.toJson(res)))
   }
-
-  private def validateJson[A : Reads]: BodyParser[A] = parse.json.validate(
-    _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
-  )
 
 }

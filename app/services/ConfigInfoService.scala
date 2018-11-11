@@ -1,6 +1,5 @@
 package services
 
-import akka.util.Timeout
 import javax.inject.Inject
 import model.domain.ConfigInfo
 import play.api.Logger
@@ -9,13 +8,10 @@ import play.api.libs.ws.WSClient
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 class ConfigInfoService @Inject()(wsClient: WSClient) {
 
-  private val intervals: mutable.HashMap[String, Int] =
-    new mutable.HashMap[String, Int]()
-  private val timeout: Timeout    = 10 seconds
+  private val intervals           = new mutable.HashMap[String, Int]()
   var logger                      = Logger(getClass)
   private var baseAddress: String = new String
 
@@ -30,7 +26,6 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
       .url(address + "/configure")
       .post(Json.toJson(ConfigInfo(intervalValue, intervalValue, intervalValue, intervalValue)))
       .map { response =>
-        val statusText: String = response.statusText
         logger.info(response.body)
       }
   }
@@ -51,7 +46,6 @@ class ConfigInfoService @Inject()(wsClient: WSClient) {
         )
       )
       .map { response =>
-        val statusText: String = response.statusText
         logger.info(response.body)
       }
   }

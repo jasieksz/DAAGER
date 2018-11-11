@@ -1,4 +1,4 @@
-GET         /                             controllers.UiController.index()
+GET         /                                controllers.UiController.index()
 
 ###
 #  summary: get cookie with token
@@ -6,7 +6,7 @@ GET         /                             controllers.UiController.index()
 #    200:
 #      description: success
 ###
-GET         /api/hello                    controllers.PullingController.hello()
+GET         /api/hello                       controllers.PullingController.hello()
 
 ###
 #  summary: get graph of current age cluster
@@ -17,7 +17,7 @@ GET         /api/hello                    controllers.PullingController.hello()
 #       $ref: '#/definitions/model.domain.nodeGraph.Graph'
 #
 ###
-GET         /api/graph                    controllers.GraphController.getGraph()
+GET         /api/graph/:alias                controllers.GraphController.getGraph(alias: String)
 
 ###
 #  summary: get state of cluster
@@ -28,72 +28,76 @@ GET         /api/graph                    controllers.GraphController.getGraph()
 #       $ref: '#/definitions/model.domain.GlobalState'
 #
 ###
-GET         /api/global-state              controllers.GraphController.getGlobalState()
+GET         /api/global-state/:alias         controllers.GraphController.getGlobalState(alias: String)
 
 
 ###
-#  summary: get statuses of pulling workers
+#  summary: get statuses of pulling workers by cluster alias
 #  responses:
 #    200:
 #      description: success
 #      schema:
 #       $ref: '#/definitions/Seq[model.domain.PullerInfo]'
 ###
-GET         /api/pull/statuses            controllers.MetricsController.getStatuses()
+GET         /api/pull/statuses/:alias        controllers.ClustersController.getStatuses(alias: String)
 
 ###
 #  summary: start pulling
 #  parameters:
 #   - name: body
 #     schema:
-#       $ref: '#/definitions/controllers.StartRequest'
+#       $ref: '#/definitions/controllers.ClustersController.StartRequest'
 #  responses:
 #    200:
 #      description: success
 ###
-POST        /api/pull/start               controllers.MetricsController.startPulling()
+POST        /api/pull/start                  controllers.ClustersController.startPulling()
 
 
 ###
-#  summary: stop pulling of a worker identified by address
+#  summary: stop pulling of a worker identified by address and cluster alias
 #  parameters:
 #   - name: body
 #     schema:
-#       $ref: '#/definitions/actors.MetricsSupervisor.Stop'
+#       $ref: '#/definitions/actors.ClustersSupervisor.Stop'
 #  responses:
 #    200:
 #      description: success
 ###
-POST        /api/pull/stop                controllers.MetricsController.stopPuller()
+POST        /api/pull/stop                   controllers.ClustersController.stopPuller()
 
 ###
-#  summary: update pulling interval of a given worker
+#  summary: update pulling interval of a given worker in a cluster
 #  parameters:
 #   - name: body
 #     schema:
-#       $ref: '#/definitions/actors.MetricsSupervisor.UpdateInterval'
+#       $ref: '#/definitions/actors.ClustersSupervisor.UpdateInterval'
 #  responses:
 #    200:
 #      description: success
 ###
-POST        /api/pull/update              controllers.MetricsController.changeInterval()
+POST        /api/pull/update                 controllers.ClustersController.changeInterval()
 
 ###
 #  summary: check if given adress is valid
+#  parameters:
+#   - name: body
+#     schema:
+#       $ref: '#/definitions/controllers.PullingRequest'
 #  responses:
 #    200:
 #      description: success
 #    400:
 #      description: bad adress
 ###
-POST        /api/pull/verify              controllers.PullingController.verify()
+POST        /api/pull/verify                 controllers.PullingController.verify()
 
 
 ### NoDocs ###
-GET         /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+GET         /docs/swagger-ui/*file           controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
 
 ### NoDocs ###
-GET         /*file                        controllers.UiController.assetOrDefault(file)
+GET         /*file                           controllers.UiController.assetOrDefault(file)
 
 
 

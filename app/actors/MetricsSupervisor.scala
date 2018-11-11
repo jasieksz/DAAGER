@@ -6,13 +6,12 @@ import akka.actor.FSM.{CurrentState, SubscribeTransitionCallBack, Transition}
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import model.domain.PullerInfo
-import model.domain.metrics._
 import model.domain.metrics.NetworkInfo._
 import model.domain.metrics.OSInfo._
 import model.domain.metrics.RuntimeInfo._
 import model.domain.metrics.ThreadInfo._
+import model.domain.metrics._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import repositories.metrics._
 
@@ -20,34 +19,47 @@ object MetricsSupervisor {
 
   final case class Start(baseAddress: String, interval: Int)
 
-  final case object GetStatus
+  final case class GetStatus(receiver: ActorRef)
 
   final case object GetConfig
 
   final case class UpdateInterval(workerAddress: String, newInterval: Int)
 
-  object UpdateInterval {
-    implicit val format = Json.format[UpdateInterval]
-  }
-
   final case class Stop(workerAddress: String)
 
-  object Stop {
-    implicit val format = Json.format[Stop]
-  }
-
-  val name = "metrics-supervisor"
+  def props(
+    clusterAlias: String,
+    networkInfoRepository: NetworkInfoRepository,
+    osInfoRepository: OsInfoRepository,
+    runtimeInfoRepository: RuntimeInfoRepository,
+    threadInfoRepository: ThreadInfoRepository,
+    logEventRepository: LogEventRepository,
+    wSClient: WSClient,
+    dbConfigProvider: DatabaseConfigProvider
+  ) = Props(
+    new MetricsSupervisor(
+      clusterAlias,
+      networkInfoRepository,
+      osInfoRepository,
+      runtimeInfoRepository,
+      threadInfoRepository,
+      logEventRepository,
+      wSClient,
+      dbConfigProvider
+    )
+  )
 
 }
 
 class MetricsSupervisor(
+  clusterAlias: String,
   networkInfoRepository: NetworkInfoRepository,
   osInfoRepository: OsInfoRepository,
   runtimeInfoRepository: RuntimeInfoRepository,
   threadInfoRepository: ThreadInfoRepository,
   logEventRepository: LogEventRepository,
   wSClient: WSClient,
-  protected val dbConfigProvider: DatabaseConfigProvider
+  dbConfigProvider: DatabaseConfigProvider
 ) extends Actor {
 
   private val workers @ Seq(
@@ -133,8 +145,8 @@ class MetricsSupervisor(
           pullingAddress
         )
       )
-    case GetStatus =>
-      sender ! prepareStatuses(workers, actorStates, intervals)
+    case GetStatus(receiver) =>
+      receiver ! prepareStatuses(workers, actorStates, intervals)
     case GetConfig =>
       sender ! pullingAddress
     case UpdateInterval(address, newInterval) =>
@@ -185,7 +197,7 @@ class MetricsSupervisor(
           dbConfigProvider
         )
       ),
-      "networkInfoPuller"
+      this.clusterAlias ++ "_network_info_puller"
     )
     networkInfoPuller ! SubscribeTransitionCallBack(self)
 
@@ -198,7 +210,7 @@ class MetricsSupervisor(
             dbConfigProvider
           )
         ),
-        "osInfoPuller"
+        this.clusterAlias ++ "_os_info_puller"
       )
     osInfoPuller ! SubscribeTransitionCallBack(self)
 
@@ -210,7 +222,7 @@ class MetricsSupervisor(
           dbConfigProvider
         )
       ),
-      "runtimeInfoPuller"
+      this.clusterAlias ++ "_runtime_info_puller"
     )
     runtimeInfoPuller ! SubscribeTransitionCallBack(self)
 
@@ -223,7 +235,7 @@ class MetricsSupervisor(
             dbConfigProvider
           )
         ),
-        "threadInfoPuller"
+        this.clusterAlias ++ "_thread_info+puller"
       )
     threadInfoPuller ! SubscribeTransitionCallBack(self)
 
@@ -236,7 +248,7 @@ class MetricsSupervisor(
             dbConfigProvider
           )
         ),
-        "logPuller"
+        this.clusterAlias ++ "_log_puller"
       )
     logPuller ! SubscribeTransitionCallBack(self)
 
