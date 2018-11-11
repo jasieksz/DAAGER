@@ -1,12 +1,12 @@
 package model.domain
 
-import org.joda.time.DateTime
 import play.api.libs.json.Json
-import utils.DateTimeUtils.dateTimeFormat
 
 case class NodeDetails(
   address: String,
-  lastMsg: Option[DateTime],
+  id: String,
+  nodeType: String,
+  services: List[String]
 )
 
 object NodeDetails {
