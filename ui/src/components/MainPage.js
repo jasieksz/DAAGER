@@ -3,12 +3,14 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import HomeComponent from "./HomeComponent";
 import ManageComponent from "./ManageComponent";
+import ClustersComponent from "./ClustersComponent";
 import GrafanaComponent from "./GrafanaComponent";
 import "../styles/MainPageComponent.css";
 import fontawesome from '@fortawesome/fontawesome'
 import faHome from '@fortawesome/fontawesome-free-solid/faHome'
 import faCog from '@fortawesome/fontawesome-free-solid/faCog'
 import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar'
+import ApiService from "../services/ApiService";
 
 class MainPage extends Component {
 
@@ -17,20 +19,39 @@ class MainPage extends Component {
         this.handleSelect = this.handleSelect.bind(this);
         this.state = {
             key: 1,
+            clusterList : [],
             pullingAddress: '',
         };
-        this.handleSetInitPullingData = this.handleSetInitPullingData.bind(this);
-    }
-
-    handleSetInitPullingData(pullAddr) {
-        this.setState({
-            pullingAddress: pullAddr,
-        });
+        this.service = new ApiService();
+        this.getClusterList();
     }
 
     handleSelect(key) {
         this.setState({ key });
     }
+
+    handleAddNewPullingData = (pullingAddress) => {
+        console.log('main page: add new pulling data' + pullingAddress);
+        this.setState({
+            pullingAddress: pullingAddress,
+        });
+        this.getClusterList();
+    };
+
+    getClusterList = () => {
+        this.service.getAllClusters().then( (response) => {
+            console.log('get cluster list');
+            if (response.data.length !== 0 ) {
+                this.setState({
+                    clusterList: response.data,
+                    pullingAddress: response.data[0]
+                });
+            }
+        }).catch((er) => {
+            this.setState({buttonState: 'error'});
+            console.log('error during getting all clusters' + er);
+        });
+    };
 
     render() {
         return (
@@ -55,12 +76,17 @@ class MainPage extends Component {
                             {fontawesome.library.add(faCog)}
                             Manage
                         </Tab>
-
+                        <Tab eventKey={4} title="clusters">
+                            <i className={"fas fa-cog fa-fw"}/>
+                            {fontawesome.library.add(faCog)}
+                            Clusters
+                        </Tab>
                     </TabList>
 
                     <TabPanel>
                         <HomeComponent
-                            pullingAddress={this.state.pullingAddress}/>
+                            clusterList={this.state.clusterList}
+                        />
                     </TabPanel>
                     <TabPanel>
                         <GrafanaComponent
@@ -69,8 +95,15 @@ class MainPage extends Component {
                     </TabPanel>
                     <TabPanel>
                         <ManageComponent
-                            pullingAddress={this.state.pullingAddress}
-                            savePullingInitData={this.handleSetInitPullingData}
+                            savePullingInitData={this.handleAddNewPullingData}
+                            clusterList={this.state.clusterList}
+                        />
+                    </TabPanel>
+                    <TabPanel>
+                        <ClustersComponent
+                            savePullingInitData={this.handleAddNewPullingData}
+                            getClusterList={this.getClusterList}
+                            clusterList={this.state.clusterList}
                         />
                     </TabPanel>
                 </Tabs>

@@ -48,26 +48,23 @@ export class PullingArgumentsComponent extends Component {
         });
     };
 
-    //TODO cluster management
     createIntervalUpdate(address, interval) {
         return {
             "workerAddress": address,
             "newInterval": interval,
-            "clusterAlias": "default"
+            "clusterAlias": this.props.pullingCluster.alias
         }
     }
 
-    //TODO cluster management
     createStopPullingData(address) {
         return {
             "workerAddress": address,
-            "clusterAlias": "default"
+            "clusterAlias": this.props.pullingCluster.alias
         }
     }
 
     getStatuses = () => {
-        // TODO cluster management
-        this.service.getStatuses("default").then(response => {
+        this.service.getStatuses(this.props.pullingCluster.alias).then(response => {
             this.setState({
                 statuses: response.data
             });

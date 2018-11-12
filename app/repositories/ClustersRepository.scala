@@ -19,6 +19,9 @@ class ClustersRepository {
 
   def findExistingByAlias(clusterAlias: String): DBIO[Cluster] = query.filter(_.alias === clusterAlias).result.head
 
+  def exists(clusterId: String, alias: String): DBIO[Boolean] =
+    query.filter(cluster => cluster.clusterId === clusterId || cluster.alias === clusterId).exists.result
+
   def markInactiveByAlias(alias: String): DBIO[Unit] =
     query.filter(_.alias === alias).map(_.isActive).update(false) >> DBIO.successful(())
 

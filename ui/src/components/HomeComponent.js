@@ -15,16 +15,19 @@ class HomeComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
+            pullingCluster: this.props.clusterList[0],
             nodes: [],
             edges: [],
             isModalOpen: false,
             modalData: {},
             globalStateData: {},
+            clustersButtonExpanded: true,
             nodesDetails: [],
         };
 
         this.service = new ApiService();
-        if (this.props.pullingAddress !== '') {
+
+        if (this.state.pullingCluster !== undefined) {
             this.getGraphData();
             this.getGlobalData();
         }
@@ -48,7 +51,7 @@ class HomeComponent extends Component {
     createNodeInfoRequest = (address) => {
     return {
             "address": address,
-            "clusterAlias": "default"
+            "clusterAlias": this.state.pullingCluster.alias
         }
     };
 
@@ -120,8 +123,7 @@ class HomeComponent extends Component {
     }
 
     getGlobalData = () => {
-        //TODO cluster management
-        this.service.getGlobalState("default").then(response => {
+        this.service.getGlobalState(this.state.pullingCluster.alias).then(response => {
             this.setState({
                 globalStateData: response.data
             });
@@ -165,10 +167,11 @@ class HomeComponent extends Component {
         );
     }
 
-    //TODO cluster management
     getGraphData = () => {
-        if (this.props.pullingAddress !== '') {
-            this.service.getGraph("default").then(response => {
+        console.log('get graph: ' + this.state.pullingCluster.alias);
+        if (this.state.pullingCluster !== undefined) {
+            console.log('get graph: ' + this.state.pullingCluster.alias);
+            this.service.getGraph(this.state.pullingCluster.alias).then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
                     edges: response.data[0].edges,
@@ -180,11 +183,39 @@ class HomeComponent extends Component {
         }
     };
 
+    handleClustersButtonChange= () => {
+        this.setState({
+            clustersButtonExpanded: true
+        });
+    };
+
+    renderChoooseClusterButton = () => {
+        return (
+        <div className="dropdown show chooseClustersButton">
+            <a className="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded={this.state.clustersButtonExpanded}
+            onClick={this.handleClustersButtonChange}>
+                Dropdown link
+            </a>
+
+            <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <a className="dropdown-item" href="#">Cluster1</a>
+                <a className="dropdown-item" href="#">Cluster2</a>
+                <a className="dropdown-item" href="#">Cluster3</a>
+            </div>
+        </div>
+        );
+
+    };
+
     render() {
-        if (this.props.pullingAddress !== '') {
+        if (this.props.clusterList.length !== 0) {
             return (
                 <div>
-                    <h2 className={'tabTitle'}>Home</h2>
+                    <div className={'header'}>
+                        {this.renderChoooseClusterButton()}
+                        <h2 className={'tabTitle'}>Home</h2>
+                    </div>
                     <div className={'homeComponents'}>
                         {this.renderInfo()}
                         {(this.state.nodes.length) ? this.renderGraph() : <div/>}
@@ -194,7 +225,7 @@ class HomeComponent extends Component {
         } else {
             return (
                 <Alert color={"danger"} className={'tabTitle'}>
-                    Go to Manage Tab and set pulling address
+                    Go to Clusters Tab and set pulling address
                 </Alert>
             )
         }

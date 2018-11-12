@@ -1,102 +1,30 @@
 import React, { Component } from 'react';
 import '../styles/ManageComponent.css';
 import { Button } from 'reactstrap';
-import ProgressButton from 'react-progress-button'
 import "../../node_modules/react-progress-button/react-progress-button.css";
 import ApiService from "../services/ApiService"
 import { PullingArgumentsComponent } from "./PullingArgumentsComponent";
+import { Alert } from 'reactstrap';
 class ManageComponent extends Component {
 
     constructor(props, context) {
         super(props, context);
         this.state = {
-            pullingAddress: this.props.pullingAddress,
+            pullingCluster: this.props.clusterList[0],
             isPulling: false,
-            getPullingAddress: true,
-            buttonState: '',
-            clusterAlias: '',
         };
 
         this.service = new ApiService();
-        this.checkIfAlreadyPulling();
-        this.saveInitPullingData = this.saveInitPullingData.bind(this);
-
-        this.handleChangePullingAddress = this.handleChangePullingAddress.bind(this);
-        this.showPullingAddress = this.showPullingAddress.bind(this);
-        this.saveClusterAlias = this.saveClusterAlias.bind(this);
     }
 
-    checkIfAlreadyPulling = ()  => {
-        // TODO cluster management
-        this.service.getGlobalState("default").then( (response) => {
-            if (response.data.status === 'OK') {
-                this.setState({
-                    pullingAddress: response.data.baseAddress,
-                    getPullingAddress: false
-                });
-                this.props.savePullingInitData(response.data.baseAddress);
-            }
-        }).catch((er) => {
-            console.log('not set ' + er);
-        });
-    };
-
-    componentDidMount() {
-        this.service.hello().then(response => console.log(response));
-    }
-
-    verifyPullingAddress = () => {
-        const  pullingInterval = document.getElementById("pullingInterval").value;
-        const pullingAddressValue = document.getElementById("pullingAddress").value;
-        if (pullingInterval === ''){
-            alert('pulling interval cannot be empty');
-            return;
-        }
-        this.setState({
-            buttonState: 'loading'
-        });
-        this.service.verify({value: pullingAddressValue}).then(clusterId => {
-            this.setState({buttonState: 'success'});
-            this.saveInitPullingData(pullingAddressValue, pullingInterval, clusterId.data)
-        }).catch((er) => {
-            console.log(er);
-            alert("Something is wrong with the address");
-            this.setState({buttonState: 'error'})
-        });
-    };
-
-    saveInitPullingData(pullingAddress, pullingInterval, clusterId) {
-        // TODO cluster management
-        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: "default"}).then(() => {
-            this.setState({
-                pullingAddress: pullingAddress,
-                getPullingAddress: false
-            });
-            this.props.savePullingInitData(pullingAddress);
-        }).catch((er) => {
-            this.setState({buttonState: 'error'});
-            console.log('error during startuing pulling data ' + er);
-        });
-    };
-
-    handleChangePullingAddress() {
+    handleChangePullingAddress = () => {
         alert('changing pulling address');
         this.setState({
-            pullingAddress: '',
-            getPullingAddress: true,
-            buttonState: ''
+            pullingCluster: '',
         });
-    }
+    };
 
-    saveClusterAlias() {
-        const clusterAliasValue = document.getElementById("clusterAliasValue").value;
-        this.setState ({
-            clusterAlias: clusterAliasValue
-        });
-        // send the alias value to backend
-    }
-
-    showPullingAddress() {
+    showPullingAddress =() => {
         return (
             <div>
                 <div className={'pullingDataAddressBox'}>
@@ -105,7 +33,7 @@ class ManageComponent extends Component {
                         <div className="col-sm-6">
                             <input type="text"
                                    className="form-control"
-                                   value={this.state.pullingAddress}
+                                   value={this.state.pullingCluster.baseAddress}
                             />
                         </div>
                     </div>
@@ -124,71 +52,32 @@ class ManageComponent extends Component {
                             <input type="text"
                                    className="form-control"
                                    id={'clusterAliasValue'}
-                                   placeholder={this.state.clusterAlias}
+                                   placeholder={this.state.pullingCluster.alias}
                             />
                         </div>
                     </div>
-                    <div className={'manageButtons'}>
-                    <Button type="SaveClusterAlias"
-                            className="btn btn-default"
-                            onClick={this.saveClusterAlias}
-                    >Save Cluster alias
-                    </Button>
-                    </div>
-                        </div>
-                <PullingArgumentsComponent/>
+                </div>
+                <PullingArgumentsComponent
+                    pullingCluster={this.state.pullingCluster}
+                />
             </div>
         )
-    }
-
-    getPullingAddress() {
-        return (
-            <div className={'inputForm'}>
-                <div className="form-group row">
-                    <label htmlFor="pullingAddress" className="col-sm-4 col-form-label">Pulling data address</label>
-                    <div className="col-sm-8">
-                        <input type="text"
-                               className="form-control"
-                               id="pullingAddress"
-                               placeholder="enter pulling address"
-                        />
-                    </div>
-                </div>
-                <div className="form-group row">
-                <label htmlFor="pullingInterval" className="col-sm-4 col-form-label">Pulling data interval</label>
-                    <div className="col-sm-8">
-                        <input type="number"
-                               className="form-control"
-                               id="pullingInterval"
-                               placeholder="enter pulling interval"
-                        />
-                    </div>
-                </div>
-                <div className={'progressButton'}>
-                    <ProgressButton
-                        onClick={this.verifyPullingAddress}
-                        state={this.state.buttonState}
-                    >Save
-                    </ProgressButton> :
-                </div>
-            </div>
-        );
-    }
-
-    renderPullingAddress() {
-        if (this.state.pullingAddress === '') {
-            return this.getPullingAddress();
-        } else {
-            return this.showPullingAddress();
-        }
-    }
+    };
 
     render() {
-        return (
-            <div>
-                {this.renderPullingAddress()}
-            </div>
-        );
+        if (this.props.clusterList.length !== 0) {
+            return (
+                <div>
+                    {this.showPullingAddress()}
+                </div>
+            );
+        } else {
+            return (
+                <Alert color={"danger"} className={'tabTitle'}>
+                    Go to Clusters Tab and set pulling address
+                </Alert>
+            )
+        }
     }
 }
 
