@@ -9,11 +9,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GraphService @Inject()(nodesInfoService: NodesInfoService) {
 
-  def getGraph()(implicit ec: ExecutionContext): Future[Graph] = {
+  def getGraph(clusterAlias: String)(implicit ec: ExecutionContext): Future[Graph] = {
     for {
-      addresses <- nodesInfoService.getNodesAddresses
-      details   <- nodesInfoService.getNodesDetails
+      details <- nodesInfoService.getNodesDetails(clusterAlias)
     } yield {
+      val addresses = details.map(_.address)
       createGraph(addresses, details)
     }
   }

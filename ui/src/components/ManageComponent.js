@@ -27,7 +27,8 @@ class ManageComponent extends Component {
     }
 
     checkIfAlreadyPulling = ()  => {
-        this.service.getGloalState().then( (response) => {
+        // TODO cluster management
+        this.service.getGlobalState("default").then( (response) => {
             if (response.data.status === 'OK') {
                 this.setState({
                     pullingAddress: response.data.baseAddress,
@@ -54,9 +55,9 @@ class ManageComponent extends Component {
         this.setState({
             buttonState: 'loading'
         });
-        this.service.verify({value: pullingAddressValue}).then(() => {
+        this.service.verify({value: pullingAddressValue}).then(clusterId => {
             this.setState({buttonState: 'success'});
-            this.saveInitPullingData(pullingAddressValue, pullingInterval)
+            this.saveInitPullingData(pullingAddressValue, pullingInterval, clusterId.data)
         }).catch((er) => {
             console.log(er);
             alert("Something is wrong with the address");
@@ -64,8 +65,9 @@ class ManageComponent extends Component {
         });
     };
 
-    saveInitPullingData(pullingAddress, pullingInterval) {
-        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval) }).then(() => {
+    saveInitPullingData(pullingAddress, pullingInterval, clusterId) {
+        // TODO cluster management
+        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: "default"}).then(() => {
             this.setState({
                 pullingAddress: pullingAddress,
                 getPullingAddress: false

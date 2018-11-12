@@ -48,9 +48,11 @@ class HomeComponent extends Component {
         });
     };
 
+    // TODO add cluster management
     createNodeInfoRequest(address) {
         return {
-            "address": address
+            "address": address,
+            "clusterAlias": "default"
         }
     }
 
@@ -111,7 +113,8 @@ class HomeComponent extends Component {
     }
 
     getGlobalData = () => {
-        this.service.getGloalState().then( response => {
+        //TODO cluster management
+        this.service.getGlobalState("default").then(response => {
             this.setState({
                 globalStateData: response.data
             });
@@ -155,9 +158,10 @@ class HomeComponent extends Component {
         );
     }
 
+    //TODO cluster management
     getGraphData = () => {
         if (this.props.pullingAddress !== '') {
-            this.service.getGraph().then(response => {
+            this.service.getGraph("default").then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
                     edges: response.data[0].edges

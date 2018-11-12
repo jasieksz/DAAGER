@@ -31,8 +31,8 @@ class PullingController @Inject()(
       val address = request.body.value
       Json.toJson(PullingRequest("asd"))
       ageConnectionService
-        .isReachable(address)
-        .map(reachable => if (reachable) Ok("") else BadRequest)
+        .getClusterId(address)
+        .map(cluster_id => if (cluster_id.isDefined) Ok(cluster_id.get) else BadRequest)
     }
 
   @AddCSRFToken

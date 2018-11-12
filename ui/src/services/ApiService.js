@@ -15,13 +15,11 @@ class ApiService {
 
     verify = (obj) => this.api.post("api/pull/verify", obj, {timeout: 10000});
 
-    startPulling = (obj) => this.api.post("api/pull/start", obj, {timeout: 10000});
-
-    getGraph = () => this.api.get("/api/graph", {timeout: 10000});
+    getGraph = (clusterAlias) => this.api.get("/api/graph/" + clusterAlias, {timeout: 10000});
 
     start = (obj) => this.api.post("/api/pull/start", obj);
 
-    getStatuses = () => this.api.get("api/pull/statuses");
+    getStatuses = (clusterAlias) => this.api.get("api/pull/statuses/" + clusterAlias);
 
     updateInterval = (obj) => this.api.post("api/pull/update", obj);
 
@@ -29,7 +27,7 @@ class ApiService {
 
     getNodeDetailInfo = (obj) => this.api.post("/api/node-details", (obj));
 
-    getGloalState = () => this.api.get("api/global-state");
+    getGlobalState = (clusterAlias) => this.api.get("api/global-state/" + clusterAlias);
 }
 
 export default ApiService;
