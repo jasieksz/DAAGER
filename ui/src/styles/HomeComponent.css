@@ -1,7 +1,7 @@
 .tabTitle {
     text-align: center;
-    margin-top: 3%;
-    margin-bottom: 3%;
+    /*margin-top: 3%;*/
+    /*margin-bottom: 3%;*/
 }
 
 .homeComponents {
@@ -29,4 +29,13 @@
 
 .homeInfoText {
     margin: 5%;
+}
+
+.chooseClustersButton {
+    float:right;
+    margin-right: 5%;
+}
+
+.header {
+    display: inline;
 }
