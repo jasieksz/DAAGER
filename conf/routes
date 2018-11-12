@@ -9,6 +9,16 @@ GET         /                                controllers.UiController.index()
 GET         /api/hello                       controllers.PullingController.hello()
 
 ###
+#  summary: get active clusters
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#       $ref: '#/definitions/Seq[model.domain.Cluster]'
+###
+GET         /api/clusters                      controllers.ClustersController.getActiveClusters()
+
+###
 #  summary: get graph of current age cluster
 #  responses:
 #    200:

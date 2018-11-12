@@ -45,7 +45,7 @@ class ClustersController @Inject()(
 
   private val timeout: Timeout = 4 seconds
 
-  def getActiveClusters: Action[AnyContent] = Action.async {
+  def getActiveClusters(): Action[AnyContent] = Action.async {
     db.run(clustersRepository.findActive()).map(res => Ok(Json.toJson(res)))
   }
 
