@@ -14,10 +14,6 @@ class ClustersComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            clusterList: [{address: 'asd', clusterAlias: 'dfg'}, {
-                address: 'qwe',
-                clusterAlias: 'dwwwfg'
-            }, {address: '111asd', clusterAlias: '222dfg'}],
             addNewCluster: false,
             buttonState: '',
         };
@@ -130,18 +126,13 @@ class ClustersComponent extends Component {
                 <ModalFooter>
                     <Button className={'modalCloseButton'} color="secondary"
                             onClick={this.cancelAddNewCluster}>Close</Button>
-                    {/*<Button type="success"*/}
-                    {/*className="btn btn-default"*/}
-                    {/*onClick={() => this.saveAddNewCluster()}*/}
-                    {/*>Save*/}
-                    {/*</Button>*/}
                 </ModalFooter>
             </Modal>
         );
     };
 
     createTableData = () => {
-        return this.state.clusterList.map(i =>
+        return this.props.clusterList.map(i =>
             <tr>
                 <th scope="row">{i.address}</th>
                 <td> {i.clusterAlias} </td>

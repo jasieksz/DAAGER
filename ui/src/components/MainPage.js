@@ -19,6 +19,10 @@ class MainPage extends Component {
         this.state = {
             key: 1,
             pullingAddress: '',
+            clusterList: [{address: 'asd', clusterAlias: 'dfg'}, {
+                address: 'qwe',
+                clusterAlias: 'dwwwfg'
+            }, {address: '111asd', clusterAlias: '222dfg'}],
         };
         this.handleSetInitPullingData = this.handleSetInitPullingData.bind(this);
     }
@@ -65,7 +69,9 @@ class MainPage extends Component {
 
                     <TabPanel>
                         <HomeComponent
-                            pullingAddress={this.state.pullingAddress}/>
+                            pullingAddress={this.state.pullingAddress}
+                            clusterList={this.state.clusterList}
+                        />
                     </TabPanel>
                     <TabPanel>
                         <GrafanaComponent
@@ -76,12 +82,14 @@ class MainPage extends Component {
                         <ManageComponent
                             pullingAddress={this.state.pullingAddress}
                             savePullingInitData={this.handleSetInitPullingData}
+                            clusterList={this.state.clusterList}
                         />
                     </TabPanel>
                     <TabPanel>
                         <ClustersComponent
                             pullingAddress={this.state.pullingAddress}
                             savePullingInitData={this.handleSetInitPullingData}
+                            clusterList={this.state.clusterList}
                         />
                     </TabPanel>
                 </Tabs>

@@ -20,6 +20,7 @@ class HomeComponent extends Component {
             isModalOpen: false,
             modalData: {},
             globalStateData: {},
+            clustersButtonExpanded: true,
         };
 
         this.service = new ApiService();
@@ -168,11 +169,43 @@ class HomeComponent extends Component {
         }
     };
 
+    getClusterList = () => {
+        //request
+    };
+
+    handleClustersButtonChange= () => {
+        this.setState({
+            clustersButtonExpanded: true
+        });
+    };
+
+    renderChoooseClusterButton = () => {
+        return (
+        <div className="dropdown show chooseClustersButton">
+            <a className="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded={this.state.clustersButtonExpanded}
+            onClick={this.handleClustersButtonChange}>
+                Dropdown link
+            </a>
+
+            <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <a className="dropdown-item" href="#">Action</a>
+                <a className="dropdown-item" href="#">Another action</a>
+                <a className="dropdown-item" href="#">Something else here</a>
+            </div>
+        </div>
+        );
+
+    };
+
     render() {
         if (this.props.pullingAddress !== '') {
             return (
                 <div>
-                    <h2 className={'tabTitle'}>Home</h2>
+                    <div className={'header'}>
+                        {this.renderChoooseClusterButton()}
+                        <h2 className={'tabTitle'}>Home</h2>
+                    </div>
                     <div className={'homeComponents'}>
                         {this.renderInfo()}
                         {(this.state.nodes.length) ? this.renderGraph() : <div/>}
