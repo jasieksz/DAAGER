@@ -89,11 +89,9 @@ class HomeComponent extends Component {
             const graphNode = this.state.nodesDetails.filter(i => i.address === node.label);
             if (graphNode[0].nodeType === 'UNKNOWN') {
                 node.color = '#d14578';
-            }
-            if (graphNode[0].nodeType === 'SATELLITE') {
+            } else if (graphNode[0].nodeType === 'SATELLITE') {
                 node.color = '#0A8A0A';
-            }
-            if (graphNode[0].nodeType === 'COMPUTE') {
+            } else if (graphNode[0].nodeType === 'COMPUTE') {
                 node.color = '#7931b7';
             }
         });
