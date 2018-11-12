@@ -71,7 +71,6 @@ class ClustersComponent extends Component {
         });
     };
 
-    //add here aliasValue
     saveInitPullingData(pullingAddress, pullingInterval, clusterId, clusterAlias) {
         // TODO cluster management
         this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: clusterAlias}).then(() => {
