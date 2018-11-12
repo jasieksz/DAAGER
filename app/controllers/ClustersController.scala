@@ -54,8 +54,11 @@ class ClustersController @Inject()(
     val updatedAddress = if (address.startsWith("http://")) address else "http://" + address
     val cluster        = Cluster(request.body.clusterId, request.body.alias, updatedAddress)
     for {
-      response <- Patterns.ask(clustersSupervisor, AddCluster(cluster, request.body.interval), timeout)
-      result   <- handleSupervisorResponse(response, cluster, updatedAddress, request.body.interval)
+      clusterExists <- db.run(clustersRepository.exists(cluster.clusterId, cluster.alias))
+      supervisorResponse <- if (!clusterExists)
+        Patterns.ask(clustersSupervisor, AddCluster(cluster, request.body.interval), timeout)
+      else Future.successful(())
+      result <- handleSupervisorResponse(supervisorResponse, cluster, updatedAddress, request.body.interval)
     } yield result
   }
 
@@ -64,7 +67,7 @@ class ClustersController @Inject()(
       case Done =>
         configInfoService.sendInitialConfigInfo(updatedAddress, interval)
         db.run(clustersRepository.save(cluster.copy(isActive = true))).map(_ => Ok(""))
-      case _ => Future.successful(BadRequest)
+      case _ => Future.successful(BadRequest("Cluster exists"))
     }
 
   def getStatuses(clusterAlias: String): Action[AnyContent] = Action.async {

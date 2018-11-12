@@ -1,8 +1,8 @@
 package actors
 import actors.ClustersSupervisor._
 import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorRef, OneForOneStrategy, PoisonPill, Props, SupervisorStrategy}
-import model.domain.{Cluster, PullerInfo}
+import akka.actor.{ Actor, ActorRef, OneForOneStrategy, PoisonPill, Props, SupervisorStrategy }
+import model.domain.{ Cluster, PullerInfo }
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.Json
 import repositories.ClustersRepository
