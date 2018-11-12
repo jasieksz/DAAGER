@@ -83,7 +83,6 @@ class ClustersSupervisor(
       cluster.alias + "_metrics_supervisor"
     )
     supervisor ! MetricsSupervisor.Start(cluster.baseAddress, interval)
-    clustersRepository.save(cluster.copy(isActive = true))
     sender ! Done
     supervisor
   }

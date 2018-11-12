@@ -1,21 +1,21 @@
 package controllers
 
 import actors.ClustersSupervisor
-import actors.ClustersSupervisor.AddCluster
+import actors.ClustersSupervisor.{ AddCluster, Done }
 import akka.actor._
 import akka.pattern.Patterns
 import akka.util.Timeout
 import controllers.ClustersController.StartRequest
 import javax.inject._
-import model.domain.{Cluster, PullerInfo}
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.json.{JsError, Json, Reads}
+import model.domain.{ Cluster, PullerInfo }
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import play.api.libs.json.{ JsError, Json, Reads }
 import play.api.mvc._
 import repositories.ClustersRepository
-import services.{ConfigInfoService, MetricsSupervisorCreationService}
+import services.{ ConfigInfoService, MetricsSupervisorCreationService }
 import utils.DaagerPostgresProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -53,9 +53,17 @@ class ClustersController @Inject()(
     val address        = request.body.baseAddress
     val updatedAddress = if (address.startsWith("http://")) address else "http://" + address
     val cluster        = Cluster(request.body.clusterId, request.body.alias, updatedAddress)
-    clustersSupervisor ! AddCluster(cluster, request.body.interval)
-    configInfoService.sendInitialConfigInfo(updatedAddress, request.body.interval)
-    db.run(clustersRepository.save(cluster)).map(_ => Ok(""))
+    for {
+      response <- Patterns.ask(clustersSupervisor, AddCluster(cluster, request.body.interval), timeout)
+      result <- handleSupervisorResponse(response, cluster, updatedAddress, request.body.interval)
+    } yield result
+  }
+
+  def handleSupervisorResponse(response: Any, cluster:Cluster, updatedAddress: String, interval: Int): Future[Result] = response match {
+    case Done =>
+      configInfoService.sendInitialConfigInfo(updatedAddress, interval)
+      db.run(clustersRepository.save(cluster.copy(isActive = true))).map(_ => Ok(""))
+    case _ => Future.successful(BadRequest)
   }
 
   def getStatuses(clusterAlias: String): Action[AnyContent] = Action.async {
