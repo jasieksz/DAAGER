@@ -218,7 +218,7 @@ class HomeComponent extends Component {
         } else {
             return (
                 <Alert color={"danger"} className={'tabTitle'}>
-                    Go to Manage Tab and set pulling address
+                    Go to Clusters Tab and set pulling address
                 </Alert>
             )
         }

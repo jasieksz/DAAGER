@@ -20,12 +20,7 @@ class ClustersComponent extends Component {
         };
 
         this.service = new ApiService();
-        this.checkIfAlreadyPulling();
     }
-
-    checkIfAlreadyPulling = ()  => {
-        this.props.getClusterList();
-    };
 
     deletePullingAddress = (cluster) => {
 
@@ -34,12 +29,11 @@ class ClustersComponent extends Component {
     cancelAddNewCluster = () => {
         this.setState({
             addNewCluster: false,
-
         })
     };
 
     componentDidMount() {
-        this.service.hello().then(response => console.log(response));
+        this.service.hello().then();
     }
 
     addNewCluster = () => {
@@ -57,14 +51,21 @@ class ClustersComponent extends Component {
             alert('pulling interval cannot be empty');
             return;
         }
+        if (clusterAliasValue === ''){
+            alert('cluster alias cannot be empty');
+            return;
+        }
         this.setState({
             buttonState: 'loading'
         });
         this.service.verify({value: pullingAddressValue}).then(clusterId => {
-            this.setState({buttonState: 'success'});
+            this.setState({
+                buttonState: 'success',
+                addNewCluster: false
+            });
             this.saveInitPullingData(pullingAddressValue, pullingIntervalValue, clusterId.data, clusterAliasValue)
         }).catch((er) => {
-            console.log(er);
+            console.error(er);
             alert("Something is wrong with the address");
             this.setState({buttonState: 'error'})
         });
@@ -77,7 +78,7 @@ class ClustersComponent extends Component {
             this.props.savePullingInitData(pullingAddress);
         }).catch((er) => {
             this.setState({buttonState: 'error'});
-            console.log('error during starting pulling data ' + er);
+            console.error('error during starting pulling data ' + er);
         });
     };
 
