@@ -15,6 +15,7 @@ class HomeComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
+            pullingCluster: this.props.clusterList[0],
             nodes: [],
             edges: [],
             isModalOpen: false,
@@ -23,8 +24,10 @@ class HomeComponent extends Component {
             clustersButtonExpanded: true,
         };
 
+        console.log('cluster list home' + this.props.clusterList[0]);
         this.service = new ApiService();
-        if (this.props.pullingAddress !== '') {
+
+        if (this.state.pullingCluster !== undefined) {
             this.getGraphData();
             this.getGlobalData();
         }
@@ -49,11 +52,10 @@ class HomeComponent extends Component {
         });
     };
 
-    // TODO add cluster management
     createNodeInfoRequest(address) {
         return {
             "address": address,
-            "clusterAlias": "default"
+            "clusterAlias": this.state.pullingCluster.alias
         }
     }
 
@@ -114,8 +116,8 @@ class HomeComponent extends Component {
     }
 
     getGlobalData = () => {
-        //TODO cluster management
-        this.service.getGlobalState("default").then(response => {
+        console.log('get global data: ' + this.state.pullingCluster.alias);
+        this.service.getGlobalState(this.state.pullingCluster.alias).then(response => {
             this.setState({
                 globalStateData: response.data
             });
@@ -159,10 +161,11 @@ class HomeComponent extends Component {
         );
     }
 
-    //TODO cluster management
     getGraphData = () => {
-        if (this.props.pullingAddress !== '') {
-            this.service.getGraph("default").then(response => {
+        console.log('get graph: ' + this.state.pullingCluster.alias);
+        if (this.state.pullingCluster !== undefined) {
+            console.log('get graph: ' + this.state.pullingCluster.alias);
+            this.service.getGraph(this.state.pullingCluster.alias).then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
                     edges: response.data[0].edges

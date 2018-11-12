@@ -40,11 +40,13 @@ class MainPage extends Component {
 
     getClusterList = () => {
         this.service.getAllClusters().then( (response) => {
-            console.log('getClusters: ' + response);
-            console.log('getClusters: ' + response.data);
-            // this.setState({
-            //     clusterList:
-            // })
+            console.log('get cluster list');
+            if (response.data.length !== 0 ) {
+                this.setState({
+                    clusterList: response.data,
+                    pullingAddress: response.data[0]
+                });
+            }
         }).catch((er) => {
             this.setState({buttonState: 'error'});
             console.log('error during getting all clusters' + er);
@@ -83,7 +85,6 @@ class MainPage extends Component {
 
                     <TabPanel>
                         <HomeComponent
-                            pullingAddress={this.state.pullingAddress}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
@@ -101,6 +102,7 @@ class MainPage extends Component {
                     <TabPanel>
                         <ClustersComponent
                             savePullingInitData={this.handleAddNewPullingData}
+                            getClusterList={this.getClusterList}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>

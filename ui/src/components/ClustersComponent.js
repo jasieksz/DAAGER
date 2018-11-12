@@ -7,9 +7,7 @@ import '../styles/ClustersComponent.css';
 import ProgressButton from "react-progress-button";
 import fontawesome from "@fortawesome/fontawesome";
 import {faTrashAlt} from "@fortawesome/fontawesome-free-solid";
-import ApiService from "../services/ApiService";
 import '../styles/ClustersComponent.css';
-
 
 
 class ClustersComponent extends Component {
@@ -26,18 +24,7 @@ class ClustersComponent extends Component {
     }
 
     checkIfAlreadyPulling = ()  => {
-        // TODO cluster management
-        this.service.getGlobalState("default").then( (response) => {
-            if (response.data.status === 'OK') {
-                this.props.savePullingInitData(response.data.baseAddress);
-            }
-        }).catch((er) => {
-            console.log('not set ' + er);
-        });
-    };
-
-    getAllPullingCLusters = () => {
-      //
+        this.props.getClusterList();
     };
 
     deletePullingAddress = (cluster) => {
@@ -152,8 +139,9 @@ class ClustersComponent extends Component {
     createTableData = () => {
         return this.props.clusterList.map(i =>
             <tr>
-                <th scope="row">{i.address}</th>
-                <td> {i.clusterAlias} </td>
+                <th scope="row">{i.baseAddress}</th>
+                <td> {i.alias} </td>
+                <td> {i.clusterId} </td>
                 <td>
                     <Button className="btn"
                             onClick={() => console.log('delete')}
@@ -172,6 +160,7 @@ class ClustersComponent extends Component {
                     <tr>
                         <th>Pulling Address</th>
                         <th>Cluster Alias</th>
+                        <th> Cluster Id </th>
                         <th>Delete</th>
                     </tr>
                     </thead>

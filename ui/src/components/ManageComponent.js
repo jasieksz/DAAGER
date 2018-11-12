@@ -10,11 +10,8 @@ class ManageComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            pullingAddress: this.props.pullingAddress,
+            pullingCluster: this.props.clusterList[0],
             isPulling: false,
-            getPullingAddress: true,
-            buttonState: '',
-            clusterAlias: '',
         };
 
         this.service = new ApiService();
@@ -23,9 +20,7 @@ class ManageComponent extends Component {
     handleChangePullingAddress = () => {
         alert('changing pulling address');
         this.setState({
-            pullingAddress: '',
-            getPullingAddress: true,
-            buttonState: ''
+            pullingCluster: '',
         });
     };
 
@@ -38,7 +33,7 @@ class ManageComponent extends Component {
                         <div className="col-sm-6">
                             <input type="text"
                                    className="form-control"
-                                   value={this.state.pullingAddress}
+                                   value={this.state.pullingCluster.baseAddress}
                             />
                         </div>
                     </div>
@@ -57,14 +52,14 @@ class ManageComponent extends Component {
                             <input type="text"
                                    className="form-control"
                                    id={'clusterAliasValue'}
-                                   placeholder={this.state.clusterAlias}
+                                   placeholder={this.state.pullingCluster.alias}
                             />
                         </div>
                     </div>
-                    <div className={'manageButtons'}>
-                    </div>
-                        </div>
-                <PullingArgumentsComponent/>
+                </div>
+                <PullingArgumentsComponent
+                    pullingCluster={this.state.pullingCluster}
+                />
             </div>
         )
     };
