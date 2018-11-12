@@ -22,9 +22,9 @@ class HomeComponent extends Component {
             modalData: {},
             globalStateData: {},
             clustersButtonExpanded: true,
+            nodesDetails: [],
         };
 
-        console.log('cluster list home' + this.props.clusterList[0]);
         this.service = new ApiService();
 
         if (this.state.pullingCluster !== undefined) {
@@ -41,27 +41,23 @@ class HomeComponent extends Component {
     };
 
     getNodeDetailInfo = (node) => {
-        this.service.getNodeDetailInfo(this.createNodeInfoRequest(node.label)).then(response => {
-            this.setState({
-                modalData: response.data
-            });
-            this.toggleModal();
-        }).catch((err) => {
-            console.log('error during getting node detail data');
-            console.log(err);
+        const details = this.state.nodesDetails.filter(i => i.address === node.label);
+        this.setState({
+            modalData: details[0],
+            isModalOpen: true
         });
     };
 
-    createNodeInfoRequest(address) {
-        return {
+    createNodeInfoRequest = (address) => {
+    return {
             "address": address,
             "clusterAlias": this.state.pullingCluster.alias
         }
-    }
+    };
 
-    renderModal() {
+    renderModal = () => {
         return (
-            <Modal isOpen={this.state.isModalOpen}>
+            <Modal isOpen={this.state.isModalOpen} className={'modal-lg'}>
                 <ModalHeader>Info for node {this.state.modalData.address} </ModalHeader>
                     <ModalBody>
                         <Table>
@@ -70,16 +66,16 @@ class HomeComponent extends Component {
                                 <td> {this.state.modalData.address} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Last Message</th>
-                                <td> {this.state.modalData.lastMsg} </td>
+                                <th scope="row">Id</th>
+                                <td> {this.state.modalData.id} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Cpu</th>
-                                <td> {this.state.modalData.cpu} </td>
+                                <th scope="row">Node type</th>
+                                <td> {this.state.modalData.nodeType} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Memory</th>
-                                <td> {this.state.modalData.memory} </td>
+                                <th scope="row">Services</th>
+                                <td> {(this.state.modalData.services || []).join("\n")} </td>
                             </tr>
                         </Table>
                     </ModalBody>
@@ -88,10 +84,21 @@ class HomeComponent extends Component {
                     </ModalFooter>
                 </Modal>
         );
-    }
+    };
 
     getGraph = ()  => {
         const graph = {nodes: this.state.nodes, edges: this.state.edges};
+        graph.nodes.forEach( node => {
+            const graphNode = this.state.nodesDetails.filter(i => i.address === node.label);
+            if (graphNode[0].nodeType === 'UNKNOWN') {
+                node.color = '#d14578';
+            } else if (graphNode[0].nodeType === 'SATELLITE') {
+                node.color = '#0A8A0A';
+            } else if (graphNode[0].nodeType === 'COMPUTE') {
+                node.color = '#7931b7';
+            }
+        });
+
         return (
                 <Sigma graph={graph}
                        style={{maxWidth: "inherit", height: "inherit"}}
@@ -116,7 +123,6 @@ class HomeComponent extends Component {
     }
 
     getGlobalData = () => {
-        console.log('get global data: ' + this.state.pullingCluster.alias);
         this.service.getGlobalState(this.state.pullingCluster.alias).then(response => {
             this.setState({
                 globalStateData: response.data
@@ -168,7 +174,8 @@ class HomeComponent extends Component {
             this.service.getGraph(this.state.pullingCluster.alias).then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
-                    edges: response.data[0].edges
+                    edges: response.data[0].edges,
+                    nodesDetails: response.data[0].nodesDetails
                 });
             }).catch(() => {
                 console.log('error during getting graph data');
