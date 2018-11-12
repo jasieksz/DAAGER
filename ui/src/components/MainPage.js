@@ -104,12 +104,6 @@ class MainPage extends Component {
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
-                    <TabPanel>
-                        <ClustersComponent
-                            pullingAddress={this.state.pullingAddress}
-                            savePullingInitData={this.handleSetInitPullingData}
-                        />
-                    </TabPanel>
                 </Tabs>
             </div>
         );

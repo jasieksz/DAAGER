@@ -7,10 +7,9 @@ import '../styles/ClustersComponent.css';
 import ProgressButton from "react-progress-button";
 import fontawesome from "@fortawesome/fontawesome";
 import {faTrashAlt} from "@fortawesome/fontawesome-free-solid";
-import {Button, Modal, ModalBody, ModalFooter, ModalHeader} from 'reactstrap';
 import ApiService from "../services/ApiService";
 import '../styles/ClustersComponent.css';
-import ProgressButton from "react-progress-button";
+
 
 
 class ClustersComponent extends Component {
