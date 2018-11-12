@@ -19,20 +19,24 @@ class ClustersComponent extends Component {
                 clusterAlias: 'dwwwfg'
             }, {address: '111asd', clusterAlias: '222dfg'}],
             addNewCluster: false,
-            newClusterAlias: '',
-            newClusterAddress: '',
-            newClusterInterval: ''
+            buttonState: '',
         };
 
         this.service = new ApiService();
     }
 
+    getAllPullingCLusters = () => {
+      //
+    };
+
+    deletePullingAddress = (cluster) => {
+
+    };
+
     cancelAddNewCluster = () => {
         this.setState({
             addNewCluster: false,
-            newClusterAlias: '',
-            newClusterAddress: '',
-            newClusterInterval: ''
+
         })
     };
 
@@ -46,6 +50,7 @@ class ClustersComponent extends Component {
         const pullingIntervalValue = document.getElementById("pullingInterval").value;
         const pullingAddressValue = document.getElementById("pullingAddress").value;
         const clusterAliasValue = document.getElementById("clusterAlias").value;
+        // verify cluster alias if exists
         if (pullingIntervalValue === '') {
             alert('pulling interval cannot be empty');
             return;
@@ -63,7 +68,19 @@ class ClustersComponent extends Component {
         });
     };
 
-    createAddNewCLusterModal = () => {
+    saveInitPullingData = (pullingAddress, pullingInterval) => {
+        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval) }).then(() => {
+            this.setState({
+                addNewCluster: false,
+            });
+            this.props.savePullingInitData(pullingAddress);
+        }).catch((er) => {
+            this.setState({buttonState: 'error'});
+            console.log('error during startuing pulling data ' + er);
+        });
+    };
+
+    createAddNewClusterModal = () => {
         return (
             <Modal isOpen={this.state.addNewCluster}>
                 <ModalHeader className={'modalHeader'}>Add new Cluster </ModalHeader>
@@ -158,8 +175,8 @@ class ClustersComponent extends Component {
     render() {
         return (
             <div className={'clusters'}>
+                {this.createAddNewClusterModal()}
                 {this.createAllClustersTable()}
-                {this.createAddNewCLusterModal()}
                 <Button type="success"
                         className="btn btn-default addNewClusterButton"
                         onClick={() => this.addNewCluster()}
