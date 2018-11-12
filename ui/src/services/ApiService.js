@@ -28,6 +28,8 @@ class ApiService {
     getNodeDetailInfo = (obj) => this.api.post("/api/node-details", (obj));
 
     getGlobalState = (clusterAlias) => this.api.get("api/global-state/" + clusterAlias);
+
+    getAllClusters = () => this.api.get("/api/clusters", {timeout: 10000});
 }
 
 export default ApiService;

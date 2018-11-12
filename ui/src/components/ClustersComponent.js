@@ -23,7 +23,19 @@ class ClustersComponent extends Component {
         };
 
         this.service = new ApiService();
+        this.checkIfAlreadyPulling();
     }
+
+    checkIfAlreadyPulling = ()  => {
+        // TODO cluster management
+        this.service.getGlobalState("default").then( (response) => {
+            if (response.data.status === 'OK') {
+                this.props.savePullingInitData(response.data.baseAddress);
+            }
+        }).catch((er) => {
+            console.log('not set ' + er);
+        });
+    };
 
     getAllPullingCLusters = () => {
       //
@@ -40,6 +52,10 @@ class ClustersComponent extends Component {
         })
     };
 
+    componentDidMount() {
+        this.service.hello().then(response => console.log(response));
+    }
+
     addNewCluster = () => {
         this.setState({
             addNewCluster: true
@@ -51,16 +67,16 @@ class ClustersComponent extends Component {
         const pullingAddressValue = document.getElementById("pullingAddress").value;
         const clusterAliasValue = document.getElementById("clusterAlias").value;
         // verify cluster alias if exists
-        if (pullingIntervalValue === '') {
+        if (pullingIntervalValue === ''){
             alert('pulling interval cannot be empty');
             return;
         }
         this.setState({
             buttonState: 'loading'
         });
-        this.service.verify({value: pullingAddressValue}).then(() => {
+        this.service.verify({value: pullingAddressValue}).then(clusterId => {
             this.setState({buttonState: 'success'});
-            this.saveInitPullingData(pullingAddressValue, pullingIntervalValue)
+            this.saveInitPullingData(pullingAddressValue, pullingIntervalValue, clusterId.data, clusterAliasValue)
         }).catch((er) => {
             console.log(er);
             alert("Something is wrong with the address");
@@ -68,15 +84,14 @@ class ClustersComponent extends Component {
         });
     };
 
-    saveInitPullingData = (pullingAddress, pullingInterval) => {
-        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval) }).then(() => {
-            this.setState({
-                addNewCluster: false,
-            });
+    //add here aliasValue
+    saveInitPullingData(pullingAddress, pullingInterval, clusterId, clusterAlias) {
+        // TODO cluster management
+        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: "default"}).then(() => {
             this.props.savePullingInitData(pullingAddress);
         }).catch((er) => {
             this.setState({buttonState: 'error'});
-            console.log('error during startuing pulling data ' + er);
+            console.log('error during starting pulling data ' + er);
         });
     };
 
