@@ -173,10 +173,6 @@ class HomeComponent extends Component {
         }
     };
 
-    getClusterList = () => {
-        //request
-    };
-
     handleClustersButtonChange= () => {
         this.setState({
             clustersButtonExpanded: true
@@ -193,9 +189,9 @@ class HomeComponent extends Component {
             </a>
 
             <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <a className="dropdown-item" href="#">Action</a>
-                <a className="dropdown-item" href="#">Another action</a>
-                <a className="dropdown-item" href="#">Something else here</a>
+                <a className="dropdown-item" href="#">Cluster1</a>
+                <a className="dropdown-item" href="#">Cluster2</a>
+                <a className="dropdown-item" href="#">Cluster3</a>
             </div>
         </div>
         );
@@ -203,7 +199,7 @@ class HomeComponent extends Component {
     };
 
     render() {
-        if (this.props.pullingAddress !== '') {
+        if (this.props.clusterList.length !== 0) {
             return (
                 <div>
                     <div className={'header'}>

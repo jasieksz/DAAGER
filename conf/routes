@@ -100,4 +100,10 @@ GET         /docs/swagger-ui/*file           controllers.Assets.at(path:String="
 GET         /*file                           controllers.UiController.assetOrDefault(file)
 
 
+###
+###
+GET         /api/clusters                     controllers.ClustersController.getActiveClusters()
+
+
+
 

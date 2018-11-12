@@ -10,6 +10,7 @@ import fontawesome from '@fortawesome/fontawesome'
 import faHome from '@fortawesome/fontawesome-free-solid/faHome'
 import faCog from '@fortawesome/fontawesome-free-solid/faCog'
 import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar'
+import ApiService from "../services/ApiService";
 
 class MainPage extends Component {
 
@@ -18,24 +19,37 @@ class MainPage extends Component {
         this.handleSelect = this.handleSelect.bind(this);
         this.state = {
             key: 1,
+            clusterList : [],
             pullingAddress: '',
-            clusterList: [{address: 'asd', clusterAlias: 'dfg'}, {
-                address: 'qwe',
-                clusterAlias: 'dwwwfg'
-            }, {address: '111asd', clusterAlias: '222dfg'}],
         };
-        this.handleSetInitPullingData = this.handleSetInitPullingData.bind(this);
-    }
-
-    handleSetInitPullingData(pullAddr) {
-        this.setState({
-            pullingAddress: pullAddr,
-        });
+        this.service = new ApiService();
+        this.getClusterList();
     }
 
     handleSelect(key) {
         this.setState({ key });
     }
+
+    handleAddNewPullingData = (pullingAddress) => {
+        console.log('main page: add new pulling data' + pullingAddress);
+        this.setState({
+            pullingAddress: pullingAddress,
+        });
+        this.getClusterList();
+    };
+
+    getClusterList = () => {
+        this.service.getAllClusters().then( (response) => {
+            console.log('getClusters: ' + response);
+            console.log('getClusters: ' + response.data);
+            // this.setState({
+            //     clusterList:
+            // })
+        }).catch((er) => {
+            this.setState({buttonState: 'error'});
+            console.log('error during getting all clusters' + er);
+        });
+    };
 
     render() {
         return (
@@ -80,15 +94,13 @@ class MainPage extends Component {
                     </TabPanel>
                     <TabPanel>
                         <ManageComponent
-                            pullingAddress={this.state.pullingAddress}
-                            savePullingInitData={this.handleSetInitPullingData}
+                            savePullingInitData={this.handleAddNewPullingData}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
                     <TabPanel>
                         <ClustersComponent
-                            pullingAddress={this.state.pullingAddress}
-                            savePullingInitData={this.handleSetInitPullingData}
+                            savePullingInitData={this.handleAddNewPullingData}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
