@@ -23,7 +23,6 @@ class ClustersComponent extends Component {
     }
 
     deletePullingAddress = (cluster) => {
-        console.log('deleting address' + cluster.baseAddress);
         this.service.stopPullingParam({
             "clusterAlias": cluster.alias,
             "workerAddress": cluster.baseAddress,
@@ -149,14 +148,14 @@ class ClustersComponent extends Component {
     };
 
     createTableData = () => {
-        return this.props.clusterList.map(cluster =>
+        return this.props.clusterList.map(i =>
             <tr>
-                <th scope="row">{cluster.baseAddress}</th>
-                <td> {cluster.alias} </td>
-                <td> {cluster.clusterId} </td>
+                <th scope="row">{i.baseAddress}</th>
+                <td> {i.alias} </td>
+                <td> {i.clusterId} </td>
                 <td>
                     <Button className="btn"
-                            onClick={() => this.deletePullingAddress(cluster)}
+                            onClick={() => this.deletePullingAddress(i)}
                     > <i className={"fas fa-trash-alt fa-fw"}/>
                         {fontawesome.library.add(faTrashAlt)}
                     </Button>
