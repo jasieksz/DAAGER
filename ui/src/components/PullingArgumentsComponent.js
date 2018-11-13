@@ -99,7 +99,7 @@ export class PullingArgumentsComponent extends Component {
           </tr>);
     };
 
-    getStatusButton(id) {
+    getStatusButton = (id) => {
         if (id.status === 'Pulling') {
             return (
                 <Button type="danger"
@@ -117,7 +117,7 @@ export class PullingArgumentsComponent extends Component {
                 </Button>
             );
         }
-    }
+    };
 
     handleAllStopPullingData = () => {
         this.state.statuses.forEach(i => this.handleStopPullingData(i));
