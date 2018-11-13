@@ -23,7 +23,15 @@ class ClustersComponent extends Component {
     }
 
     deletePullingAddress = (cluster) => {
-
+        console.log('deleting address' + cluster.baseAddress);
+        this.service.stopPullingParam({
+            "clusterAlias": cluster.alias,
+            "workerAddress": cluster.baseAddress,
+        }).then(() => {
+        this.props.getClusterList();
+        }).catch((er) => {
+            console.error('Error during deleting address' + er);
+        });
     };
 
     cancelAddNewCluster = () => {
@@ -72,8 +80,12 @@ class ClustersComponent extends Component {
     };
 
     saveInitPullingData(pullingAddress, pullingInterval, clusterId, clusterAlias) {
-        // TODO cluster management
-        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: clusterAlias}).then(() => {
+        this.service.start({
+            "baseAddress": pullingAddress,
+            "interval": parseInt(pullingInterval),
+            "clusterId": clusterId,
+            alias: clusterAlias
+        }).then(() => {
             this.props.savePullingInitData(pullingAddress);
         }).catch((er) => {
             this.setState({buttonState: 'error'});
@@ -137,14 +149,14 @@ class ClustersComponent extends Component {
     };
 
     createTableData = () => {
-        return this.props.clusterList.map(i =>
+        return this.props.clusterList.map(cluster =>
             <tr>
-                <th scope="row">{i.baseAddress}</th>
-                <td> {i.alias} </td>
-                <td> {i.clusterId} </td>
+                <th scope="row">{cluster.baseAddress}</th>
+                <td> {cluster.alias} </td>
+                <td> {cluster.clusterId} </td>
                 <td>
                     <Button className="btn"
-                            onClick={() => console.log('delete')}
+                            onClick={() => this.deletePullingAddress(cluster)}
                     > <i className={"fas fa-trash-alt fa-fw"}/>
                         {fontawesome.library.add(faTrashAlt)}
                     </Button>

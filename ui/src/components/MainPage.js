@@ -95,7 +95,6 @@ class MainPage extends Component {
                     </TabPanel>
                     <TabPanel>
                         <ManageComponent
-                            savePullingInitData={this.handleAddNewPullingData}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
