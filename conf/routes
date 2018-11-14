@@ -1,4 +1,4 @@
-GET         /                                controllers.UiController.index()
+GET           /                                controllers.UiController.index()
 
 ###
 #  summary: get cookie with token
@@ -6,7 +6,7 @@ GET         /                                controllers.UiController.index()
 #    200:
 #      description: success
 ###
-GET         /api/hello                       controllers.PullingController.hello()
+GET           /api/hello                       controllers.PullingController.hello()
 
 ###
 #  summary: get active clusters
@@ -16,7 +16,15 @@ GET         /api/hello                       controllers.PullingController.hello
 #      schema:
 #       $ref: '#/definitions/Seq[model.domain.Cluster]'
 ###
-GET         /api/clusters                      controllers.ClustersController.getActiveClusters()
+GET           /api/clusters                    controllers.ClustersController.getActiveClusters()
+
+###
+#  summary: delete cluster
+#  responses:
+#    200:
+#      description: success
+###
+DELETE        /api/clusters/:alias             controllers.ClustersController.removeCluster(alias: String)
 
 ###
 #  summary: get graph of current age cluster
@@ -27,7 +35,7 @@ GET         /api/clusters                      controllers.ClustersController.ge
 #       $ref: '#/definitions/model.domain.nodeGraph.Graph'
 #
 ###
-GET         /api/graph/:alias                controllers.GraphController.getGraph(alias: String)
+GET           /api/graph/:alias                controllers.GraphController.getGraph(alias: String)
 
 ###
 #  summary: get state of cluster
@@ -38,7 +46,7 @@ GET         /api/graph/:alias                controllers.GraphController.getGrap
 #       $ref: '#/definitions/model.domain.GlobalState'
 #
 ###
-GET         /api/global-state/:alias         controllers.GraphController.getGlobalState(alias: String)
+GET           /api/global-state/:alias         controllers.GraphController.getGlobalState(alias: String)
 
 
 ###
@@ -49,7 +57,7 @@ GET         /api/global-state/:alias         controllers.GraphController.getGlob
 #      schema:
 #       $ref: '#/definitions/Seq[model.domain.PullerInfo]'
 ###
-GET         /api/pull/statuses/:alias        controllers.ClustersController.getStatuses(alias: String)
+GET           /api/pull/statuses/:alias        controllers.ClustersController.getStatuses(alias: String)
 
 ###
 #  summary: start pulling
@@ -61,7 +69,7 @@ GET         /api/pull/statuses/:alias        controllers.ClustersController.getS
 #    200:
 #      description: success
 ###
-POST        /api/pull/start                  controllers.ClustersController.startPulling()
+POST          /api/pull/start                  controllers.ClustersController.startPulling()
 
 
 ###
@@ -74,7 +82,7 @@ POST        /api/pull/start                  controllers.ClustersController.star
 #    200:
 #      description: success
 ###
-POST        /api/pull/stop                   controllers.ClustersController.stopPuller()
+POST          /api/pull/stop                   controllers.ClustersController.stopPuller()
 
 ###
 #  summary: update pulling interval of a given worker in a cluster
@@ -86,7 +94,7 @@ POST        /api/pull/stop                   controllers.ClustersController.stop
 #    200:
 #      description: success
 ###
-POST        /api/pull/update                 controllers.ClustersController.changeInterval()
+POST          /api/pull/update                 controllers.ClustersController.changeInterval()
 
 ###
 #  summary: check if given adress is valid
@@ -100,19 +108,19 @@ POST        /api/pull/update                 controllers.ClustersController.chan
 #    400:
 #      description: bad adress
 ###
-POST        /api/pull/verify                 controllers.PullingController.verify()
+POST          /api/pull/verify                 controllers.PullingController.verify()
 
 
 ### NoDocs ###
-GET         /docs/swagger-ui/*file           controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+GET           /docs/swagger-ui/*file           controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
 
 ### NoDocs ###
-GET         /*file                           controllers.UiController.assetOrDefault(file)
+GET           /*file                           controllers.UiController.assetOrDefault(file)
 
 
 ###
 ###
-GET         /api/clusters                     controllers.ClustersController.getActiveClusters()
+GET           /api/clusters                    controllers.ClustersController.getActiveClusters()
 
 
 
