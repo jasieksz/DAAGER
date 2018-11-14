@@ -83,9 +83,11 @@ class ClustersController @Inject()(
 
   def changeInterval(): Action[ClustersSupervisor.UpdateInterval] =
     Action(validateJson[ClustersSupervisor.UpdateInterval]) { request =>
+      clustersSupervisor ! request.body
       configInfoService.sendUpdateConfigInfo(
         request.body.newInterval,
-        request.body.workerAddress
+        request.body.workerAddress,
+        request.body.clusterAlias
       )
       Ok("")
     }

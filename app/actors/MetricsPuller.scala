@@ -1,7 +1,7 @@
 package actors
 
 import actors.MetricsPuller._
-import akka.actor.FSM
+import akka.actor.{Cancellable, FSM}
 import cats.implicits._
 import model.domain.metrics.Metric
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -10,7 +10,6 @@ import play.api.libs.ws.WSClient
 import repositories.metrics.MetricsRepository
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile
-
 import utils.instances.DbioInstances._
 
 import scala.concurrent.duration._
@@ -29,7 +28,8 @@ object MetricsPuller {
 
   case object Uninitialized extends Data
 
-  final case class Stat(address: String, interval: Int, errors: Int) extends Data
+  final case class Stat(address: String, interval: Int, errors: Int, scheduledMsg: Option[Cancellable] = None)
+    extends Data
 
   final case class StartPulling(address: String, interval: Int)
 
@@ -67,48 +67,54 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
       val reachable = Await.result(isReachable(address), 2 seconds)
       if (reachable) {
         log.info("Host reachable, starting pulling")
-        pullAgainAfter(1 second)
-        goto(Pulling) using newState
+        val scheduled = pullAgainAfter(1 seconds)
+        goto(Pulling) using newState.copy(scheduledMsg = scheduled.some)
       } else {
         log.info(s"Host unreachable, tries ${1}")
-        pullAgainAfter(5 seconds)
-        goto(Testing) using newState.copy(errors = 1)
+        val scheduled = pullAgainAfter(5 seconds)
+        goto(Testing) using newState.copy(errors = 1, scheduledMsg = scheduled.some)
       }
-    case Event(Pull, s: Stat) =>
-      pullAgainAfter(1 second)
-      goto(Pulling) using s
+    case Event(Pull, _) => stay()
+    case Event(Stop, _) => stay()
     case Event(ChangeInterval(newInterval), s: Stat) =>
-      pullAgainAfter(1 second)
-      goto(Pulling) using s.copy(interval = newInterval)
+      val scheduled = pullAgainAfter(newInterval seconds)
+      goto(Pulling) using s.copy(interval = newInterval, scheduledMsg = scheduled.some)
+    case Event(ChangeInterval(newInterval), s: Stat) =>
+      val scheduled = pullAgainAfter(1 second)
+      goto(Pulling) using s.copy(interval = newInterval, scheduledMsg = scheduled.some)
   }
 
   when(Testing) {
-    case Event(Pull, Stat(add, interval, 10)) =>
+    case Event(Pull, Stat(add, interval, 10, scheduled)) =>
+      scheduled.foreach(_.cancel())
       goto(Cancelled)
-    case Event(Pull, st @ Stat(add, int, err)) =>
+    case Event(Pull, st @ Stat(add, int, err, _)) =>
       val reachable = Await.result(isReachable(add), 2 seconds)
       if (reachable) {
         log.info("Host reachable, starting pulling")
-        pullAgainAfter(1 seconds)
-        goto(Pulling) using st.copy(errors = 0)
+        val scheduled = pullAgainAfter(1 seconds)
+        goto(Pulling) using st.copy(errors = 0, scheduledMsg = scheduled.some)
       } else {
         log.info(s"Host unreachable, tries ${err + 1}")
-        pullAgainAfter(5 seconds)
-        goto(Testing) using st.copy(errors = err + 1)
+        val scheduled = pullAgainAfter(5 seconds)
+        goto(Testing) using st.copy(errors = err + 1, scheduledMsg = scheduled.some)
       }
   }
 
   when(Pulling) {
-    case Event(Pull, s @ Stat(address, interval, err)) =>
+    case Event(Pull, s @ Stat(address, interval, err, _)) =>
       getData(address).onComplete {
-        case Success(_) => pullAgainAfter(interval seconds)
+        case Success(_) =>
+          stay using s.copy(scheduledMsg = pullAgainAfter(interval seconds).some)
         case Failure(e) =>
           log.error("Error occured during pulling")
           log.error(e.toString)
           goto(ErrorOccurred) using s.copy(errors = err + 1)
       }
       stay()
-    case Event(Stop, s) =>
+    case Event(Stop, s: Stat) =>
+      log.info(s.scheduledMsg.toString)
+      s.scheduledMsg.foreach(_.cancel())
       goto(Idle) using s
     case Event(ChangeInterval(newInterval), s: Stat) =>
       stay using s.copy(interval = newInterval)
@@ -129,13 +135,17 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
       stay()
   }
 
+  onTermination {
+    case StopEvent(FSM.Shutdown, _, _) => log.info("Shutting down metrics puller")
+  }
+
   whenUnhandled {
-    case _ =>
-      log.error("Sum Ting Wong")
+    case msg =>
+      log.error(s"Unhandled msg: $msg")
       stay()
   }
 
-  private def pullAgainAfter(duration: FiniteDuration): Unit =
+  private def pullAgainAfter(duration: FiniteDuration): Cancellable =
     context.system.scheduler.scheduleOnce(duration, self, Pull)
 
   private def getData(address: String)(implicit ec: ExecutionContext): Future[Unit] = {
