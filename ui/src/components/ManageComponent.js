@@ -5,27 +5,54 @@ import "../../node_modules/react-progress-button/react-progress-button.css";
 import ApiService from "../services/ApiService"
 import { PullingArgumentsComponent } from "./PullingArgumentsComponent";
 import { Alert } from 'reactstrap';
+import Dropdown from "react-dropdown";
 class ManageComponent extends Component {
 
     constructor(props, context) {
         super(props, context);
         this.state = {
-            pullingAddress: this.props.pullingAddress,
+            pullingCluster: this.props.clusterList[0],
             isPulling: false,
-            getPullingAddress: true,
-            buttonState: '',
-            clusterAlias: '',
         };
 
         this.service = new ApiService();
     }
 
+    handleClusterChanged = (alias) => {
+        const newCluster = this.props.clusterList.filter(cluster => cluster.alias === alias.value);
+        this.setState({
+            pullingCluster: newCluster[0]
+        });
+        this.render();
+    };
+
+    createDropdownMenu = () => {
+        const dropdownOptions = [];
+        this.props.clusterList.forEach(
+            cluster => dropdownOptions.push({
+                'value': cluster.alias,
+                'label': cluster.alias
+            })
+        );
+        return dropdownOptions
+    };
+
+
+    renderChooseClusterButton = () => {
+        return (
+            <Dropdown className={'chooseClustersButton'}
+                      options={this.createDropdownMenu()}
+                      onChange={ (i) => this.handleClusterChanged(i)}
+                      value = {this.state.pullingCluster.alias}
+                      placeholder="Select an option"/>
+        )
+
+    };
+
     handleChangePullingAddress = () => {
         alert('changing pulling address');
         this.setState({
-            pullingAddress: '',
-            getPullingAddress: true,
-            buttonState: ''
+            pullingCluster: '',
         });
     };
 
@@ -38,7 +65,7 @@ class ManageComponent extends Component {
                         <div className="col-sm-6">
                             <input type="text"
                                    className="form-control"
-                                   value={this.state.pullingAddress}
+                                   value={this.state.pullingCluster.baseAddress}
                             />
                         </div>
                     </div>
@@ -57,14 +84,14 @@ class ManageComponent extends Component {
                             <input type="text"
                                    className="form-control"
                                    id={'clusterAliasValue'}
-                                   placeholder={this.state.clusterAlias}
+                                   placeholder={this.state.pullingCluster.alias}
                             />
                         </div>
                     </div>
-                    <div className={'manageButtons'}>
-                    </div>
-                        </div>
-                <PullingArgumentsComponent/>
+                </div>
+                <PullingArgumentsComponent
+                    pullingCluster={this.state.pullingCluster}
+                />
             </div>
         )
     };
@@ -73,13 +100,17 @@ class ManageComponent extends Component {
         if (this.props.clusterList.length !== 0) {
             return (
                 <div>
+                    <div className={'header'}>
+                        {this.renderChooseClusterButton()}
+                        <h2 className={'tabTitle'}>Manage Cluster</h2>
+                    </div>
                     {this.showPullingAddress()}
                 </div>
             );
         } else {
             return (
                 <Alert color={"danger"} className={'tabTitle'}>
-                    Go to Manage Tab and set pulling address
+                    Go to Clusters Tab and set pulling address
                 </Alert>
             )
         }

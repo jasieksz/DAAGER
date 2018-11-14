@@ -8,6 +8,8 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Alert } from 'reactstrap';
 import { Table } from 'reactstrap';
 import ApiService from "../services/ApiService";
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
 
 class HomeComponent extends Component {
@@ -15,16 +17,19 @@ class HomeComponent extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
+            pullingCluster: this.props.clusterList[0],
             nodes: [],
             edges: [],
             isModalOpen: false,
             modalData: {},
             globalStateData: {},
-            clustersButtonExpanded: true,
+            clustersButtonExpanded: false,
+            nodesDetails: [],
         };
 
         this.service = new ApiService();
-        if (this.props.pullingAddress !== '') {
+
+        if (this.state.pullingCluster !== undefined) {
             this.getGraphData();
             this.getGlobalData();
         }
@@ -38,28 +43,23 @@ class HomeComponent extends Component {
     };
 
     getNodeDetailInfo = (node) => {
-        this.service.getNodeDetailInfo(this.createNodeInfoRequest(node.label)).then(response => {
-            this.setState({
-                modalData: response.data
-            });
-            this.toggleModal();
-        }).catch((err) => {
-            console.log('error during getting node detail data');
-            console.log(err);
+        const details = this.state.nodesDetails.filter(i => i.address === node.label);
+        this.setState({
+            modalData: details[0],
+            isModalOpen: true
         });
     };
 
-    // TODO add cluster management
-    createNodeInfoRequest(address) {
-        return {
+    createNodeInfoRequest = (address) => {
+    return {
             "address": address,
-            "clusterAlias": "default"
+            "clusterAlias": this.state.pullingCluster.alias
         }
-    }
+    };
 
-    renderModal() {
+    renderModal = () => {
         return (
-            <Modal isOpen={this.state.isModalOpen}>
+            <Modal isOpen={this.state.isModalOpen} className={'modal-lg'}>
                 <ModalHeader>Info for node {this.state.modalData.address} </ModalHeader>
                     <ModalBody>
                         <Table>
@@ -68,16 +68,16 @@ class HomeComponent extends Component {
                                 <td> {this.state.modalData.address} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Last Message</th>
-                                <td> {this.state.modalData.lastMsg} </td>
+                                <th scope="row">Id</th>
+                                <td> {this.state.modalData.id} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Cpu</th>
-                                <td> {this.state.modalData.cpu} </td>
+                                <th scope="row">Node type</th>
+                                <td> {this.state.modalData.nodeType} </td>
                             </tr>
                             <tr>
-                                <th scope="row">Memory</th>
-                                <td> {this.state.modalData.memory} </td>
+                                <th scope="row">Services</th>
+                                <td> {(this.state.modalData.services || []).join("\n")} </td>
                             </tr>
                         </Table>
                     </ModalBody>
@@ -86,10 +86,21 @@ class HomeComponent extends Component {
                     </ModalFooter>
                 </Modal>
         );
-    }
+    };
 
     getGraph = ()  => {
         const graph = {nodes: this.state.nodes, edges: this.state.edges};
+        graph.nodes.forEach( node => {
+            const graphNode = this.state.nodesDetails.filter(i => i.address === node.label);
+            if (graphNode[0].nodeType === 'UNKNOWN') {
+                node.color = '#d14578';
+            } else if (graphNode[0].nodeType === 'SATELLITE') {
+                node.color = '#0A8A0A';
+            } else if (graphNode[0].nodeType === 'COMPUTE') {
+                node.color = '#7931b7';
+            }
+        });
+
         return (
                 <Sigma graph={graph}
                        style={{maxWidth: "inherit", height: "inherit"}}
@@ -114,13 +125,12 @@ class HomeComponent extends Component {
     }
 
     getGlobalData = () => {
-        //TODO cluster management
-        this.service.getGlobalState("default").then(response => {
+        this.service.getGlobalState(this.state.pullingCluster.alias).then(response => {
             this.setState({
                 globalStateData: response.data
             });
         }).catch(() => {
-            console.log('error during getting global state data');
+            console.error('error during getting global state data');
         });
     };
 
@@ -159,51 +169,59 @@ class HomeComponent extends Component {
         );
     }
 
-    //TODO cluster management
     getGraphData = () => {
-        if (this.props.pullingAddress !== '') {
-            this.service.getGraph("default").then(response => {
+        if (this.state.pullingCluster !== undefined) {
+            this.service.getGraph(this.state.pullingCluster.alias).then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
-                    edges: response.data[0].edges
+                    edges: response.data[0].edges,
+                    nodesDetails: response.data[0].nodesDetails
                 });
             }).catch(() => {
-                console.log('error during getting graph data');
+                console.error('error during getting graph data');
             });
         }
     };
 
-    handleClustersButtonChange= () => {
+    handleClusterChanged = (alias) => {
+        const newCluster = this.props.clusterList.filter(i => i.alias === alias.value);
         this.setState({
-            clustersButtonExpanded: true
+            pullingCluster: newCluster[0]
         });
+        this.getGraphData();
+        this.getGlobalData();
+        this.renderInfo();
     };
 
-    renderChoooseClusterButton = () => {
-        return (
-        <div className="dropdown show chooseClustersButton">
-            <a className="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-               data-toggle="dropdown" aria-haspopup="true" aria-expanded={this.state.clustersButtonExpanded}
-            onClick={this.handleClustersButtonChange}>
-                Dropdown link
-            </a>
-
-            <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <a className="dropdown-item" href="#">Cluster1</a>
-                <a className="dropdown-item" href="#">Cluster2</a>
-                <a className="dropdown-item" href="#">Cluster3</a>
-            </div>
-        </div>
+    createDropdownMenu = () => {
+        const dropdownOptions = [];
+        this.props.clusterList.forEach(
+            cluster => dropdownOptions.push({
+                'value': cluster.alias,
+                'label': cluster.alias
+            })
         );
+        return dropdownOptions
+    };
+
+
+    renderChooseClusterButton = () => {
+        return (
+            <Dropdown className={'chooseClustersButton'}
+                      options={this.createDropdownMenu()}
+                      onChange={ (i) => this.handleClusterChanged(i)}
+                      value = {this.state.pullingCluster.alias}
+                      placeholder="Select an option"/>
+        )
 
     };
 
     render() {
-        if (this.props.clusterList.length !== 0) {
+        if (this.props.clusterList.length !== 0 && this.state.pullingCluster !== undefined) {
             return (
                 <div>
                     <div className={'header'}>
-                        {this.renderChoooseClusterButton()}
+                        {this.renderChooseClusterButton()}
                         <h2 className={'tabTitle'}>Home</h2>
                     </div>
                     <div className={'homeComponents'}>
@@ -215,7 +233,7 @@ class HomeComponent extends Component {
         } else {
             return (
                 <Alert color={"danger"} className={'tabTitle'}>
-                    Go to Manage Tab and set pulling address
+                    Go to Clusters Tab and set pulling address
                 </Alert>
             )
         }

@@ -9,6 +9,7 @@ import "../styles/MainPageComponent.css";
 import fontawesome from '@fortawesome/fontawesome'
 import faHome from '@fortawesome/fontawesome-free-solid/faHome'
 import faCog from '@fortawesome/fontawesome-free-solid/faCog'
+import faList from '@fortawesome/fontawesome-free-solid/faList'
 import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar'
 import ApiService from "../services/ApiService";
 
@@ -40,11 +41,13 @@ class MainPage extends Component {
 
     getClusterList = () => {
         this.service.getAllClusters().then( (response) => {
-            console.log('getClusters: ' + response);
-            console.log('getClusters: ' + response.data);
-            // this.setState({
-            //     clusterList:
-            // })
+            console.log('get cluster list');
+            if (response.data.length !== 0 ) {
+                this.setState({
+                    clusterList: response.data,
+                    pullingAddress: response.data[0]
+                });
+            }
         }).catch((er) => {
             this.setState({buttonState: 'error'});
             console.log('error during getting all clusters' + er);
@@ -75,15 +78,14 @@ class MainPage extends Component {
                             Manage
                         </Tab>
                         <Tab eventKey={4} title="clusters">
-                            <i className={"fas fa-cog fa-fw"}/>
-                            {fontawesome.library.add(faCog)}
+                            <i className={"fas fa-list fa-fw"}/>
+                            {fontawesome.library.add(faList)}
                             Clusters
                         </Tab>
                     </TabList>
 
                     <TabPanel>
                         <HomeComponent
-                            pullingAddress={this.state.pullingAddress}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
@@ -94,13 +96,13 @@ class MainPage extends Component {
                     </TabPanel>
                     <TabPanel>
                         <ManageComponent
-                            savePullingInitData={this.handleAddNewPullingData}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
                     <TabPanel>
                         <ClustersComponent
                             savePullingInitData={this.handleAddNewPullingData}
+                            getClusterList={this.getClusterList}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
