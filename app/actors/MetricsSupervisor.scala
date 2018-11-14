@@ -13,6 +13,8 @@ import model.domain.metrics.ThreadInfo._
 import model.domain.metrics._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.ws.WSClient
+
+import scala.concurrent.duration._
 import repositories.metrics._
 
 object MetricsSupervisor {
@@ -162,9 +164,10 @@ class MetricsSupervisor(
       addressToWorker(address) ! MetricsPuller.Stop
   }
 
-  override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
-    case _ => Restart
-  }
+  override def supervisorStrategy: SupervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
+      case _ => Restart
+    }
 
   private def generateIntervals(
     pullers: Seq[ActorRef],

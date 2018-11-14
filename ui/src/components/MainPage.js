@@ -48,8 +48,15 @@ class MainPage extends Component {
                     },
                     () => this.render()
                 );
+            } else {
+                this.setState(
+                    {
+                        clusterList: [],
+                        pullingAddress: ''
+                    },
+                    () => this.render()
+                )
             }
-            this.render();
         }).catch((er) => {
             this.setState({buttonState: 'error'});
             console.error('error during getting all clusters' + er);

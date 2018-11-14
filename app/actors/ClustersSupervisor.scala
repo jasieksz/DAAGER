@@ -61,8 +61,7 @@ class ClustersSupervisor(
       }
 
     case RemoveCluster(alias) if clusters.contains(alias) =>
-      clusters(alias) ! PoisonPill
-      clustersRepository.markInactiveByAlias(alias)
+      context stop clusters(alias)
       if (clusters.size == 1) context become empty else context become nonEmptyClusters(clusters - alias)
 
     case GetStatuses(clusterAlias) if clusters.contains(clusterAlias) =>
@@ -88,7 +87,7 @@ class ClustersSupervisor(
   }
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
-    case _ => Restart
+    case _ => SupervisorStrategy.Stop
   }
 
 }

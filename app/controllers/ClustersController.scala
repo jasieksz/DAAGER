@@ -62,9 +62,9 @@ class ClustersController @Inject()(
     } yield result
   }
 
-  def removeCluster(alias: String): Action[AnyContent] = Action {
+  def removeCluster(alias: String): Action[AnyContent] = Action.async {
     clustersSupervisor ! RemoveCluster(alias)
-    Ok("")
+    db.run(clustersRepository.deleteByAlias(alias)).map(_ => Ok(""))
   }
 
   def handleSupervisorResponse(response: Any, cluster: Cluster, updatedAddress: String, interval: Int): Future[Result] =
