@@ -8,6 +8,8 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Alert } from 'reactstrap';
 import { Table } from 'reactstrap';
 import ApiService from "../services/ApiService";
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 import RandomizeNodePositions from "react-sigma/es/RandomizeNodePositions";
 
 class HomeComponent extends Component {
@@ -21,7 +23,7 @@ class HomeComponent extends Component {
             isModalOpen: false,
             modalData: {},
             globalStateData: {},
-            clustersButtonExpanded: true,
+            clustersButtonExpanded: false,
             nodesDetails: [],
         };
 
@@ -128,7 +130,7 @@ class HomeComponent extends Component {
                 globalStateData: response.data
             });
         }).catch(() => {
-            console.log('error during getting global state data');
+            console.error('error during getting global state data');
         });
     };
 
@@ -168,9 +170,7 @@ class HomeComponent extends Component {
     }
 
     getGraphData = () => {
-        console.log('get graph: ' + this.state.pullingCluster.alias);
         if (this.state.pullingCluster !== undefined) {
-            console.log('get graph: ' + this.state.pullingCluster.alias);
             this.service.getGraph(this.state.pullingCluster.alias).then(response => {
                 this.setState({
                     nodes: response.data[0].nodes,
@@ -178,42 +178,50 @@ class HomeComponent extends Component {
                     nodesDetails: response.data[0].nodesDetails
                 });
             }).catch(() => {
-                console.log('error during getting graph data');
+                console.error('error during getting graph data');
             });
         }
     };
 
-    handleClustersButtonChange= () => {
+    handleClusterChanged = (alias) => {
+        const newCluster = this.props.clusterList.filter(i => i.alias === alias.value);
         this.setState({
-            clustersButtonExpanded: true
+            pullingCluster: newCluster[0]
         });
+        this.getGraphData();
+        this.getGlobalData();
+        this.renderInfo();
     };
 
-    renderChoooseClusterButton = () => {
-        return (
-        <div className="dropdown show chooseClustersButton">
-            <a className="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-               data-toggle="dropdown" aria-haspopup="true" aria-expanded={this.state.clustersButtonExpanded}
-            onClick={this.handleClustersButtonChange}>
-                Dropdown link
-            </a>
-
-            <div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <a className="dropdown-item" href="#">Cluster1</a>
-                <a className="dropdown-item" href="#">Cluster2</a>
-                <a className="dropdown-item" href="#">Cluster3</a>
-            </div>
-        </div>
+    createDropdownMenu = () => {
+        const dropdownOptions = [];
+        this.props.clusterList.forEach(
+            cluster => dropdownOptions.push({
+                'value': cluster.alias,
+                'label': cluster.alias
+            })
         );
+        return dropdownOptions
+    };
+
+
+    renderChooseClusterButton = () => {
+        return (
+            <Dropdown className={'chooseClustersButton'}
+                      options={this.createDropdownMenu()}
+                      onChange={ (i) => this.handleClusterChanged(i)}
+                      value = {this.state.pullingCluster.alias}
+                      placeholder="Select an option"/>
+        )
 
     };
 
     render() {
-        if (this.props.clusterList.length !== 0) {
+        if (this.props.clusterList.length !== 0 && this.state.pullingCluster !== undefined) {
             return (
                 <div>
                     <div className={'header'}>
-                        {this.renderChoooseClusterButton()}
+                        {this.renderChooseClusterButton()}
                         <h2 className={'tabTitle'}>Home</h2>
                     </div>
                     <div className={'homeComponents'}>

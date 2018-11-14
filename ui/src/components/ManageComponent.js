@@ -5,6 +5,7 @@ import "../../node_modules/react-progress-button/react-progress-button.css";
 import ApiService from "../services/ApiService"
 import { PullingArgumentsComponent } from "./PullingArgumentsComponent";
 import { Alert } from 'reactstrap';
+import Dropdown from "react-dropdown";
 class ManageComponent extends Component {
 
     constructor(props, context) {
@@ -16,6 +17,37 @@ class ManageComponent extends Component {
 
         this.service = new ApiService();
     }
+
+    handleClusterChanged = (alias) => {
+        const newCluster = this.props.clusterList.filter(cluster => cluster.alias === alias.value);
+        this.setState({
+            pullingCluster: newCluster[0]
+        });
+        this.render();
+    };
+
+    createDropdownMenu = () => {
+        const dropdownOptions = [];
+        this.props.clusterList.forEach(
+            cluster => dropdownOptions.push({
+                'value': cluster.alias,
+                'label': cluster.alias
+            })
+        );
+        return dropdownOptions
+    };
+
+
+    renderChooseClusterButton = () => {
+        return (
+            <Dropdown className={'chooseClustersButton'}
+                      options={this.createDropdownMenu()}
+                      onChange={ (i) => this.handleClusterChanged(i)}
+                      value = {this.state.pullingCluster.alias}
+                      placeholder="Select an option"/>
+        )
+
+    };
 
     handleChangePullingAddress = () => {
         alert('changing pulling address');
@@ -68,6 +100,10 @@ class ManageComponent extends Component {
         if (this.props.clusterList.length !== 0) {
             return (
                 <div>
+                    <div className={'header'}>
+                        {this.renderChooseClusterButton()}
+                        <h2 className={'tabTitle'}>Manage Cluster</h2>
+                    </div>
                     {this.showPullingAddress()}
                 </div>
             );

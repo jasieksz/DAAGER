@@ -23,7 +23,14 @@ class ClustersComponent extends Component {
     }
 
     deletePullingAddress = (cluster) => {
-
+        this.service.stopPullingParam({
+            "clusterAlias": cluster.alias,
+            "workerAddress": cluster.baseAddress,
+        }).then(() => {
+        this.props.getClusterList();
+        }).catch((er) => {
+            console.error('Error during deleting address' + er);
+        });
     };
 
     cancelAddNewCluster = () => {
@@ -72,8 +79,12 @@ class ClustersComponent extends Component {
     };
 
     saveInitPullingData(pullingAddress, pullingInterval, clusterId, clusterAlias) {
-        // TODO cluster management
-        this.service.start({"baseAddress": pullingAddress, "interval": parseInt(pullingInterval), "clusterId": clusterId, alias: clusterAlias}).then(() => {
+        this.service.start({
+            "baseAddress": pullingAddress,
+            "interval": parseInt(pullingInterval),
+            "clusterId": clusterId,
+            alias: clusterAlias
+        }).then(() => {
             this.props.savePullingInitData(pullingAddress);
         }).catch((er) => {
             this.setState({buttonState: 'error'});
@@ -144,7 +155,7 @@ class ClustersComponent extends Component {
                 <td> {i.clusterId} </td>
                 <td>
                     <Button className="btn"
-                            onClick={() => console.log('delete')}
+                            onClick={() => this.deletePullingAddress(i)}
                     > <i className={"fas fa-trash-alt fa-fw"}/>
                         {fontawesome.library.add(faTrashAlt)}
                     </Button>

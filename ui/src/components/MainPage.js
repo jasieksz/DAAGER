@@ -9,6 +9,7 @@ import "../styles/MainPageComponent.css";
 import fontawesome from '@fortawesome/fontawesome'
 import faHome from '@fortawesome/fontawesome-free-solid/faHome'
 import faCog from '@fortawesome/fontawesome-free-solid/faCog'
+import faList from '@fortawesome/fontawesome-free-solid/faList'
 import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar'
 import ApiService from "../services/ApiService";
 
@@ -77,8 +78,8 @@ class MainPage extends Component {
                             Manage
                         </Tab>
                         <Tab eventKey={4} title="clusters">
-                            <i className={"fas fa-cog fa-fw"}/>
-                            {fontawesome.library.add(faCog)}
+                            <i className={"fas fa-list fa-fw"}/>
+                            {fontawesome.library.add(faList)}
                             Clusters
                         </Tab>
                     </TabList>
@@ -95,7 +96,6 @@ class MainPage extends Component {
                     </TabPanel>
                     <TabPanel>
                         <ManageComponent
-                            savePullingInitData={this.handleAddNewPullingData}
                             clusterList={this.state.clusterList}
                         />
                     </TabPanel>
