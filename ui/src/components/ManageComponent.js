@@ -20,10 +20,9 @@ class ManageComponent extends Component {
 
     handleClusterChanged = (alias) => {
         const newCluster = this.props.clusterList.filter(cluster => cluster.alias === alias.value);
-        this.setState({
-            pullingCluster: newCluster[0]
-        });
-        this.render();
+        this.setState(
+            {pullingCluster: newCluster[0]},
+            () => this.render());
     };
 
     createDropdownMenu = () => {

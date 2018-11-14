@@ -23,13 +23,13 @@ class ClustersComponent extends Component {
     }
 
     deletePullingAddress = (cluster) => {
-        this.service.stopPullingParam({
-            "clusterAlias": cluster.alias,
-            "workerAddress": cluster.baseAddress,
-        }).then(() => {
-        this.props.getClusterList();
-        }).catch((er) => {
-            console.error('Error during deleting address' + er);
+        console.log('delete ' + cluster.alias);
+        this.service.deleteCluster(cluster.alias)
+            .then(() => {
+                this.props.getClusterList();
+                this.render();
+            }).catch((er) => {
+                console.error('Error during deleting address' + er);
         });
     };
 
@@ -149,7 +149,7 @@ class ClustersComponent extends Component {
 
     createTableData = () => {
         return this.props.clusterList.map(i =>
-            <tr>
+            <tr key={i.alias}>
                 <th scope="row">{i.baseAddress}</th>
                 <td> {i.alias} </td>
                 <td> {i.clusterId} </td>

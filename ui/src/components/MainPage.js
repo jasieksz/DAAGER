@@ -32,7 +32,6 @@ class MainPage extends Component {
     }
 
     handleAddNewPullingData = (pullingAddress) => {
-        console.log('main page: add new pulling data' + pullingAddress);
         this.setState({
             pullingAddress: pullingAddress,
         });
@@ -41,16 +40,19 @@ class MainPage extends Component {
 
     getClusterList = () => {
         this.service.getAllClusters().then( (response) => {
-            console.log('get cluster list');
             if (response.data.length !== 0 ) {
-                this.setState({
-                    clusterList: response.data,
-                    pullingAddress: response.data[0]
-                });
+                this.setState(
+                    {
+                        clusterList: response.data,
+                        pullingAddress: response.data[0]
+                    },
+                    () => this.render()
+                );
             }
+            this.render();
         }).catch((er) => {
             this.setState({buttonState: 'error'});
-            console.log('error during getting all clusters' + er);
+            console.error('error during getting all clusters' + er);
         });
     };
 
