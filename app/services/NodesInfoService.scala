@@ -28,12 +28,13 @@ class NodesInfoService @Inject()(
 
   def getGlobalState(clusterAlias: String)(implicit ec: ExecutionContext): Future[GlobalState] = {
     for {
-      address   <- getBaseAddress(clusterAlias)
-      addresses <- getNodesAddresses(address.toString)
+      cluster   <- db.run(clustersRepository.findExistingByAlias(clusterAlias))
+      addresses <- getNodesAddresses(cluster.baseAddress)
     } yield {
       GlobalState(
         addresses.length,
-        address.toString,
+        cluster.baseAddress,
+        cluster.alias,
         if (addresses.nonEmpty) "Ok" else "Idle"
       )
     }

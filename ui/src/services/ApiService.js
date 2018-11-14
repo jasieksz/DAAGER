@@ -30,6 +30,8 @@ class ApiService {
     getGlobalState = (clusterAlias) => this.api.get("api/global-state/" + clusterAlias);
 
     getAllClusters = () => this.api.get("/api/clusters", {timeout: 10000});
+
+    deleteCluster = (clusterAlias) => this.api.delete("/api/clusters/" + clusterAlias);
 }
 
 export default ApiService;

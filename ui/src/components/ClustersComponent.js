@@ -23,19 +23,19 @@ class ClustersComponent extends Component {
     }
 
     deletePullingAddress = (cluster) => {
-        this.service.stopPullingParam({
-            "clusterAlias": cluster.alias,
-            "workerAddress": cluster.baseAddress,
-        }).then(() => {
-        this.props.getClusterList();
-        }).catch((er) => {
-            console.error('Error during deleting address' + er);
+        this.service.deleteCluster(cluster.alias)
+            .then(() => {
+                this.props.getClusterList();
+                this.render();
+            }).catch((er) => {
+                console.error('Error during deleting address' + er);
         });
     };
 
-    cancelAddNewCluster = () => {
+    closeAddNewCluster = () => {
         this.setState({
             addNewCluster: false,
+            buttonState: ''
         })
     };
 
@@ -54,6 +54,9 @@ class ClustersComponent extends Component {
         const pullingAddressValue = document.getElementById("pullingAddress").value;
         const clusterAliasValue = document.getElementById("clusterAlias").value;
         // verify cluster alias if exists
+        this.setState({
+            buttonState: 'loading'
+        });
         if (pullingIntervalValue === ''){
             alert('pulling interval cannot be empty');
             return;
@@ -62,14 +65,7 @@ class ClustersComponent extends Component {
             alert('cluster alias cannot be empty');
             return;
         }
-        this.setState({
-            buttonState: 'loading'
-        });
         this.service.verify({value: pullingAddressValue}).then(clusterId => {
-            this.setState({
-                buttonState: 'success',
-                addNewCluster: false
-            });
             this.saveInitPullingData(pullingAddressValue, pullingIntervalValue, clusterId.data, clusterAliasValue)
         }).catch((er) => {
             console.error(er);
@@ -85,7 +81,11 @@ class ClustersComponent extends Component {
             "clusterId": clusterId,
             alias: clusterAlias
         }).then(() => {
+            this.setState({
+                buttonState: 'success',
+            });
             this.props.savePullingInitData(pullingAddress);
+            this.closeAddNewCluster();
         }).catch((er) => {
             this.setState({buttonState: 'error'});
             console.error('error during starting pulling data ' + er);
@@ -141,7 +141,7 @@ class ClustersComponent extends Component {
                 </ModalBody>
                 <ModalFooter>
                     <Button className={'modalCloseButton'} color="secondary"
-                            onClick={this.cancelAddNewCluster}>Close</Button>
+                            onClick={this.closeAddNewCluster}>Close</Button>
                 </ModalFooter>
             </Modal>
         );
@@ -149,7 +149,7 @@ class ClustersComponent extends Component {
 
     createTableData = () => {
         return this.props.clusterList.map(i =>
-            <tr>
+            <tr key={i.alias}>
                 <th scope="row">{i.baseAddress}</th>
                 <td> {i.alias} </td>
                 <td> {i.clusterId} </td>

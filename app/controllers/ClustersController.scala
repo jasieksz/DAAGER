@@ -1,7 +1,7 @@
 package controllers
 
 import actors.ClustersSupervisor
-import actors.ClustersSupervisor.{AddCluster, Done}
+import actors.ClustersSupervisor.{AddCluster, Done, RemoveCluster}
 import akka.actor._
 import akka.pattern.Patterns
 import akka.util.Timeout
@@ -62,6 +62,11 @@ class ClustersController @Inject()(
     } yield result
   }
 
+  def removeCluster(alias: String): Action[AnyContent] = Action.async {
+    clustersSupervisor ! RemoveCluster(alias)
+    db.run(clustersRepository.deleteByAlias(alias)).map(_ => Ok(""))
+  }
+
   def handleSupervisorResponse(response: Any, cluster: Cluster, updatedAddress: String, interval: Int): Future[Result] =
     response match {
       case Done =>
@@ -78,9 +83,11 @@ class ClustersController @Inject()(
 
   def changeInterval(): Action[ClustersSupervisor.UpdateInterval] =
     Action(validateJson[ClustersSupervisor.UpdateInterval]) { request =>
+      clustersSupervisor ! request.body
       configInfoService.sendUpdateConfigInfo(
         request.body.newInterval,
-        request.body.workerAddress
+        request.body.workerAddress,
+        request.body.clusterAlias
       )
       Ok("")
     }

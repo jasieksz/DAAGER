@@ -13,7 +13,11 @@ import model.domain.metrics.ThreadInfo._
 import model.domain.metrics._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.ws.WSClient
+
+import scala.concurrent.duration._
 import repositories.metrics._
+
+import scala.language.postfixOps
 
 object MetricsSupervisor {
 
@@ -150,6 +154,7 @@ class MetricsSupervisor(
     case GetConfig =>
       sender ! pullingAddress
     case UpdateInterval(address, newInterval) =>
+      println("xD")
       addressToWorker(address) ! MetricsPuller.ChangeInterval(newInterval)
       context.become(
         onMessage(
@@ -162,9 +167,13 @@ class MetricsSupervisor(
       addressToWorker(address) ! MetricsPuller.Stop
   }
 
-  override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
-    case _ => Restart
-  }
+  override def supervisorStrategy: SupervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
+      case _ => Restart
+    }
+
+  override def postStop(): Unit =
+    workers.foreach(context stop)
 
   private def generateIntervals(
     pullers: Seq[ActorRef],

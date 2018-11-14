@@ -150,6 +150,10 @@ class HomeComponent extends Component {
                         <th scope="row">Status</th>
                         <td> {this.state.globalStateData.status} </td>
                     </tr>
+                    <tr>
+                        <th scope="row">Alias</th>
+                        <td> {this.state.globalStateData.clusterAlias} </td>
+                    </tr>
                 </Table>
             );
         } else {
@@ -185,12 +189,14 @@ class HomeComponent extends Component {
 
     handleClusterChanged = (alias) => {
         const newCluster = this.props.clusterList.filter(i => i.alias === alias.value);
-        this.setState({
-            pullingCluster: newCluster[0]
-        });
-        this.getGraphData();
-        this.getGlobalData();
-        this.renderInfo();
+        this.setState(
+            {pullingCluster: newCluster[0]},
+            () => {
+                this.getGraphData();
+                this.getGlobalData();
+                this.render();
+            }
+        );
     };
 
     createDropdownMenu = () => {
