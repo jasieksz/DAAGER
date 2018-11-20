@@ -79,9 +79,6 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     case Event(ChangeInterval(newInterval), s: Stat) =>
       val scheduled = pullAgainAfter(newInterval seconds)
       goto(Pulling) using s.copy(interval = newInterval, scheduledMsg = scheduled.some)
-    case Event(ChangeInterval(newInterval), s: Stat) =>
-      val scheduled = pullAgainAfter(1 second)
-      goto(Pulling) using s.copy(interval = newInterval, scheduledMsg = scheduled.some)
   }
 
   when(Testing) {
