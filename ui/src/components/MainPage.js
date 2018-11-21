@@ -67,7 +67,7 @@ class MainPage extends Component {
         return (
             <div>
                 <div className={'daagerTitle'}>
-                    <img src={'logo.png'}/>
+                    <img src={'logo.png'} alt={''}/>
                 </div>
                 <Tabs>
                     <TabList className={'tabs'}>

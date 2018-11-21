@@ -76,9 +76,10 @@ class ClustersController @Inject()(
     }
 
   def getStatuses(clusterAlias: String): Action[AnyContent] = Action.async {
+    type PullerInfos = Seq[PullerInfo]
     Patterns
       .ask(clustersSupervisor, ClustersSupervisor.GetStatuses(clusterAlias), timeout)
-      .map { case res: Seq[PullerInfo] => Ok(Json.toJson(res)) }
+      .map { case res: PullerInfos => Ok(Json.toJson(res)) }
   }
 
   def changeInterval(): Action[ClustersSupervisor.UpdateInterval] =
