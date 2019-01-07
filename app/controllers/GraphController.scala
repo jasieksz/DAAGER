@@ -1,13 +1,14 @@
 package controllers
 
 import akka.actor.ActorSystem
-import controllers.GraphController.NodeDetailsRequest
-import javax.inject.{ Inject, Singleton }
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.{ JsError, Json, Reads }
+import javax.inject.{Inject, Singleton}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.{ GraphService, NodesInfoService }
+import repositories.ClustersRepository
+import services.{GraphService, NodesInfoService}
+import utils.DaagerPostgresProfile
 
 import scala.concurrent.ExecutionContext
 
@@ -25,23 +26,28 @@ class GraphController @Inject()(
   wSClient: WSClient,
   graphService: GraphService,
   nodesInfoService: NodesInfoService,
+  clustersRepository: ClustersRepository,
   protected val dbConfigProvider: DatabaseConfigProvider
-)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+)(implicit ec: ExecutionContext)
+  extends AbstractController(cc)
+  with HasDatabaseConfigProvider[DaagerPostgresProfile] {
 
-  def getGraph(): Action[AnyContent] = Action.async { _ =>
-    graphService.getGraph.map(result => Ok(Json.toJson(Seq(result))))
+  def getGraph(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
+    for {
+      clusterExists <- db.run(clustersRepository.findByAlias(clusterAlias).map(_.isDefined))
+      graph         <- graphService.getGraph(clusterAlias)
+    } yield {
+      if (!clusterExists) NotFound else Ok(Json.toJson(Seq(graph)))
+    }
   }
 
-  def getGlobalState(): Action[AnyContent] = Action.async { _ =>
-    nodesInfoService.getGlobalState.map(res => Ok(Json.toJson(res)))
+  def getGlobalState(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
+    for {
+      clusterExists <- db.run(clustersRepository.findByAlias(clusterAlias).map(_.isDefined))
+      state         <- nodesInfoService.getGlobalState(clusterAlias)
+    } yield {
+      if (!clusterExists) NotFound else Ok(Json.toJson(Seq(state)))
+    }
   }
-
-  def getNodeDetails(): Action[NodeDetailsRequest] = Action(validateJson[NodeDetailsRequest]).async{ request =>
-    nodesInfoService.getNodeDetails(request.body.address).map(res => Ok(Json.toJson(res)))
-  }
-
-  private def validateJson[A: Reads]: BodyParser[A] = parse.json.validate(
-    _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
-  )
 
 }

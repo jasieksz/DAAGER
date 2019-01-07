@@ -1,46 +1,79 @@
 package services
 
-import actors.{ MetricsSupervisor, NodesKeeper }
-import akka.actor.ActorSystem
-import akka.pattern.Patterns
-import akka.util.Timeout
-import javax.inject.Inject
-import model.domain.{ GlobalState, NodeDetails }
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
-import repositories.metrics.OsInfoRepository
-import slick.jdbc.PostgresProfile
+import java.net.URL
 
-import scala.concurrent.{ ExecutionContext, Future }
+import akka.actor.ActorSystem
+import javax.inject.Inject
+import model.domain.{GlobalState, NodeDetails}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.libs.ws.WSClient
+import repositories.ClustersRepository
+import repositories.metrics.OsInfoRepository
+import utils.DaagerPostgresProfile
+
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class NodesInfoService @Inject()(
   system: ActorSystem,
   osInfoRepository: OsInfoRepository,
+  clustersRepository: ClustersRepository,
+  WSClient: WSClient,
   protected val dbConfigProvider: DatabaseConfigProvider
-) extends HasDatabaseConfigProvider[PostgresProfile] {
+) extends HasDatabaseConfigProvider[DaagerPostgresProfile] {
 
-  private val nodesKeeper = system.actorSelection("user/" + MetricsSupervisor.name + "/" + NodesKeeper.name)
-  private val timeout: Timeout = 10 seconds
+  private val clusterInfoParameter  = "/cluster"
+  private val clusterStateParameter = "/cluster/detail"
 
-  def getGlobalState(implicit ec: ExecutionContext): Future[GlobalState] = {
-    Patterns.ask(nodesKeeper, NodesKeeper.GetClients, timeout).map {
-      case addresses: Seq[String] => GlobalState(
+  def getGlobalState(clusterAlias: String)(implicit ec: ExecutionContext): Future[GlobalState] = {
+    for {
+      cluster   <- db.run(clustersRepository.findExistingByAlias(clusterAlias))
+      addresses <- getNodesAddresses(cluster.baseAddress)
+    } yield {
+      GlobalState(
         addresses.length,
-        addresses.headOption.map(_.stripSuffix("http://").takeWhile(_ != '/)).getOrElse("----"),
-        "OK"
+        cluster.baseAddress,
+        cluster.alias,
+        if (addresses.nonEmpty) "Ok" else "Idle"
       )
     }
   }
 
-  def getNodeDetails(nodeAddress: String)(implicit ec: ExecutionContext): Future[NodeDetails] = {
-    db.run(osInfoRepository.findLastByAddress(nodeAddress)).map(osinfo => {
-      NodeDetails(
-        nodeAddress,
-        osinfo.map(_.timestamp),
-        osinfo.map(_.osSystemCpuLoad).getOrElse(0.0),
-        osinfo.map(_.osTotalPhysicalMemorySize.toDouble).getOrElse(0.0)
-      )
-    })
+  def getNodesDetails(clusterAlias: String)(implicit ec: ExecutionContext): Future[Seq[NodeDetails]] = {
+    for {
+      address      <- getBaseAddress(clusterAlias)
+      nodesDetails <- getNodeDetails(address)
+    } yield {
+      nodesDetails
+    }
+  }
+
+  private def getBaseAddress(clusterAlias: String)(implicit ec: ExecutionContext): Future[String] =
+    db.run(clustersRepository.findExistingByAlias(clusterAlias)).map(_.baseAddress)
+
+  private def getNodesAddresses(baseAddress: String)(implicit ec: ExecutionContext): Future[Seq[String]] = {
+    if (Try(new URL(baseAddress).toURI).isSuccess) {
+      WSClient
+        .url(baseAddress + clusterInfoParameter)
+        .get()
+        .map(_.json.validate[Seq[String]].getOrElse(Seq.empty))
+    } else {
+      Future.successful(Seq.empty)
+    }
+  }
+
+  private def getNodeDetails(baseAddress: String)(implicit ec: ExecutionContext): Future[Seq[NodeDetails]] = {
+    if (Try(new URL(baseAddress).toURI).isSuccess) {
+      WSClient
+        .url(baseAddress + clusterStateParameter)
+        .addHttpHeaders("Accept" -> "application/json")
+        .withRequestTimeout(2 seconds)
+        .get()
+        .map(_.json.validate[Seq[NodeDetails]].getOrElse(Seq.empty))
+    } else {
+      Future.successful(Seq.empty)
+    }
   }
 
 }

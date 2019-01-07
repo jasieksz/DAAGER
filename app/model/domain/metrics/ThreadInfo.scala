@@ -5,10 +5,13 @@ import play.api.libs.json.Json
 import utils.DateTimeUtils.dateTimeFormat
 
 case class ThreadInfo(
-  date: DateTime,
+  timestamp: DateTime,
+  clusterId: String,
   address: String,
   threadPeakThreadCount: Long,
-  threadThreadCount: Long
+  threadThreadCount: Long,
+  threadDaemonThreadCount: Long,
+  threadTotalStartedThreadCount: Long
 ) extends Metric
 
 object ThreadInfo {

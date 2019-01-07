@@ -5,6 +5,7 @@ import play.api.libs.json.Json
 case class GlobalState(
   nodesCount: Int,
   baseAddress: String,
+  clusterAlias: String,
   status: String
 )
 

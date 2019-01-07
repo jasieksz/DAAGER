@@ -6,17 +6,13 @@ import utils.DateTimeUtils.dateTimeFormat
 
 case class OSInfo(
   timestamp: DateTime,
+  clusterId: String,
   address: String,
-  osProcessCpuLoad: Double,
   osSystemLoadAverage: Double,
-  osSystemCpuLoad: Double,
-  osTotalPhysicalMemorySize: Long,
-  osFreePhysicalMemorySize: Long,
-  osFreeSwapSpaceSize: Long,
-  osTotalSwapSpaceSize: Long
-) extends Metric {
-  override def date: DateTime = timestamp
-}
+  diskUsableSpace: Long,
+  diskFreeSpace: Long,
+  diskTotalSpace: Long
+) extends Metric
 
 object OSInfo {
   implicit val format = Json.format[OSInfo]

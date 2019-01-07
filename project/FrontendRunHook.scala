@@ -19,7 +19,7 @@ object FrontendRunHook {
         * Change these commands if you want to use Yarn.
         */
       var npmInstall: String = FrontendCommands.dependencyInstall
-      var npmRun: String = FrontendCommands.serve
+      var npmRun: String     = FrontendCommands.serve
 
       // Windows requires npm commands prefixed with cmd /c
       if (System.getProperty("os.name").toLowerCase().contains("win")) {
@@ -31,9 +31,9 @@ object FrontendRunHook {
         * Executed before play run start.
         * Run npm install if node modules are not installed.
         */
-      override def beforeStarted(): Unit = {
-        if (!(base / "ui" / "node_modules").exists()) Process(npmInstall, base / "ui").!
-      }
+      override def beforeStarted(): Unit =
+        if (!(base / "ui" / "node_modules").exists())
+          Process(npmInstall, base / "ui").!
 
       /**
         * Executed after play run start.

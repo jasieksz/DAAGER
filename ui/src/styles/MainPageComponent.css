@@ -1,11 +1,12 @@
 
 .tabs {
-    background-color: cornflowerblue;
+    background-color: #136435;
+    margin-bottom: 0;
+    color: #d5d5f4;
 }
 
 .daagerTitle {
     color: white;
-    font-size: 40px;
     text-align: center;
-    background-color: cornflowerblue;
+    background-color: #136435;
 }

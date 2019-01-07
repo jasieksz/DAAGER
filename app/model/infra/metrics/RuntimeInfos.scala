@@ -1,14 +1,15 @@
 package model.infra.metrics
 
 import model.domain.metrics.RuntimeInfo
-import model.infra.metrics.NetworkInfos.query
 import org.joda.time.DateTime
-import slick.jdbc.PostgresProfile.api._
+import utils.DaagerPostgresProfile.api._
 import utils.DateTimeUtils._
 
 class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos") {
 
   def timestamp = column[DateTime]("timestamp")
+
+  def clusterId = column[String]("cluster_id")
 
   def address = column[String]("address")
 
@@ -22,8 +23,17 @@ class RuntimeInfos(tag: Tag) extends Table[RuntimeInfo](tag, "runtime_infos") {
 
   def runtimeUsedMemory = column[Long]("runtime_used_memory")
 
-  def * = (timestamp, address, runtimeAvailableProcessors, runtimeTotalMemory, runtimeMaxMemory, runtimeFreeMemory,
-    runtimeUsedMemory) <> ((RuntimeInfo.apply _).tupled, RuntimeInfo.unapply)
+  def * =
+    (
+      timestamp,
+      clusterId,
+      address,
+      runtimeAvailableProcessors,
+      runtimeTotalMemory,
+      runtimeMaxMemory,
+      runtimeFreeMemory,
+      runtimeUsedMemory
+    ) <> ((RuntimeInfo.apply _).tupled, RuntimeInfo.unapply)
 
 }
 

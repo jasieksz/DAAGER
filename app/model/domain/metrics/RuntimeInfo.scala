@@ -1,11 +1,12 @@
 package model.domain.metrics
 
 import org.joda.time.DateTime
-import play.api.libs.json._
+import play.api.libs.json.Json
 import utils.DateTimeUtils.dateTimeFormat
 
 case class RuntimeInfo(
-  date: DateTime, //ISO Format
+  timestamp: DateTime,
+  clusterId: String,
   address: String,
   runtimeAvailableProcessors: Long,
   runtimeTotalMemory: Long,
@@ -17,5 +18,3 @@ case class RuntimeInfo(
 object RuntimeInfo {
   implicit val format = Json.format[RuntimeInfo]
 }
-
-

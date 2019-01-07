@@ -2,7 +2,7 @@
 version: '3'
 services:
   daager:
-    image: daager:0.2
+    image: daager:1.0
     ports:
       - "9000:9000"
     networks:
@@ -10,13 +10,14 @@ services:
     depends_on:
       - db
       - vis
+    restart: on-failure
 
   vis:
     build: ./dependencies/grafana
     networks:
       - daager
     ports:
-    - "3001:3000"
+      - "3001:3000"
     depends_on:
       - db
 
@@ -30,5 +31,7 @@ services:
       - daager
     volumes:
       - ./timescale:/var/lib/postgresql
+
 networks:
   daager:
+

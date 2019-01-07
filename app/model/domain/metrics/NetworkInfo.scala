@@ -1,11 +1,12 @@
 package model.domain.metrics
 
 import org.joda.time.DateTime
-import play.api.libs.json._
+import play.api.libs.json.Json
 import utils.DateTimeUtils.dateTimeFormat
 
 case class NetworkInfo(
-  date: DateTime,
+  timestamp: DateTime,
+  clusterId: String,
   address: String,
   tcpConnectionActiveCount: Long,
   tcpConnectionCount: Long,

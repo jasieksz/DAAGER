@@ -8,7 +8,8 @@ export class PullingArgumentsComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            statuses: []
+            statuses: [],
+            isPulling: true,
         };
         this.service = new ApiService();
         this.getStatuses();
@@ -50,18 +51,20 @@ export class PullingArgumentsComponent extends Component {
     createIntervalUpdate(address, interval) {
         return {
             "workerAddress": address,
-            "newInterval": interval
+            "newInterval": interval,
+            "clusterAlias": this.props.pullingCluster.alias
         }
     }
 
     createStopPullingData(address) {
         return {
-            "workerAddress": address
+            "workerAddress": address,
+            "clusterAlias": this.props.pullingCluster.alias
         }
     }
 
     getStatuses = () => {
-        this.service.getStatuses().then(response => {
+        this.service.getStatuses(this.props.pullingCluster.alias).then(response => {
             this.setState({
                 statuses: response.data
             });
@@ -96,7 +99,7 @@ export class PullingArgumentsComponent extends Component {
           </tr>);
     };
 
-    getStatusButton(id) {
+    getStatusButton = (id) => {
         if (id.status === 'Pulling') {
             return (
                 <Button type="danger"
@@ -114,9 +117,46 @@ export class PullingArgumentsComponent extends Component {
                 </Button>
             );
         }
-    }
+    };
 
-    renderTableWithIntervals() {
+    handleAllStopPullingData = () => {
+        this.state.statuses.forEach(i => this.handleStopPullingData(i));
+        this.changeHealthPullingButton();
+    };
+
+
+    handleAllStartPullingData = () => {
+        this.state.statuses.forEach(i => this.handleContinuePullingData(i));
+        this.changeHealthPullingButton();
+    };
+
+    changeHealthPullingButton = () => {
+        this.setState({
+            isPulling: !this.state.isPulling
+        });
+    };
+
+    getHealthStatusButton =() =>  {
+        if (this.state.isPulling) {
+            return (
+                <Button color={"danger"}
+                        className="btn btn-default"
+                        onClick={ () => this.handleAllStopPullingData() }
+                >Stop All
+                </Button>
+            );
+        } else {
+            return (
+                <Button color={"success"}
+                        className="btn btn-default"
+                        onClick={ () => this.handleAllStartPullingData() }
+                >Start All
+                </Button>
+            );
+        }
+    };
+
+    renderTableWithIntervals =() => {
         return (
             <div className={'inputForm'}>
                 <Table>
@@ -133,9 +173,10 @@ export class PullingArgumentsComponent extends Component {
                         {this.createTable()}
                     </tbody>
                 </Table>
+                {this.getHealthStatusButton()}
             </div>
         );
-    }
+    };
 
     render() {
         if (this.state.statuses !== []) {
