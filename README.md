@@ -35,6 +35,9 @@ After successfully running command above DAAGER UI should be available at:
  localhost:9000
  ```
 
+If Grafana prompts you to input login and password simply write `daager` / `daager`
+(you can change that later).
+
 In order to stop DAAGER simply type  
 ```bash
 sbt dockerComposeStop

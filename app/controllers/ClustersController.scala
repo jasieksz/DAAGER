@@ -1,22 +1,22 @@
 package controllers
 
 import actors.ClustersSupervisor
-import actors.ClustersSupervisor.{ AddCluster, Done, RemoveCluster }
+import actors.ClustersSupervisor.{AddCluster, Done, RemoveCluster}
 import akka.actor._
 import akka.pattern.Patterns
 import akka.util.Timeout
 import controllers.ClustersController.StartRequest
 import javax.inject._
-import model.domain.{ Cluster, PullerInfo }
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
-import play.api.libs.json.{ JsError, Json, Reads }
+import model.domain.{Cluster, PullerInfo}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.libs.json.{JsError, Json, Reads}
 import play.api.mvc._
 import repositories.ClustersRepository
-import services.{ ConfigInfoService, MetricsSupervisorCreationService }
+import services.{ConfigInfoService, MetricsSupervisorCreationService}
 import utils.DaagerPostgresProfile
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 object ClustersController {
