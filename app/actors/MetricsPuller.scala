@@ -1,19 +1,14 @@
 package actors
 
 import actors.MetricsPuller._
-import akka.actor.{Cancellable, FSM}
+import akka.actor.{Cancellable, FSM, Props}
 import cats.implicits._
 import model.domain.metrics.Metric
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.{Json, Reads}
-import play.api.libs.ws.WSClient
-import repositories.metrics.MetricsRepository
-import slick.dbio.DBIO
-import slick.jdbc.PostgresProfile
-import utils.instances.DbioInstances._
+import services.DataPullingService
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
@@ -41,15 +36,14 @@ object MetricsPuller {
 
   final case object GetStatus
 
+  def props[M <: Metric](dataPullingService: DataPullingService[M, _])(implicit reads: Reads[M]): Props =
+    Props(new MetricsPuller[M](dataPullingService))
 }
 
-class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
-  repository: Repo,
-  wSClient: WSClient,
-  protected val dbConfigProvider: DatabaseConfigProvider
+class MetricsPuller[M <: Metric](
+  dataPullingService: DataPullingService[M, _]
 )(implicit reads: Reads[M])
-  extends FSM[Status.Value, Data]
-  with HasDatabaseConfigProvider[PostgresProfile] {
+  extends FSM[Status.Value, Data] {
 
   private case class ValuesList(list: Seq[M])(implicit reads: Reads[M])
   private implicit val listReads = Json.reads[ValuesList]
@@ -64,7 +58,7 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
     case Event(StartPulling(address, interval), Uninitialized) =>
       log.info("Received pulling request")
       val newState  = Stat(address, interval, 0)
-      val reachable = Await.result(isReachable(address), 2 seconds)
+      val reachable = Await.result(dataPullingService.isReachable(address), 2 seconds)
       if (reachable) {
         log.info("Host reachable, starting pulling")
         val scheduled = pullAgainAfter(1 seconds)
@@ -82,11 +76,11 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
   }
 
   when(Testing) {
-    case Event(Pull, Stat(add, interval, 10, scheduled)) =>
+    case Event(Pull, Stat(_, _, 10, scheduled)) =>
       scheduled.foreach(_.cancel())
-      goto(Cancelled)
+      goto(Idle)
     case Event(Pull, st @ Stat(add, int, err, _)) =>
-      val reachable = Await.result(isReachable(add), 2 seconds)
+      val reachable = Await.result(dataPullingService.isReachable(add), 2 seconds)
       if (reachable) {
         log.info("Host reachable, starting pulling")
         val scheduled = pullAgainAfter(1 seconds)
@@ -100,7 +94,7 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
 
   when(Pulling) {
     case Event(Pull, s @ Stat(address, interval, err, _)) =>
-      getData(address).onComplete {
+      dataPullingService.getData(address).onComplete {
         case Success(_) =>
           stay using s.copy(scheduledMsg = pullAgainAfter(interval seconds).some)
         case Failure(e) =>
@@ -110,12 +104,11 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
       }
       stay()
     case Event(Stop, s: Stat) =>
-      log.info(s.scheduledMsg.toString)
       s.scheduledMsg.foreach(_.cancel())
       goto(Idle) using s
     case Event(ChangeInterval(newInterval), s: Stat) =>
       stay using s.copy(interval = newInterval)
-    case Event(StartPulling(address, interval), _) =>
+    case Event(StartPulling(_, _), _) =>
       log.warning("Received start pulling request but already pulling")
       stay()
   }
@@ -123,12 +116,6 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
   when(ErrorOccurred) {
     case _ =>
       log.error("error")
-      stay()
-  }
-
-  when(Cancelled) {
-    case _ =>
-      log.error("cancelled")
       stay()
   }
 
@@ -144,41 +131,5 @@ class MetricsPuller[M <: Metric, Repo <: MetricsRepository[M, _]](
 
   private def pullAgainAfter(duration: FiniteDuration): Cancellable =
     context.system.scheduler.scheduleOnce(duration, self, Pull)
-
-  private def getData(address: String)(implicit ec: ExecutionContext): Future[Unit] = {
-    val data = wSClient
-      .url(address)
-      .addHttpHeaders("Accept" -> "application/json")
-      .withRequestTimeout(2 seconds)
-      .get()
-      .map(
-        res =>
-          res.json
-            .validate[Seq[M]]
-            .fold(
-              err => {
-                log.error(
-                  s"Error in $address puller actor }" + err.toString + "\n" + res.body
-                )
-                Seq.empty
-              },
-              logResultInfo
-          )
-      )
-    val dbAction = DBIO
-      .from(data)
-      .flatMap(values => values.toList.traverse(repository.save))
-    db.run(dbAction).void
-  }
-
-  private def logResultInfo(res: Seq[M]): Seq[M] = {
-    log.info(s"Successfully downloaded ${res.length} ${res.headOption
-      .map(info => info.getClass.toString.stripPrefix("class model.domain.metrics."))
-      .getOrElse("")} messages")
-    res
-  }
-
-  private def isReachable(address: String): Future[Boolean] =
-    wSClient.url(address).get().map(_.status == 200)
 
 }

@@ -48,13 +48,6 @@ class ManageComponent extends Component {
 
     };
 
-    handleChangePullingAddress = () => {
-        alert('changing pulling address');
-        this.setState({
-            pullingCluster: '',
-        });
-    };
-
     showPullingAddress =() => {
         return (
             <div>
@@ -68,13 +61,13 @@ class ManageComponent extends Component {
                             />
                         </div>
                     </div>
-                    <div className={'manageButtons'}>
-                        <Button color="warning"
-                                className="btn btn-default manageButton"
-                                onClick={this.handleChangePullingAddress}
-                        >Change Pulling Address
-                        </Button>
-                    </div>
+                    {/*<div className={'manageButtons'}>*/}
+                        {/*<Button color="warning"*/}
+                                {/*className="btn btn-default manageButton"*/}
+                                {/*onClick={this.handleChangePullingAddress}*/}
+                        {/*>Change Pulling Address*/}
+                        {/*</Button>*/}
+                    {/*</div>*/}
                 </div>
                 <div className={'clusterAliasBox'}>
                     <div className="row clusterAlias">

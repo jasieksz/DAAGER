@@ -1,13 +1,14 @@
 package controllers
 
 import akka.actor.ActorSystem
-import controllers.GraphController.NodeDetailsRequest
 import javax.inject.{Inject, Singleton}
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.{JsError, Json, Reads}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import repositories.ClustersRepository
 import services.{GraphService, NodesInfoService}
+import utils.DaagerPostgresProfile
 
 import scala.concurrent.ExecutionContext
 
@@ -25,16 +26,28 @@ class GraphController @Inject()(
   wSClient: WSClient,
   graphService: GraphService,
   nodesInfoService: NodesInfoService,
+  clustersRepository: ClustersRepository,
   protected val dbConfigProvider: DatabaseConfigProvider
 )(implicit ec: ExecutionContext)
-  extends AbstractController(cc) {
+  extends AbstractController(cc)
+  with HasDatabaseConfigProvider[DaagerPostgresProfile] {
 
   def getGraph(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
-    graphService.getGraph(clusterAlias).map(result => Ok(Json.toJson(Seq(result))))
+    for {
+      clusterExists <- db.run(clustersRepository.findByAlias(clusterAlias).map(_.isDefined))
+      graph         <- graphService.getGraph(clusterAlias)
+    } yield {
+      if (!clusterExists) NotFound else Ok(Json.toJson(Seq(graph)))
+    }
   }
 
   def getGlobalState(clusterAlias: String): Action[AnyContent] = Action.async { _ =>
-    nodesInfoService.getGlobalState(clusterAlias).map(res => Ok(Json.toJson(res)))
+    for {
+      clusterExists <- db.run(clustersRepository.findByAlias(clusterAlias).map(_.isDefined))
+      state         <- nodesInfoService.getGlobalState(clusterAlias)
+    } yield {
+      if (!clusterExists) NotFound else Ok(Json.toJson(Seq(state)))
+    }
   }
 
 }

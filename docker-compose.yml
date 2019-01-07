@@ -2,7 +2,7 @@
 version: '3'
 services:
   daager:
-    image: daager:0.2
+    image: daager:1.0
     ports:
       - "9000:9000"
     networks:

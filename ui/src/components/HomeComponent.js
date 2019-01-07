@@ -127,7 +127,7 @@ class HomeComponent extends Component {
     getGlobalData = () => {
         this.service.getGlobalState(this.state.pullingCluster.alias).then(response => {
             this.setState({
-                globalStateData: response.data
+                globalStateData: response.data[0]
             });
         }).catch(() => {
             console.error('error during getting global state data');
